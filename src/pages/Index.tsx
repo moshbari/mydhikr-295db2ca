@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { getCurrentHijriDate, formatHijriDate } from "@/lib/hijri-calendar";
 
 import { BarChart3, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -20,13 +22,10 @@ const Index = () => {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   
-  const today = new Date().toISOString().split('T')[0];
-  const todayFormatted = new Date().toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const todayFormatted = format(new Date(), 'EEEE, MMMM d, yyyy');
+  const hijriDate = getCurrentHijriDate();
+  const hijriFormatted = formatHijriDate(hijriDate);
 
   // Create admin accounts on component mount
   useEffect(() => {
@@ -360,7 +359,10 @@ const Index = () => {
           <div className="flex justify-between items-center">
             <div className="text-center flex-1">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">🕌 My Dhikr</h1>
-              <p className="text-white/90 text-xs sm:text-sm md:text-base">{todayFormatted}</p>
+              <div className="text-white/90 text-xs sm:text-sm">
+                <p className="font-medium">{todayFormatted}</p>
+                <p className="text-white/80 mt-1" style={{ fontFamily: 'Arial, sans-serif' }}>{hijriFormatted}</p>
+              </div>
             </div>
             <div className="flex gap-1 sm:gap-2 flex-wrap">
               {isAdmin() && (
