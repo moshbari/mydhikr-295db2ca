@@ -16,11 +16,41 @@ export const useAuth = () => {
   useEffect(() => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         
         if (session?.user) {
-          // Fetch role separately after setting user
+          // Use setTimeout to defer the async operation to prevent deadlock
+          setTimeout(async () => {
+            try {
+              const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: session.user.id });
+              setUser({
+                ...session.user,
+                role: (roleData as UserRole) || 'user'
+              });
+            } catch (error) {
+              console.error('Error fetching user role:', error);
+              setUser({
+                ...session.user,
+                role: 'user'
+              });
+            }
+          }, 0);
+        } else {
+          setUser(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      
+      if (session?.user) {
+        // Use setTimeout to defer the async operation
+        setTimeout(async () => {
           try {
             const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: session.user.id });
             setUser({
@@ -34,32 +64,9 @@ export const useAuth = () => {
               role: 'user'
             });
           }
-        } else {
-          setUser(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      
-      if (session?.user) {
-        try {
-          const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: session.user.id });
-          setUser({
-            ...session.user,
-            role: (roleData as UserRole) || 'user'
-          });
-        } catch (error) {
-          console.error('Error fetching user role:', error);
-          setUser({
-            ...session.user,
-            role: 'user'
-          });
-        }
+        }, 0);
+      } else {
+        setUser(null);
       }
       
       setLoading(false);
