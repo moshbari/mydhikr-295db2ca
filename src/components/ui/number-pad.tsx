@@ -9,9 +9,14 @@ interface NumberPadProps {
 
 export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) {
   const handleNumberClick = (num: string) => {
-    if (value === "0" || value === "1") {
-      onChange(num);
+    if (value === "1") {
+      // If current value is 1, replace it with the clicked number (unless it's 0)
+      onChange(num === "0" ? "10" : num);
+    } else if (value === "0") {
+      // If current value is 0, replace it with the clicked number (unless it's 0)
+      onChange(num === "0" ? "10" : num);
     } else {
+      // Otherwise append the number
       onChange(value + num);
     }
   };
@@ -69,7 +74,7 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
         <Button
           onClick={onAdd}
           className="islamic-button col-span-1 text-sm"
-          disabled={disabled || value === "0" || value === "" || parseInt(value) <= 0}
+          disabled={disabled || value === "" || parseInt(value) <= 0 || isNaN(parseInt(value))}
         >
           Add
         </Button>
