@@ -178,4 +178,13 @@ All colors in HSL format following Islamic green theme
       @apply w-3 h-3;
     }
   }
+  
+  /* Green scroll area for daily summary */
+  .scroll-area-green [data-radix-scroll-area-thumb] {
+    @apply bg-success;
+  }
+  
+  .scroll-area-green [data-radix-scroll-area-scrollbar] {
+    @apply bg-success/20;
+  }
 }

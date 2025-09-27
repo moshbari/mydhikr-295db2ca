@@ -98,7 +98,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   return (
     <div className="tracker-card">
       <h3 className="text-lg font-semibold mb-4 text-foreground">📊 Daily Summary</h3>
-      <ScrollArea className="h-64">
+      <ScrollArea className="h-64 scroll-area-green">
         <div className="space-y-3">
           {entries.map((entry) => (
             <div
