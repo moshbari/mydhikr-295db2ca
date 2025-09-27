@@ -69,7 +69,7 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
         <Button
           onClick={onAdd}
           className="islamic-button col-span-1 text-sm"
-          disabled={disabled || value === "0"}
+          disabled={disabled || value === "0" || value === ""}
         >
           Add
         </Button>

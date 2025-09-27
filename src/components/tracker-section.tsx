@@ -43,7 +43,7 @@ export function TrackerSection({ title, icon, options, onAdd }: TrackerSectionPr
   const isAddDisabled = () => {
     if (!selectedOption) return true;
     if (showCustomInput && !customValue.trim()) return true;
-    return parseInt(numberValue) <= 0;
+    return parseInt(numberValue) <= 0 || isNaN(parseInt(numberValue));
   };
 
   return (
@@ -80,13 +80,12 @@ export function TrackerSection({ title, icon, options, onAdd }: TrackerSectionPr
           )}
         </div>
 
-        {/* Number Input Column */}
         <div>
           <NumberPad
             value={numberValue}
             onChange={setNumberValue}
             onAdd={handleAdd}
-            disabled={isAddDisabled()}
+            disabled={false}
           />
         </div>
       </div>
