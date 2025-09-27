@@ -36,33 +36,36 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
       {/* Number pad */}
       <div className="grid grid-cols-3 gap-2">
         {numbers.flat().map((num) => (
-          <button
+          <Button
             key={num}
             onClick={() => handleNumberClick(num)}
             className="number-pad-button"
             disabled={disabled}
+            variant="outline"
           >
             {num}
-          </button>
+          </Button>
         ))}
       </div>
 
       {/* Bottom row */}
       <div className="grid grid-cols-3 gap-2">
-        <button
+        <Button
           onClick={handleClear}
           className="number-pad-button col-span-1 text-destructive"
           disabled={disabled}
+          variant="outline"
         >
           Clear
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => handleNumberClick("0")}
           className="number-pad-button"
           disabled={disabled}
+          variant="outline"
         >
           0
-        </button>
+        </Button>
         <Button
           onClick={onAdd}
           className="islamic-button col-span-1 text-sm"
