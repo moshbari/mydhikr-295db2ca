@@ -71,14 +71,13 @@ const Admin = () => {
   }, [user, isAdmin, navigate, authLoading]);
 
   useEffect(() => {
-    if (isAdmin() && !loading) {
+    if (isAdmin()) {
       fetchUsers();
     }
-  }, []);
+  }, [isAdmin]);
 
   const fetchUsers = async () => {
     try {
-      console.log('Starting to fetch users...');
       setLoading(true);
       
       // Get all profiles
@@ -108,7 +107,6 @@ const Admin = () => {
         role: roleMap.get(profile.user_id) || 'user'
       })) || [];
 
-      console.log('Users fetched successfully:', usersWithDetails);
       setUsers(usersWithDetails);
     } catch (error) {
       console.error('Error fetching users:', error);
