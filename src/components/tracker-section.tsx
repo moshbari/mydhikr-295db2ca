@@ -40,10 +40,13 @@ export function TrackerSection({ title, icon, onAdd }: TrackerSectionProps) {
         {/* Input Column */}
         <div className="space-y-3">
           <Input
+            id={`${title.toLowerCase()}-name`}
+            name={`${title.toLowerCase()}Name`}
             placeholder={`Enter ${title.toLowerCase()} name...`}
             value={activityName}
             onChange={(e) => setActivityName(e.target.value)}
             className="w-full"
+            autoComplete="off"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !isAddDisabled()) {
                 handleAdd();

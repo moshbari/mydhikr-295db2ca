@@ -55,11 +55,14 @@ export function NotesSection({ notes, onNotesChange }: NotesSectionProps) {
       </div>
       
       <Textarea
+        id="daily-notes"
+        name="dailyNotes"
         placeholder="Add any notes, duas, or reflections for today..."
         value={localNotes}
         onChange={(e) => handleNotesChange(e.target.value)}
         rows={4}
         className="w-full resize-none"
+        autoComplete="off"
       />
       
       {hasUnsavedChanges && (
