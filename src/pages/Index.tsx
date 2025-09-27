@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
 import { BarChart3, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
+import { createAdminAccounts } from "@/lib/admin-setup";
 
 const Index = () => {
   const { toast } = useToast();
@@ -25,6 +27,11 @@ const Index = () => {
     month: 'long', 
     day: 'numeric' 
   });
+
+  // Create admin accounts on component mount
+  useEffect(() => {
+    createAdminAccounts();
+  }, []);
 
   // Load today's data from database
   useEffect(() => {
@@ -241,6 +248,7 @@ const Index = () => {
                 <BarChart3 className="w-4 h-4 mr-2" />
                 History
               </Button>
+              <ChangePasswordDialog />
               <Button 
                 onClick={signOut} 
                 variant="outline" 
