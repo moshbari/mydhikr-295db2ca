@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
+
 import { BarChart3, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
@@ -337,7 +337,6 @@ const Index = () => {
         <TrackerSection
           title="Dhikr & Tasbih"
           icon="📿"
-          options={dhikrOptions}
           onAdd={(name, count) => addEntry("dhikr", name, count)}
         />
 
@@ -345,7 +344,6 @@ const Index = () => {
         <TrackerSection
           title="Quran Recitation"
           icon="📖"
-          options={quranOptions}
           onAdd={(name, count) => addEntry("quran", name, count)}
         />
 
@@ -353,7 +351,6 @@ const Index = () => {
         <TrackerSection
           title="Nafl Salah"
           icon="🤲"
-          options={salahOptions}
           onAdd={(name, count) => addEntry("salah", name, count)}
         />
 

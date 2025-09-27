@@ -1,49 +1,32 @@
 import { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { NumberPad } from "@/components/ui/number-pad";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface TrackerSectionProps {
   title: string;
   icon: string;
-  options: string[];
   onAdd: (name: string, count: number) => void;
 }
 
-export function TrackerSection({ title, icon, options, onAdd }: TrackerSectionProps) {
-  const [selectedOption, setSelectedOption] = useState<string>("");
-  const [customValue, setCustomValue] = useState<string>("");
+export function TrackerSection({ title, icon, onAdd }: TrackerSectionProps) {
+  const [activityName, setActivityName] = useState<string>("");
   const [numberValue, setNumberValue] = useState<string>("0");
-  const [showCustomInput, setShowCustomInput] = useState(false);
-
-  const handleSelectionChange = (value: string) => {
-    setSelectedOption(value);
-    if (value === "custom") {
-      setShowCustomInput(true);
-      setCustomValue("");
-    } else {
-      setShowCustomInput(false);
-      setCustomValue("");
-    }
-  };
 
   const handleAdd = () => {
-    const name = showCustomInput ? customValue.trim() : selectedOption;
+    const name = activityName.trim();
     const count = parseInt(numberValue);
     
     if (name && count > 0) {
       onAdd(name, count);
+      setActivityName("");
       setNumberValue("0");
-      if (showCustomInput) {
-        setCustomValue("");
-      }
     }
   };
 
   const isAddDisabled = () => {
-    if (!selectedOption) return true;
-    if (showCustomInput && !customValue.trim()) return true;
-    return parseInt(numberValue) <= 0 || isNaN(parseInt(numberValue));
+    return !activityName.trim() || parseInt(numberValue) <= 0 || isNaN(parseInt(numberValue));
   };
 
   return (
@@ -54,30 +37,28 @@ export function TrackerSection({ title, icon, options, onAdd }: TrackerSectionPr
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Selection Column */}
+        {/* Input Column */}
         <div className="space-y-3">
-          <Select value={selectedOption} onValueChange={handleSelectionChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={`Select ${title.toLowerCase()}`} />
-            </SelectTrigger>
-            <SelectContent className="max-h-60 overflow-y-auto">
-              {options.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-              <SelectItem value="custom">Add Custom...</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {showCustomInput && (
-            <Input
-              placeholder="Enter custom name..."
-              value={customValue}
-              onChange={(e) => setCustomValue(e.target.value)}
-              className="w-full"
-            />
-          )}
+          <Input
+            placeholder={`Enter ${title.toLowerCase()} name...`}
+            value={activityName}
+            onChange={(e) => setActivityName(e.target.value)}
+            className="w-full"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !isAddDisabled()) {
+                handleAdd();
+              }
+            }}
+          />
+          <Button 
+            onClick={handleAdd} 
+            disabled={isAddDisabled()}
+            className="w-full"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add {title}
+          </Button>
         </div>
 
         <div>
@@ -85,7 +66,7 @@ export function TrackerSection({ title, icon, options, onAdd }: TrackerSectionPr
             value={numberValue}
             onChange={setNumberValue}
             onAdd={handleAdd}
-            disabled={false}
+            disabled={isAddDisabled()}
           />
         </div>
       </div>
