@@ -20,13 +20,9 @@ export const useAuth = () => {
         setSession(session);
         
         if (session?.user) {
-          // Fetch user role
-          const { data: roleData } = await supabase
-            .rpc('get_user_role', { _user_id: session.user.id });
-          
           setUser({
             ...session.user,
-            role: roleData || 'user'
+            role: 'user' // Default role, can be enhanced later
           });
         } else {
           setUser(null);
@@ -41,13 +37,9 @@ export const useAuth = () => {
       setSession(session);
       
       if (session?.user) {
-        // Fetch user role
-        const { data: roleData } = await supabase
-          .rpc('get_user_role', { _user_id: session.user.id });
-        
         setUser({
           ...session.user,
-          role: roleData || 'user'
+          role: 'user' // Default role, can be enhanced later
         });
       }
       
