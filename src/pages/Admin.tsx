@@ -71,10 +71,10 @@ const Admin = () => {
   }, [user, isAdmin, navigate, authLoading]);
 
   useEffect(() => {
-    if (isAdmin()) {
+    if (user && user.role === 'admin') {
       fetchUsers();
     }
-  }, [isAdmin]);
+  }, [user?.role]);
 
   const fetchUsers = async () => {
     try {
