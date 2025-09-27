@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,8 +97,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   return (
     <div className="tracker-card">
       <h3 className="text-lg font-semibold mb-4 text-foreground">📊 Daily Summary</h3>
-      <ScrollArea className="h-64 scroll-area-green">
-        <div className="space-y-3">
+      <div className="space-y-3">
           {entries.map((entry) => (
             <div
               key={entry.id}
@@ -221,7 +219,6 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
             </div>
           ))}
         </div>
-      </ScrollArea>
     </div>
   );
 }
