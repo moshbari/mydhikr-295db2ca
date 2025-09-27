@@ -119,7 +119,14 @@ const Index = () => {
   }, [user, today, toast]);
 
   const addEntry = async (type: "dhikr" | "quran" | "salah", name: string, count: number) => {
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to track your activities.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       // Check if entry with same type and name already exists today
