@@ -25,7 +25,7 @@ interface UserProfile {
 }
 
 const Admin = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -33,20 +33,24 @@ const Admin = () => {
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Redirect if not admin
+  // Redirect if not admin - but wait for auth to load
   useEffect(() => {
-    console.log('Admin page - user:', user, 'isAdmin:', isAdmin());
+    console.log('Admin page - user:', user, 'isAdmin:', isAdmin(), 'authLoading:', authLoading);
+    
+    // Don't redirect while auth is still loading
+    if (authLoading) return;
+    
     if (!user) {
-      console.log('No user, redirecting to auth');
-      navigate('/auth');
+      console.log('No user after loading, redirecting to auth');
+      navigate('/auth', { replace: true });
       return;
     }
     if (!isAdmin()) {
-      console.log('User is not admin, redirecting to home');
-      navigate('/');
+      console.log('User is not admin after loading, redirecting to home');
+      navigate('/', { replace: true });
       return;
     }
-  }, [user, isAdmin, navigate]);
+  }, [user, isAdmin, navigate, authLoading]);
 
   useEffect(() => {
     if (isAdmin()) {
