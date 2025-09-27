@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Trash2, Shield, Users } from "lucide-react";
+import { ArrowLeft, Users, Edit3, Trash2, Save, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 interface UserProfile {
@@ -21,7 +21,7 @@ interface UserProfile {
   created_at: string;
   updated_at: string;
   email?: string;
-  role?: 'admin' | 'user';
+  role?: string;
 }
 
 const Admin = () => {
@@ -30,141 +30,165 @@ const Admin = () => {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Redirect if not admin
   useEffect(() => {
-    if (!user || !isAdmin()) {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    if (!isAdmin()) {
       navigate('/');
       return;
     }
   }, [user, isAdmin, navigate]);
 
-  // Fetch all users
   useEffect(() => {
-    if (!user || !isAdmin()) return;
-    
-    const fetchUsers = async () => {
-      try {
-        // Get profiles with auth data
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
+    if (isAdmin()) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
 
-        if (profilesError) throw profilesError;
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      
+      // Get all profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*');
 
-        // Get auth users to get emails (admin only)
-        const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-        if (authError) throw authError;
+      if (profilesError) throw profilesError;
 
-        // Get user roles
-        const { data: roles, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role');
+      // Get user roles separately
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
 
-        if (rolesError) throw rolesError;
+      if (rolesError) throw rolesError;
 
-        // Combine data
-        const usersWithDetails: UserProfile[] = profiles?.map(profile => {
-          const authUser = authUsers?.find((u: any) => u.id === profile.user_id);
-          const userRole = roles?.find(r => r.user_id === profile.user_id);
-          
-          return {
-            ...profile,
-            email: authUser?.email || '',
-            role: userRole?.role || 'user'
-          };
-        }) || [];
+      // Create a map of user roles
+      const roleMap = new Map();
+      userRoles?.forEach(userRole => {
+        roleMap.set(userRole.user_id, userRole.role);
+      });
 
-        setUsers(usersWithDetails);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load users",
-          variant: "destructive",
-        });
-      } finally {
+      // Get user emails from auth.users via admin API
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        // Fallback to getting users without admin API
+        const usersWithoutEmails = profiles?.map(profile => ({
+          ...profile,
+          email: 'Email not available',
+          role: roleMap.get(profile.user_id) || 'user'
+        })) || [];
+        setUsers(usersWithoutEmails);
         setLoading(false);
+        return;
       }
-    };
 
-    fetchUsers();
-  }, [user, isAdmin, toast]);
+      // Combine the data
+      const usersWithDetails = profiles?.map(profile => {
+        const authUser = authUsers && authUsers.users 
+          ? authUsers.users.find((u: any) => u.id === profile.user_id)
+          : null;
+        const role = roleMap.get(profile.user_id) || 'user';
+        
+        return {
+          ...profile,
+          email: authUser?.email || 'Unknown',
+          role
+        };
+      }) || [];
 
-  const updateUser = async (userId: string, updates: Partial<UserProfile>) => {
-    setSaving(userId);
+      setUsers(usersWithDetails);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch users",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveUser = async (updatedUser: UserProfile) => {
     try {
       // Update profile
-      if (updates.display_name !== undefined || updates.is_active !== undefined) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            display_name: updates.display_name,
-            is_active: updates.is_active,
-          })
-          .eq('user_id', userId);
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          display_name: updatedUser.display_name,
+          is_active: updatedUser.is_active,
+        })
+        .eq('user_id', updatedUser.user_id);
 
-        if (profileError) throw profileError;
-      }
+      if (profileError) throw profileError;
 
       // Update role if changed
-      if (updates.role !== undefined) {
-        // Delete existing role
+      if (updatedUser.role) {
+        // First delete existing role
         await supabase
           .from('user_roles')
           .delete()
-          .eq('user_id', userId);
+          .eq('user_id', updatedUser.user_id);
 
         // Insert new role
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
-            user_id: userId,
-            role: updates.role
+            user_id: updatedUser.user_id,
+            role: updatedUser.role as 'admin' | 'user'
           });
 
         if (roleError) throw roleError;
       }
 
-      // Update local state
-      setUsers(users.map(user => 
-        user.user_id === userId 
-          ? { ...user, ...updates }
-          : user
-      ));
-
       toast({
         title: "Success",
         description: "User updated successfully",
       });
+
+      setEditingUser(null);
+      fetchUsers();
     } catch (error) {
-      console.error('Error updating user:', error);
+      console.error('Error saving user:', error);
       toast({
         title: "Error",
         description: "Failed to update user",
         variant: "destructive",
       });
-    } finally {
-      setSaving(null);
     }
   };
 
-  const deleteUser = async (userId: string) => {
-    setSaving(userId);
+  const handleDeleteUser = async (userId: string) => {
     try {
-      // Delete from auth (this will cascade to profiles and user_roles)
+      // Delete from auth.users (this will cascade to profiles and user_roles)
       const { error } = await supabase.auth.admin.deleteUser(userId);
-      if (error) throw error;
-
-      // Update local state
-      setUsers(users.filter(user => user.user_id !== userId));
+      
+      if (error) {
+        console.error('Delete error:', error);
+        // Fallback: delete from profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('user_id', userId);
+        
+        if (profileError) throw profileError;
+      }
 
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
+
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
       toast({
@@ -172,12 +196,15 @@ const Admin = () => {
         description: "Failed to delete user",
         variant: "destructive",
       });
-    } finally {
-      setSaving(null);
     }
   };
 
-  if (!user || !isAdmin()) {
+  const filteredUsers = users.filter(user => 
+    user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (!isAdmin()) {
     return null;
   }
 
@@ -200,161 +227,177 @@ const Admin = () => {
               <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
             </div>
           </div>
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <Users className="h-3 w-3" />
-            {users.length} Users
-          </Badge>
         </div>
 
+        {/* Search */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              User Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4 mb-4">
+              <div className="flex-1">
+                <Label htmlFor="search">Search Users</Label>
+                <Input
+                  id="search"
+                  placeholder="Search by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex items-end">
+                <Button onClick={fetchUsers} disabled={loading}>
+                  {loading ? "Loading..." : "Refresh"}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Users List */}
-        {loading ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">Loading users...</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {users.map((userProfile) => (
-              <Card key={userProfile.user_id} className="overflow-hidden">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{userProfile.display_name || 'No name'}</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={userProfile.role === 'admin' ? 'default' : 'secondary'}>
-                        {userProfile.role}
-                      </Badge>
-                      <Badge variant={userProfile.is_active ? 'default' : 'destructive'}>
-                        {userProfile.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{userProfile.email}</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {/* Display Name */}
-                    <div className="space-y-2">
-                      <Label>Display Name</Label>
-                      <Input
-                        value={userProfile.display_name || ''}
-                        onChange={(e) => {
-                          setUsers(users.map(u => 
-                            u.user_id === userProfile.user_id 
-                              ? { ...u, display_name: e.target.value }
-                              : u
-                          ));
-                        }}
-                        placeholder="Enter display name"
-                      />
-                    </div>
-
-                    {/* Role */}
-                    <div className="space-y-2">
-                      <Label>Role</Label>
-                      <Select
-                        value={userProfile.role}
-                        onValueChange={(value) => {
-                          setUsers(users.map(u => 
-                            u.user_id === userProfile.user_id 
-                              ? { ...u, role: value as 'admin' | 'user' }
-                              : u
-                          ));
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">User</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Status */}
-                    <div className="space-y-2">
-                      <Label>Status</Label>
-                      <div className="flex items-center space-x-2 pt-2">
-                        <Switch
-                          checked={userProfile.is_active}
-                          onCheckedChange={(checked) => {
-                            setUsers(users.map(u => 
-                              u.user_id === userProfile.user_id 
-                                ? { ...u, is_active: checked }
-                                : u
-                            ));
-                          }}
-                        />
-                        <Label className="text-sm">
-                          {userProfile.is_active ? 'Active' : 'Inactive'}
-                        </Label>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="space-y-2">
-                      <Label>Actions</Label>
-                      <div className="flex gap-2 pt-1">
-                        <Button
-                          onClick={() => updateUser(userProfile.user_id, {
-                            display_name: userProfile.display_name,
-                            role: userProfile.role,
-                            is_active: userProfile.is_active
+        <div className="grid gap-4">
+          {filteredUsers.map((userProfile) => (
+            <Card key={userProfile.id} className="overflow-hidden">
+              <CardContent className="p-6">
+                {editingUser?.id === userProfile.id ? (
+                  // Edit Mode
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="display_name">Display Name</Label>
+                        <Input
+                          id="display_name"
+                          value={editingUser.display_name || ''}
+                          onChange={(e) => setEditingUser({
+                            ...editingUser,
+                            display_name: e.target.value
                           })}
-                          disabled={saving === userProfile.user_id}
-                          size="sm"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="role">Role</Label>
+                        <Select
+                          value={editingUser.role}
+                          onValueChange={(value) => setEditingUser({
+                            ...editingUser,
+                            role: value
+                          })}
                         >
-                          <Save className="h-3 w-3 mr-1" />
-                          Save
-                        </Button>
-                        
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button 
-                              variant="destructive" 
-                              size="sm"
-                              disabled={saving === userProfile.user_id}
-                            >
-                              <Trash2 className="h-3 w-3 mr-1" />
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete User</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete {userProfile.display_name || userProfile.email}? 
-                                This action cannot be undone and will permanently delete the user's account and all associated data.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteUser(userProfile.user_id)}
-                                className="bg-destructive hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">User</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="text-xs text-muted-foreground">
-                    Created: {new Date(userProfile.created_at).toLocaleDateString()} • 
-                    ID: {userProfile.user_id.slice(0, 8)}...
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                    
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="is_active"
+                        checked={editingUser.is_active}
+                        onCheckedChange={(checked) => setEditingUser({
+                          ...editingUser,
+                          is_active: checked
+                        })}
+                      />
+                      <Label htmlFor="is_active">Active</Label>
+                    </div>
 
-        {/* Empty state */}
-        {!loading && users.length === 0 && (
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleSaveUser(editingUser)}
+                        className="flex items-center gap-2"
+                      >
+                        <Save className="h-4 w-4" />
+                        Save
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setEditingUser(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  // View Mode
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">
+                          {userProfile.display_name || 'No Display Name'}
+                        </h3>
+                        <Badge variant={userProfile.role === 'admin' ? 'default' : 'secondary'}>
+                          {userProfile.role}
+                        </Badge>
+                        <Badge variant={userProfile.is_active ? 'default' : 'destructive'}>
+                          {userProfile.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {userProfile.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Joined: {new Date(userProfile.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingUser(userProfile)}
+                        className="flex items-center gap-2"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                        Edit
+                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete {userProfile.display_name || userProfile.email}? 
+                              This action cannot be undone and will permanently delete all user data.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteUser(userProfile.user_id)}
+                              className="bg-destructive text-destructive-foreground"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredUsers.length === 0 && !loading && (
           <Card>
             <CardContent className="text-center py-8">
               <p className="text-muted-foreground">No users found.</p>
