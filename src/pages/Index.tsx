@@ -36,15 +36,9 @@ const Index = () => {
   // Load today's data from database
   useEffect(() => {
     const loadTodayData = async () => {
-      // If no user, don't try to load data but set loading to false
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+      if (!user) return;
       
       try {
-        console.log('Loading data for user:', user.id);
-        
         // Load entries
         const { data: entriesData, error: entriesError } = await supabase
           .from('daily_entries')
@@ -53,12 +47,7 @@ const Index = () => {
           .eq('entry_date', today)
           .order('created_at', { ascending: false });
 
-        if (entriesError) {
-          console.error('Error loading entries:', entriesError);
-          throw entriesError;
-        }
-
-        console.log('Loaded entries:', entriesData);
+        if (entriesError) throw entriesError;
 
         // Transform database entries to match component format
         const transformedEntries: DailyEntry[] = (entriesData || []).map(entry => ({
@@ -83,12 +72,7 @@ const Index = () => {
           .eq('entry_date', today)
           .maybeSingle();
 
-        if (notesError && notesError.code !== 'PGRST116') {
-          console.error('Error loading notes:', notesError);
-          throw notesError;
-        }
-        
-        console.log('Loaded notes:', notesData);
+        if (notesError && notesError.code !== 'PGRST116') throw notesError;
         setNotes(notesData?.notes || "");
 
       } catch (error) {
@@ -99,7 +83,6 @@ const Index = () => {
           variant: "destructive",
         });
       } finally {
-        console.log('Setting loading to false');
         setLoading(false);
       }
     };
@@ -328,7 +311,6 @@ const Index = () => {
     }
   };
 
-  // Show loading only if auth is still loading OR if we have a user but data is still loading
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -337,7 +319,6 @@ const Index = () => {
             <span className="text-2xl">🕌</span>
           </div>
           <p className="text-muted-foreground">Loading your data...</p>
-          <p className="text-xs text-muted-foreground">User: {user ? 'authenticated' : 'checking authentication'}</p>
         </div>
       </div>
     );
