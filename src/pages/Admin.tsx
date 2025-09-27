@@ -35,11 +35,14 @@ const Admin = () => {
 
   // Redirect if not admin
   useEffect(() => {
+    console.log('Admin page - user:', user, 'isAdmin:', isAdmin());
     if (!user) {
+      console.log('No user, redirecting to auth');
       navigate('/auth');
       return;
     }
     if (!isAdmin()) {
+      console.log('User is not admin, redirecting to home');
       navigate('/');
       return;
     }

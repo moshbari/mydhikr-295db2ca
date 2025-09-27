@@ -374,7 +374,10 @@ const Index = () => {
             <div className="flex gap-1 sm:gap-2 flex-wrap">
               {isAdmin() && (
                 <Button 
-                  onClick={() => navigate('/admin')} 
+                  onClick={() => {
+                    console.log('Admin button clicked, user role:', user?.role);
+                    navigate('/admin');
+                  }} 
                   variant="header"
                   size="mobile"
                 >
