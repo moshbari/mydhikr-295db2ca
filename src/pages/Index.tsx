@@ -7,12 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { toast } = useToast();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [notes, setNotes] = useState("");
@@ -223,6 +223,16 @@ const Index = () => {
               <p className="text-white/90 text-sm sm:text-base">{todayFormatted}</p>
             </div>
             <div className="flex gap-2">
+              {isAdmin() && (
+                <Button 
+                  onClick={() => navigate('/admin')} 
+                  variant="outline" 
+                  className="text-white border-white/20 hover:bg-white/20"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Admin
+                </Button>
+              )}
               <Button 
                 onClick={() => navigate('/history')} 
                 variant="outline" 
