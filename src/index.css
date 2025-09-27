@@ -2,39 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Islamic Daily Tracker Design System
+All colors in HSL format following Islamic green theme
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Islamic color palette */
+    --background: 210 20% 98%;
+    --foreground: 210 12% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 12% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 12% 16%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Islamic greens */
+    --primary: 146 43% 35%; /* #2e8b57 Islamic green */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 146 43% 45%;
+    --primary-dark: 146 43% 25%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 210 12% 16%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 95%;
+    --muted-foreground: 210 8% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 43 74% 49%; /* Gold accent #daa520 */
+    --accent-foreground: 210 12% 16%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --success: 134 61% 41%; /* Success green */
+    --success-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 31% 91%;
+    --input: 214 31% 91%;
+    --ring: 146 43% 35%;
+
+    /* Islamic gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(146 43% 35%), hsl(146 43% 45%));
+    --gradient-header: linear-gradient(90deg, hsl(146 43% 35%), hsl(134 43% 41%));
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%), hsl(43 74% 59%));
+
+    /* Shadows with Islamic green tint */
+    --shadow-soft: 0 2px 8px hsla(146, 43%, 35%, 0.1);
+    --shadow-card: 0 4px 12px hsla(146, 43%, 35%, 0.15);
+    --shadow-button: 0 2px 4px hsla(146, 43%, 35%, 0.2);
 
     --radius: 0.5rem;
 
@@ -100,6 +117,44 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer components {
+  /* Islamic app specific components */
+  .header-gradient {
+    background: var(--gradient-header);
+  }
+  
+  .number-pad-button {
+    @apply w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-card border border-border hover:bg-primary hover:text-primary-foreground transition-all duration-200 flex items-center justify-center text-lg font-semibold touch-manipulation;
+    box-shadow: var(--shadow-button);
+  }
+  
+  .number-pad-button:active {
+    transform: scale(0.95);
+  }
+  
+  .tracker-card {
+    @apply bg-card border border-border rounded-xl p-4 sm:p-6;
+    box-shadow: var(--shadow-card);
+  }
+  
+  .islamic-button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 rounded-lg px-4 py-2 font-medium touch-manipulation;
+    box-shadow: var(--shadow-button);
+  }
+  
+  .islamic-button:active {
+    transform: scale(0.98);
+  }
+  
+  .success-button {
+    @apply bg-success text-success-foreground hover:bg-success/90 transition-all duration-200 rounded-lg px-4 py-2 font-medium;
+  }
+  
+  .accent-button {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200 rounded-lg px-4 py-2 font-medium;
   }
 }
