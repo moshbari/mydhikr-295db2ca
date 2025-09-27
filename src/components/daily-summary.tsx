@@ -112,18 +112,24 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                     // Edit Mode
                     <div className="space-y-2">
                       <Input
+                        id={`edit-name-${entry.id}`}
+                        name={`editName-${entry.id}`}
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         className="text-sm"
                         placeholder="Activity name"
+                        autoComplete="off"
                       />
                       <div className="flex items-center gap-2">
                         <Input
+                          id={`edit-count-${entry.id}`}
+                          name={`editCount-${entry.id}`}
                           type="number"
                           value={editCount}
                           onChange={(e) => setEditCount(parseInt(e.target.value) || 0)}
                           className="w-20 text-sm"
                           min="1"
+                          autoComplete="off"
                         />
                         <Badge className={getTypeColor(entry.type)}>
                           {formatType(entry.type)}
