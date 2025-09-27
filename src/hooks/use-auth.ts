@@ -54,11 +54,14 @@ export const useAuth = () => {
 
   // Separate effect to fetch and update user role after auth is established
   useEffect(() => {
-    if (user?.id && user.role === 'user') {
+    if (user?.id) {
       const fetchRole = async () => {
         try {
+          console.log('Fetching role for user:', user.id);
           const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: user.id });
+          console.log('Role fetched:', roleData, 'current user role:', user.role);
           if (roleData && roleData !== user.role) {
+            console.log('Updating user role from', user.role, 'to', roleData);
             setUser(prev => prev ? { ...prev, role: roleData as UserRole } : null);
           }
         } catch (error) {
