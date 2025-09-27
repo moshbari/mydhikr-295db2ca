@@ -243,9 +243,11 @@ const Admin = () => {
                 <Label htmlFor="search">Search Users</Label>
                 <Input
                   id="search"
+                  name="search"
                   placeholder="Search by name or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  autoComplete="off"
                 />
               </div>
               <div className="flex items-end">
@@ -270,11 +272,13 @@ const Admin = () => {
                         <Label htmlFor="display_name">Display Name</Label>
                         <Input
                           id="display_name"
+                          name="displayName"
                           value={editingUser.display_name || ''}
                           onChange={(e) => setEditingUser({
                             ...editingUser,
                             display_name: e.target.value
                           })}
+                          autoComplete="name"
                         />
                       </div>
                       <div>
