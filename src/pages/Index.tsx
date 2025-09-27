@@ -49,17 +49,46 @@ const Index = () => {
 
         if (entriesError) throw entriesError;
 
-        // Transform database entries to match component format
-        const transformedEntries: DailyEntry[] = (entriesData || []).map(entry => ({
-          id: entry.id,
-          type: entry.type as "dhikr" | "quran" | "salah",
-          name: entry.name,
-          count: entry.count,
-          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-US', { 
+        // Transform database entries to match component format and consolidate duplicates
+        const entriesMap = new Map();
+        
+        (entriesData || []).forEach(entry => {
+          const key = `${entry.type}-${entry.name}`;
+          const timestamp = entry.timestamp || new Date().toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit',
             hour12: true 
-          }),
+          });
+          
+          if (entriesMap.has(key)) {
+            // If entry exists, add to count and use latest timestamp
+            const existing = entriesMap.get(key);
+            existing.count += entry.count;
+            // Keep the latest timestamp (entries are ordered by created_at desc)
+            if (entry.created_at > existing.created_at) {
+              existing.timestamp = timestamp;
+              existing.id = entry.id; // Use the latest entry's ID
+              existing.created_at = entry.created_at;
+            }
+          } else {
+            // New entry
+            entriesMap.set(key, {
+              id: entry.id,
+              type: entry.type as "dhikr" | "quran" | "salah",
+              name: entry.name,
+              count: entry.count,
+              timestamp: timestamp,
+              created_at: entry.created_at,
+            });
+          }
+        });
+
+        const transformedEntries: DailyEntry[] = Array.from(entriesMap.values()).map(entry => ({
+          id: entry.id,
+          type: entry.type,
+          name: entry.name,
+          count: entry.count,
+          timestamp: entry.timestamp,
         }));
 
         setEntries(transformedEntries);
@@ -103,15 +132,18 @@ const Index = () => {
         // Update existing entry by adding the new count
         const newCount = existingEntry.count + count;
         
+        const currentTime = new Date().toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true 
+        });
+        
         const { error } = await supabase
           .from('daily_entries')
           .update({
             count: newCount,
-            timestamp: new Date().toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: true 
-            }),
+            timestamp: currentTime,
+            created_at: new Date().toISOString(), // Update created_at to reflect last update time
           })
           .eq('id', String(existingEntry.id))
           .eq('user_id', user.id);
@@ -122,11 +154,7 @@ const Index = () => {
         setEntries(prev => 
           prev.map(entry => 
             entry.id === existingEntry.id 
-              ? { ...entry, count: newCount, timestamp: new Date().toLocaleTimeString('en-US', { 
-                  hour: '2-digit', 
-                  minute: '2-digit',
-                  hour12: true 
-                }) }
+              ? { ...entry, count: newCount, timestamp: currentTime }
               : entry
           )
         );
