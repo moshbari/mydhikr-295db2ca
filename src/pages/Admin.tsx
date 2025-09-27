@@ -33,7 +33,7 @@ const Admin = () => {
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Redirect if not admin - but wait for auth to load
+  // Redirect if not admin - but wait for auth to load and role to update
   useEffect(() => {
     console.log('Admin page - user:', user, 'user.role:', user?.role, 'isAdmin:', isAdmin(), 'authLoading:', authLoading);
     
@@ -46,10 +46,21 @@ const Admin = () => {
       return;
     }
     
-    // Give extra time for role to load if user exists but no role yet
-    if (user && !user.role) {
-      console.log('User exists but no role yet, waiting...');
-      return;
+    // Give extra time for role to load if user exists but role is still 'user'
+    // We know from the database that this user should be admin
+    if (user && user.role === 'user') {
+      console.log('User exists but role is still user, waiting for role update...');
+      
+      // Set a timeout to check again after role has time to update
+      const timeoutId = setTimeout(() => {
+        console.log('Timeout reached, checking role again:', user.role);
+        if (user.role !== 'admin') {
+          console.log('Role still not admin after timeout, redirecting to home');
+          navigate('/', { replace: true });
+        }
+      }, 1000); // Wait 1 second for role update
+      
+      return () => clearTimeout(timeoutId);
     }
     
     if (!isAdmin()) {
