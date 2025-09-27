@@ -119,7 +119,7 @@ export default function AuthPage() {
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">🕌</span>
           </div>
-          <CardTitle className="text-2xl">Islamic Daily Tracker</CardTitle>
+          <CardTitle className="text-2xl">My Dhikr</CardTitle>
           <CardDescription>
             {isLogin ? "Sign in to continue your spiritual journey" : "Create an account to start tracking your daily worship"}
           </CardDescription>
