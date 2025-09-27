@@ -13,16 +13,6 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRole = async (userId: string): Promise<UserRole> => {
-    try {
-      const { data } = await supabase.rpc('get_user_role', { _user_id: userId });
-      return data || 'user';
-    } catch (error) {
-      console.error('Error fetching user role:', error);
-      return 'user';
-    }
-  };
-
   useEffect(() => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -30,11 +20,20 @@ export const useAuth = () => {
         setSession(session);
         
         if (session?.user) {
-          const role = await fetchUserRole(session.user.id);
-          setUser({
-            ...session.user,
-            role
-          });
+          // Fetch role separately after setting user
+          try {
+            const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: session.user.id });
+            setUser({
+              ...session.user,
+              role: (roleData as UserRole) || 'user'
+            });
+          } catch (error) {
+            console.error('Error fetching user role:', error);
+            setUser({
+              ...session.user,
+              role: 'user'
+            });
+          }
         } else {
           setUser(null);
         }
@@ -48,11 +47,19 @@ export const useAuth = () => {
       setSession(session);
       
       if (session?.user) {
-        const role = await fetchUserRole(session.user.id);
-        setUser({
-          ...session.user,
-          role
-        });
+        try {
+          const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: session.user.id });
+          setUser({
+            ...session.user,
+            role: (roleData as UserRole) || 'user'
+          });
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          setUser({
+            ...session.user,
+            role: 'user'
+          });
+        }
       }
       
       setLoading(false);
