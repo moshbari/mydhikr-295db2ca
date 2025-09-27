@@ -78,6 +78,7 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
+      console.log('Starting to fetch users...');
       setLoading(true);
       
       // Get all profiles
@@ -100,14 +101,14 @@ const Admin = () => {
         roleMap.set(userRole.user_id, userRole.role);
       });
 
-      // Combine the data without trying to get emails from auth.users
-      // Note: Emails are not accessible in frontend for security reasons
+      // Combine the data with actual emails from profiles
       const usersWithDetails = profiles?.map(profile => ({
         ...profile,
-        email: 'Private', // Don't show emails for security
+        email: profile.email || 'No email set', // Show actual email from profiles table
         role: roleMap.get(profile.user_id) || 'user'
       })) || [];
 
+      console.log('Users fetched successfully:', usersWithDetails);
       setUsers(usersWithDetails);
       setLoading(false);
     } catch (error) {
