@@ -94,39 +94,83 @@ const Index = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
-        .from('daily_entries')
-        .insert({
-          user_id: user.id,
+      // Check if entry with same type and name already exists today
+      const existingEntry = entries.find(entry => 
+        entry.type === type && entry.name === name
+      );
+
+      if (existingEntry) {
+        // Update existing entry by adding the new count
+        const newCount = existingEntry.count + count;
+        
+        const { error } = await supabase
+          .from('daily_entries')
+          .update({
+            count: newCount,
+            timestamp: new Date().toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true 
+            }),
+          })
+          .eq('id', String(existingEntry.id))
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        // Update local state
+        setEntries(prev => 
+          prev.map(entry => 
+            entry.id === existingEntry.id 
+              ? { ...entry, count: newCount, timestamp: new Date().toLocaleTimeString('en-US', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  hour12: true 
+                }) }
+              : entry
+          )
+        );
+
+        toast({
+          title: "Entry updated",
+          description: `${name}: ${count} added (total: ${newCount})`,
+        });
+      } else {
+        // Create new entry
+        const { data, error } = await supabase
+          .from('daily_entries')
+          .insert({
+            user_id: user.id,
+            type,
+            name,
+            count,
+            entry_date: today,
+            timestamp: new Date().toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true 
+            }),
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const newEntry: DailyEntry = {
+          id: data.id,
           type,
           name,
           count,
-          entry_date: today,
-          timestamp: new Date().toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-          }),
-        })
-        .select()
-        .single();
+          timestamp: data.timestamp,
+        };
 
-      if (error) throw error;
+        setEntries(prev => [newEntry, ...prev]);
 
-      const newEntry: DailyEntry = {
-        id: data.id,
-        type,
-        name,
-        count,
-        timestamp: data.timestamp,
-      };
-
-      setEntries(prev => [newEntry, ...prev]);
-
-      toast({
-        title: "Entry added",
-        description: `${name}: ${count} recorded`,
-      });
+        toast({
+          title: "Entry added",
+          description: `${name}: ${count} recorded`,
+        });
+      }
     } catch (error) {
       console.error('Error adding entry:', error);
       toast({
