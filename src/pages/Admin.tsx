@@ -35,7 +35,7 @@ const Admin = () => {
 
   // Redirect if not admin - but wait for auth to load
   useEffect(() => {
-    console.log('Admin page - user:', user, 'isAdmin:', isAdmin(), 'authLoading:', authLoading);
+    console.log('Admin page - user:', user, 'user.role:', user?.role, 'isAdmin:', isAdmin(), 'authLoading:', authLoading);
     
     // Don't redirect while auth is still loading
     if (authLoading) return;
@@ -45,6 +45,13 @@ const Admin = () => {
       navigate('/auth', { replace: true });
       return;
     }
+    
+    // Give extra time for role to load if user exists but no role yet
+    if (user && !user.role) {
+      console.log('User exists but no role yet, waiting...');
+      return;
+    }
+    
     if (!isAdmin()) {
       console.log('User is not admin after loading, redirecting to home');
       navigate('/', { replace: true });
