@@ -90,10 +90,12 @@ export const ChangePasswordDialog = () => {
             <div className="relative">
               <Input
                 id="newPassword"
+                name="newPassword"
                 type={showPasswords ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
+                autoComplete="new-password"
               />
               <Button
                 type="button"
@@ -111,10 +113,12 @@ export const ChangePasswordDialog = () => {
             <Label htmlFor="confirmPassword">Confirm New Password</Label>
             <Input
               id="confirmPassword"
+              name="confirmPassword"
               type={showPasswords ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
+              autoComplete="new-password"
             />
           </div>
         </div>
