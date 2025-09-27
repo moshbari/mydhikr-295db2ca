@@ -9,7 +9,7 @@ interface NumberPadProps {
 
 export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) {
   const handleNumberClick = (num: string) => {
-    if (value === "0") {
+    if (value === "0" || value === "1") {
       onChange(num);
     } else {
       onChange(value + num);
@@ -17,7 +17,7 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
   };
 
   const handleClear = () => {
-    onChange("0");
+    onChange("1");
   };
 
   const numbers = [
@@ -69,7 +69,7 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
         <Button
           onClick={onAdd}
           className="islamic-button col-span-1 text-sm"
-          disabled={disabled || value === "0" || value === ""}
+          disabled={disabled || value === "0" || value === "" || parseInt(value) <= 0}
         >
           Add
         </Button>

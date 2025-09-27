@@ -16,7 +16,7 @@ interface TrackerSectionProps {
 export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps) {
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [customName, setCustomName] = useState<string>("");
-  const [numberValue, setNumberValue] = useState<string>("0");
+  const [numberValue, setNumberValue] = useState<string>("1");
   const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
 
   const getOptions = () => {
@@ -40,14 +40,15 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       onAdd(name, count);
       setSelectedOption("");
       setCustomName("");
-      setNumberValue("0");
+      setNumberValue("1");
       setShowCustomInput(false);
     }
   };
 
   const isAddDisabled = () => {
     const name = showCustomInput ? customName.trim() : selectedOption;
-    return !name || parseInt(numberValue) <= 0 || isNaN(parseInt(numberValue));
+    const count = parseInt(numberValue);
+    return !name || count <= 0 || isNaN(count);
   };
 
   return (
