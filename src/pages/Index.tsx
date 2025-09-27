@@ -228,12 +228,6 @@ const Index = () => {
     }
   };
 
-  const handleSaveAll = () => {
-    toast({
-      title: "All data saved",
-      description: "Your daily tracking data is automatically saved.",
-    });
-  };
 
   const handleResetAll = async () => {
     if (!user) return;
@@ -330,6 +324,13 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Daily Summary */}
+        <DailySummary 
+          entries={entries} 
+          onEdit={handleEditEntry}
+          onDelete={handleDeleteEntry}
+        />
+
         {/* Dhikr & Tasbih Section */}
         <TrackerSection
           title="Dhikr & Tasbih"
@@ -354,25 +355,15 @@ const Index = () => {
           onAdd={(name, count) => addEntry("salah", name, count)}
         />
 
-        {/* Daily Summary */}
-        <DailySummary 
-          entries={entries} 
-          onEdit={handleEditEntry}
-          onDelete={handleDeleteEntry}
-        />
-
         {/* Notes Section */}
         <NotesSection 
           notes={notes} 
           onNotesChange={handleNotesChange} 
         />
 
-        {/* Save/Reset Controls */}
+        {/* Reset Controls */}
         <div className="tracker-card">
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button onClick={handleSaveAll} className="success-button">
-              💾 Save All Data
-            </Button>
+          <div className="flex justify-center">
             <Button onClick={handleResetAll} variant="destructive">
               🔄 Reset All Data
             </Button>
