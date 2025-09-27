@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { NumberPad } from "@/components/ui/number-pad";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
 
@@ -14,7 +14,8 @@ interface TrackerSectionProps {
 }
 
 export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps) {
-  const [activityName, setActivityName] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [customName, setCustomName] = useState<string>("");
   const [numberValue, setNumberValue] = useState<string>("0");
   const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
 
@@ -32,31 +33,21 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   };
 
   const handleAdd = () => {
-    const name = activityName.trim();
+    const name = showCustomInput ? customName.trim() : selectedOption;
     const count = parseInt(numberValue);
     
     if (name && count > 0) {
       onAdd(name, count);
-      setActivityName("");
+      setSelectedOption("");
+      setCustomName("");
       setNumberValue("0");
       setShowCustomInput(false);
     }
   };
 
-  const handleQuickAdd = (optionName: string) => {
-    const count = parseInt(numberValue);
-    if (count > 0) {
-      onAdd(optionName, count);
-      setNumberValue("0");
-    }
-  };
-
   const isAddDisabled = () => {
-    return !activityName.trim() || parseInt(numberValue) <= 0 || isNaN(parseInt(numberValue));
-  };
-
-  const isQuickAddDisabled = () => {
-    return parseInt(numberValue) <= 0 || isNaN(parseInt(numberValue));
+    const name = showCustomInput ? customName.trim() : selectedOption;
+    return !name || parseInt(numberValue) <= 0 || isNaN(parseInt(numberValue));
   };
 
   return (
@@ -66,78 +57,80 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         <h2 className="text-lg font-semibold text-foreground">{title}</h2>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Options and Input Column */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Selection Column */}
         <div className="space-y-3">
-          {/* Default Options */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-foreground">Quick Select:</h4>
-            <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-              {getOptions().slice(0, 12).map((option) => (
-                <Badge
-                  key={option}
-                  variant="outline"
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground text-xs"
-                  onClick={() => handleQuickAdd(option)}
-                >
-                  {option}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          
-          {/* Custom Input Toggle */}
-          <div className="pt-2 border-t border-border/50">
-            {!showCustomInput ? (
+          {!showCustomInput ? (
+            <>
+              <Select value={selectedOption} onValueChange={setSelectedOption}>
+                <SelectTrigger className="w-full bg-background border border-input">
+                  <SelectValue placeholder={`Select ${title.toLowerCase()}...`} />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-input shadow-lg z-50 max-h-60">
+                  {getOptions().map((option) => (
+                    <SelectItem 
+                      key={option} 
+                      value={option}
+                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => setShowCustomInput(true)}
-                className="w-full text-xs"
+                className="w-full"
               >
-                <Plus className="w-3 h-3 mr-1" />
+                <Plus className="w-4 h-4 mr-2" />
                 Add Custom {title}
               </Button>
-            ) : (
-              <div className="space-y-2">
-                <Input
-                  id={`${title.toLowerCase()}-name`}
-                  name={`${title.toLowerCase()}Name`}
-                  placeholder={`Enter custom ${title.toLowerCase()} name...`}
-                  value={activityName}
-                  onChange={(e) => setActivityName(e.target.value)}
-                  className="w-full text-sm"
-                  autoComplete="off"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !isAddDisabled()) {
-                      handleAdd();
-                    }
+            </>
+          ) : (
+            <>
+              <Input
+                id={`${title.toLowerCase()}-custom`}
+                name={`${title.toLowerCase()}Custom`}
+                placeholder={`Enter custom ${title.toLowerCase()} name...`}
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                className="w-full"
+                autoComplete="off"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isAddDisabled()) {
+                    handleAdd();
+                  }
+                }}
+              />
+              
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowCustomInput(false);
+                    setCustomName("");
                   }}
-                />
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleAdd} 
-                    disabled={isAddDisabled()}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Add
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowCustomInput(false);
-                      setActivityName("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
+                  className="flex-1"
+                >
+                  Back to List
+                </Button>
               </div>
-            )}
-          </div>
+            </>
+          )}
+          
+          <Button 
+            onClick={handleAdd} 
+            disabled={isAddDisabled()}
+            className="w-full"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add {title}
+          </Button>
         </div>
 
         {/* Number Pad Column */}
@@ -145,12 +138,8 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
           <NumberPad
             value={numberValue}
             onChange={setNumberValue}
-            onAdd={() => {
-              if (showCustomInput && activityName.trim()) {
-                handleAdd();
-              }
-            }}
-            disabled={showCustomInput ? isAddDisabled() : isQuickAddDisabled()}
+            onAdd={handleAdd}
+            disabled={isAddDisabled()}
           />
         </div>
       </div>
