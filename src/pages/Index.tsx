@@ -7,10 +7,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
+import { BarChart3 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
@@ -216,16 +219,26 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center">
             <div className="text-center flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">🕌 Islamic Daily Tracker</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">🕌 My Dhikr</h1>
               <p className="text-white/90 text-sm sm:text-base">{todayFormatted}</p>
             </div>
-            <Button 
-              onClick={signOut} 
-              variant="outline" 
-              className="text-white border-white/20 hover:bg-white/20"
-            >
-              Sign Out
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => navigate('/history')} 
+                variant="outline" 
+                className="text-white border-white/20 hover:bg-white/20"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                History
+              </Button>
+              <Button 
+                onClick={signOut} 
+                variant="outline" 
+                className="text-white border-white/20 hover:bg-white/20"
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
