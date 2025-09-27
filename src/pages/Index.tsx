@@ -137,6 +137,73 @@ const Index = () => {
     }
   };
 
+  const handleEditEntry = async (id: string | number, newCount: number, newName: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('daily_entries')
+        .update({
+          count: newCount,
+          name: newName,
+        })
+        .eq('id', String(id))
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setEntries(prev => 
+        prev.map(entry => 
+          entry.id === id 
+            ? { ...entry, count: newCount, name: newName }
+            : entry
+        )
+      );
+
+      toast({
+        title: "Entry updated",
+        description: `Updated to ${newName}: ${newCount}`,
+      });
+    } catch (error) {
+      console.error('Error updating entry:', error);
+      toast({
+        title: "Error updating entry",
+        description: "There was an issue updating your entry.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteEntry = async (id: string | number) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('daily_entries')
+        .delete()
+        .eq('id', String(id))
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setEntries(prev => prev.filter(entry => entry.id !== id));
+
+      toast({
+        title: "Entry deleted",
+        description: "The entry has been removed.",
+      });
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      toast({
+        title: "Error deleting entry",
+        description: "There was an issue deleting your entry.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleNotesChange = async (newNotes: string) => {
     if (!user) return;
     
@@ -288,7 +355,11 @@ const Index = () => {
         />
 
         {/* Daily Summary */}
-        <DailySummary entries={entries} />
+        <DailySummary 
+          entries={entries} 
+          onEdit={handleEditEntry}
+          onDelete={handleDeleteEntry}
+        />
 
         {/* Notes Section */}
         <NotesSection 
