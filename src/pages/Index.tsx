@@ -381,6 +381,7 @@ const Index = () => {
         <TrackerSection
           title="Dhikr & Tasbih"
           icon="📿"
+          type="dhikr"
           onAdd={(name, count) => addEntry("dhikr", name, count)}
         />
 
@@ -388,6 +389,7 @@ const Index = () => {
         <TrackerSection
           title="Quran Recitation"
           icon="📖"
+          type="quran"
           onAdd={(name, count) => addEntry("quran", name, count)}
         />
 
@@ -395,6 +397,7 @@ const Index = () => {
         <TrackerSection
           title="Nafl Salah"
           icon="🤲"
+          type="salah"
           onAdd={(name, count) => addEntry("salah", name, count)}
         />
 
