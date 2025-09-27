@@ -20,22 +20,11 @@ export const useAuth = () => {
         setSession(session);
         
         if (session?.user) {
-          // Use setTimeout to defer the async operation to prevent deadlock
-          setTimeout(async () => {
-            try {
-              const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: session.user.id });
-              setUser({
-                ...session.user,
-                role: (roleData as UserRole) || 'user'
-              });
-            } catch (error) {
-              console.error('Error fetching user role:', error);
-              setUser({
-                ...session.user,
-                role: 'user'
-              });
-            }
-          }, 0);
+          // Set user with default role first to prevent loading issues
+          setUser({
+            ...session.user,
+            role: 'user' // Will be updated after component mounts
+          });
         } else {
           setUser(null);
         }
@@ -49,22 +38,10 @@ export const useAuth = () => {
       setSession(session);
       
       if (session?.user) {
-        // Use setTimeout to defer the async operation
-        setTimeout(async () => {
-          try {
-            const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: session.user.id });
-            setUser({
-              ...session.user,
-              role: (roleData as UserRole) || 'user'
-            });
-          } catch (error) {
-            console.error('Error fetching user role:', error);
-            setUser({
-              ...session.user,
-              role: 'user'
-            });
-          }
-        }, 0);
+        setUser({
+          ...session.user,
+          role: 'user' // Will be updated after component mounts
+        });
       } else {
         setUser(null);
       }
@@ -74,6 +51,24 @@ export const useAuth = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Separate effect to fetch and update user role after auth is established
+  useEffect(() => {
+    if (user?.id && user.role === 'user') {
+      const fetchRole = async () => {
+        try {
+          const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: user.id });
+          if (roleData && roleData !== user.role) {
+            setUser(prev => prev ? { ...prev, role: roleData as UserRole } : null);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
+      };
+      
+      fetchRole();
+    }
+  }, [user?.id]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
