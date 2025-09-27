@@ -283,39 +283,41 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="header-gradient text-white py-6 px-4">
+      <header className="header-gradient text-white py-4 px-3 sm:py-6 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center">
             <div className="text-center flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">🕌 My Dhikr</h1>
-              <p className="text-white/90 text-sm sm:text-base">{todayFormatted}</p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">🕌 My Dhikr</h1>
+              <p className="text-white/90 text-xs sm:text-sm md:text-base">{todayFormatted}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2 flex-wrap">
               {isAdmin() && (
                 <Button 
                   onClick={() => navigate('/admin')} 
-                  variant="outline" 
-                  className="text-white border-white/20 hover:bg-white/20"
+                  variant="header"
+                  size="mobile"
                 >
-                  <Shield className="w-4 h-4 mr-2" />
-                  Admin
+                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Admin</span>
                 </Button>
               )}
               <Button 
                 onClick={() => navigate('/history')} 
-                variant="outline" 
-                className="text-white border-white/20 hover:bg-white/20"
+                variant="header"
+                size="mobile"
               >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                History
+                <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">History</span>
               </Button>
-              <ChangePasswordDialog />
+              <div className="flex">
+                <ChangePasswordDialog />
+              </div>
               <Button 
                 onClick={signOut} 
-                variant="outline" 
-                className="text-white border-white/20 hover:bg-white/20"
+                variant="header"
+                size="mobile"
               >
-                Sign Out
+                <span className="text-xs sm:text-sm">Sign Out</span>
               </Button>
             </div>
           </div>
@@ -323,7 +325,7 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Daily Summary */}
         <DailySummary 
           entries={entries} 

@@ -128,7 +128,7 @@ All colors in HSL format following Islamic green theme
   }
   
   .number-pad-button {
-    @apply w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-card border border-border hover:bg-primary hover:text-primary-foreground transition-all duration-200 flex items-center justify-center text-lg font-semibold touch-manipulation;
+    @apply w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg bg-card border border-border hover:bg-primary hover:text-primary-foreground transition-all duration-200 flex items-center justify-center text-sm sm:text-lg font-semibold touch-manipulation;
     box-shadow: var(--shadow-button);
   }
   
@@ -137,12 +137,12 @@ All colors in HSL format following Islamic green theme
   }
   
   .tracker-card {
-    @apply bg-card border border-border rounded-xl p-4 sm:p-6;
+    @apply bg-card border border-border rounded-xl p-3 sm:p-4 md:p-6;
     box-shadow: var(--shadow-card);
   }
   
   .islamic-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 rounded-lg px-4 py-2 font-medium touch-manipulation;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 rounded-lg px-3 py-2 text-sm font-medium touch-manipulation;
     box-shadow: var(--shadow-button);
   }
   
@@ -151,10 +151,31 @@ All colors in HSL format following Islamic green theme
   }
   
   .success-button {
-    @apply bg-success text-success-foreground hover:bg-success/90 transition-all duration-200 rounded-lg px-4 py-2 font-medium;
+    @apply bg-success text-success-foreground hover:bg-success/90 transition-all duration-200 rounded-lg px-3 py-2 text-sm font-medium;
   }
   
   .accent-button {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200 rounded-lg px-4 py-2 font-medium;
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200 rounded-lg px-3 py-2 text-sm font-medium;
+  }
+
+  /* Mobile-optimized header buttons */
+  .header-button {
+    @apply bg-white/10 text-white border border-white/30 hover:bg-white/20 hover:border-white/50 backdrop-blur-sm transition-all duration-200 rounded-lg px-2 py-1.5 text-xs sm:text-sm font-medium touch-manipulation min-h-[36px] shadow-lg;
+  }
+  
+  .header-button:active {
+    transform: scale(0.98);
+    @apply bg-white/30;
+  }
+  
+  /* Improved mobile button sizing */
+  @media (max-width: 640px) {
+    .header-button {
+      @apply px-2 py-1 text-xs min-h-[32px];
+    }
+    
+    .header-button .icon {
+      @apply w-3 h-3;
+    }
   }
 }

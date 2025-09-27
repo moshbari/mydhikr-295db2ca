@@ -70,9 +70,10 @@ export const ChangePasswordDialog = () => {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 text-white border-white/20 hover:bg-white/20">
-          <Lock className="h-4 w-4" />
-          Change Password
+        <Button variant="header" size="mobile" className="flex items-center gap-1">
+          <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline text-xs sm:text-sm">Change Password</span>
+          <span className="sm:hidden text-xs">Pass</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
