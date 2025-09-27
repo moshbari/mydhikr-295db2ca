@@ -100,45 +100,23 @@ const Admin = () => {
         roleMap.set(userRole.user_id, userRole.role);
       });
 
-      // Get user emails from auth.users via admin API
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) {
-        console.error('Auth error:', authError);
-        // Fallback to getting users without admin API
-        const usersWithoutEmails = profiles?.map(profile => ({
-          ...profile,
-          email: 'Email not available',
-          role: roleMap.get(profile.user_id) || 'user'
-        })) || [];
-        setUsers(usersWithoutEmails);
-        setLoading(false);
-        return;
-      }
-
-      // Combine the data
-      const usersWithDetails = profiles?.map(profile => {
-        const authUser = authUsers && authUsers.users 
-          ? authUsers.users.find((u: any) => u.id === profile.user_id)
-          : null;
-        const role = roleMap.get(profile.user_id) || 'user';
-        
-        return {
-          ...profile,
-          email: authUser?.email || 'Unknown',
-          role
-        };
-      }) || [];
+      // Combine the data without trying to get emails from auth.users
+      // Note: Emails are not accessible in frontend for security reasons
+      const usersWithDetails = profiles?.map(profile => ({
+        ...profile,
+        email: 'Private', // Don't show emails for security
+        role: roleMap.get(profile.user_id) || 'user'
+      })) || [];
 
       setUsers(usersWithDetails);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
-        title: "Error",
-        description: "Failed to fetch users",
+        title: "Error loading users",
+        description: "There was an issue loading user data.",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
