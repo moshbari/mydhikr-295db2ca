@@ -71,10 +71,10 @@ const Admin = () => {
   }, [user, isAdmin, navigate, authLoading]);
 
   useEffect(() => {
-    if (isAdmin()) {
+    if (isAdmin() && !loading) {
       fetchUsers();
     }
-  }, [isAdmin]);
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -110,7 +110,6 @@ const Admin = () => {
 
       console.log('Users fetched successfully:', usersWithDetails);
       setUsers(usersWithDetails);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -118,6 +117,7 @@ const Admin = () => {
         description: "There was an issue loading user data.",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
