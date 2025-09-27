@@ -27,7 +27,7 @@ export default function AuthPage() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        navigate("/", { replace: true });
       }
     };
     checkAuth();
@@ -80,7 +80,7 @@ export default function AuthPage() {
           title: "Welcome back!",
           description: "You have been logged in successfully.",
         });
-        navigate("/");
+        navigate("/", { replace: true });
       } else {
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
@@ -103,7 +103,7 @@ export default function AuthPage() {
           title: "Account created!",
           description: "You have been signed up successfully.",
         });
-        navigate("/");
+        navigate("/", { replace: true });
       }
     } catch (error) {
       setErrors({ general: "An unexpected error occurred. Please try again." });
