@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TrackerSection } from "@/components/tracker-section";
 import { DailySummary, DailyEntry } from "@/components/daily-summary";
 import { NotesSection } from "@/components/notes-section";
 import { Button } from "@/components/ui/button";
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
-
-interface DailyData {
-  entries: DailyEntry[];
-  notes: string;
-  date: string;
-}
 
 const Index = () => {
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
+  const [entries, setEntries] = useState<DailyEntry[]>([]);
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(true);
+  
   const today = new Date().toISOString().split('T')[0];
   const todayFormatted = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -23,73 +23,210 @@ const Index = () => {
     day: 'numeric' 
   });
 
-  const [dailyData, setDailyData] = useLocalStorage<DailyData>(`islamic-tracker-${today}`, {
-    entries: [],
-    notes: "",
-    date: today,
-  });
+  // Load today's data from database
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadTodayData = async () => {
+      try {
+        // Load entries
+        const { data: entriesData, error: entriesError } = await supabase
+          .from('daily_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('entry_date', today)
+          .order('created_at', { ascending: false });
 
-  const addEntry = (type: "dhikr" | "quran" | "salah", name: string, count: number) => {
-    const newEntry: DailyEntry = {
-      id: Date.now(),
-      type,
-      name,
-      count,
-      timestamp: new Date().toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      }),
+        if (entriesError) throw entriesError;
+
+        // Transform database entries to match component format
+        const transformedEntries: DailyEntry[] = (entriesData || []).map(entry => ({
+          id: entry.id,
+          type: entry.type as "dhikr" | "quran" | "salah",
+          name: entry.name,
+          count: entry.count,
+          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          }),
+        }));
+
+        setEntries(transformedEntries);
+
+        // Load notes
+        const { data: notesData, error: notesError } = await supabase
+          .from('daily_notes')
+          .select('notes')
+          .eq('user_id', user.id)
+          .eq('entry_date', today)
+          .maybeSingle();
+
+        if (notesError && notesError.code !== 'PGRST116') throw notesError;
+        setNotes(notesData?.notes || "");
+
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast({
+          title: "Error loading data",
+          description: "There was an issue loading your tracking data.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setDailyData(prev => ({
-      ...prev,
-      entries: [newEntry, ...prev.entries],
-    }));
+    loadTodayData();
+  }, [user, today, toast]);
 
-    toast({
-      title: "Entry added",
-      description: `${name}: ${count} recorded`,
-    });
-  };
+  const addEntry = async (type: "dhikr" | "quran" | "salah", name: string, count: number) => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('daily_entries')
+        .insert({
+          user_id: user.id,
+          type,
+          name,
+          count,
+          entry_date: today,
+          timestamp: new Date().toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          }),
+        })
+        .select()
+        .single();
 
-  const handleNotesChange = (notes: string) => {
-    setDailyData(prev => ({
-      ...prev,
-      notes,
-    }));
-  };
+      if (error) throw error;
 
-  const handleSaveAll = () => {
-    // Data is already saved via localStorage, this is just user feedback
-    toast({
-      title: "All data saved",
-      description: "Your daily tracking data has been saved successfully.",
-    });
-  };
+      const newEntry: DailyEntry = {
+        id: data.id,
+        type,
+        name,
+        count,
+        timestamp: data.timestamp,
+      };
 
-  const handleResetAll = () => {
-    if (window.confirm("Are you sure you want to reset all data for today? This action cannot be undone.")) {
-      setDailyData({
-        entries: [],
-        notes: "",
-        date: today,
-      });
+      setEntries(prev => [newEntry, ...prev]);
+
       toast({
-        title: "Data reset",
-        description: "All today's data has been cleared.",
+        title: "Entry added",
+        description: `${name}: ${count} recorded`,
+      });
+    } catch (error) {
+      console.error('Error adding entry:', error);
+      toast({
+        title: "Error adding entry",
+        description: "There was an issue saving your entry.",
         variant: "destructive",
       });
     }
   };
 
+  const handleNotesChange = async (newNotes: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('daily_notes')
+        .upsert({
+          user_id: user.id,
+          entry_date: today,
+          notes: newNotes,
+        });
+
+      if (error) throw error;
+      setNotes(newNotes);
+    } catch (error) {
+      console.error('Error saving notes:', error);
+      toast({
+        title: "Error saving notes",
+        description: "There was an issue saving your notes.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveAll = () => {
+    toast({
+      title: "All data saved",
+      description: "Your daily tracking data is automatically saved.",
+    });
+  };
+
+  const handleResetAll = async () => {
+    if (!user) return;
+    
+    if (window.confirm("Are you sure you want to reset all data for today? This action cannot be undone.")) {
+      try {
+        // Delete entries
+        await supabase
+          .from('daily_entries')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('entry_date', today);
+
+        // Delete/reset notes
+        await supabase
+          .from('daily_notes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('entry_date', today);
+
+        setEntries([]);
+        setNotes("");
+        
+        toast({
+          title: "Data reset",
+          description: "All today's data has been cleared.",
+          variant: "destructive",
+        });
+      } catch (error) {
+        console.error('Error resetting data:', error);
+        toast({
+          title: "Error resetting data",
+          description: "There was an issue clearing your data.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <span className="text-2xl">🕌</span>
+          </div>
+          <p className="text-muted-foreground">Loading your data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="header-gradient text-white py-6 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">🕌 Islamic Daily Tracker</h1>
-          <p className="text-white/90 text-sm sm:text-base">{todayFormatted}</p>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">🕌 Islamic Daily Tracker</h1>
+              <p className="text-white/90 text-sm sm:text-base">{todayFormatted}</p>
+            </div>
+            <Button 
+              onClick={signOut} 
+              variant="outline" 
+              className="text-white border-white/20 hover:bg-white/20"
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -120,11 +257,11 @@ const Index = () => {
         />
 
         {/* Daily Summary */}
-        <DailySummary entries={dailyData.entries} />
+        <DailySummary entries={entries} />
 
         {/* Notes Section */}
         <NotesSection 
-          notes={dailyData.notes} 
+          notes={notes} 
           onNotesChange={handleNotesChange} 
         />
 

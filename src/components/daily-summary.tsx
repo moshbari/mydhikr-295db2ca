@@ -2,7 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
 export interface DailyEntry {
-  id: number;
+  id: string | number;
   type: "dhikr" | "quran" | "salah";
   name: string;
   count: number;
