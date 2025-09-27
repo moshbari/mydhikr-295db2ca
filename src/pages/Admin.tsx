@@ -29,7 +29,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
