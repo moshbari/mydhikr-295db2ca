@@ -45,13 +45,22 @@ const Admin = () => {
   });
   const [creatingUser, setCreatingUser] = useState(false);
 
-  // Simple admin check - no complex loading logic
+  // Simple admin check with debugging
   useEffect(() => {
+    console.log('=== ADMIN PAGE DEBUG ===');
+    console.log('User:', user);
+    console.log('User role:', user?.role);
+    console.log('Auth loading:', authLoading);
+    console.log('isAdmin():', isAdmin());
+    console.log('========================');
+    
     if (user && !authLoading) {
-      console.log('Admin page - user role:', user.role, 'isAdmin:', isAdmin());
       if (!isAdmin()) {
         console.log('User is not admin, redirecting to home');
-        navigate('/', { replace: true });
+        // Temporarily disable redirect to see what's happening
+        // navigate('/', { replace: true });
+      } else {
+        console.log('User is admin, staying on admin page');
       }
     }
   }, [user, authLoading, isAdmin, navigate]);
@@ -336,10 +345,10 @@ const Admin = () => {
     );
   }
 
-  // Don't render anything if not admin (redirect will handle this)
-  if (!isAdmin()) {
-    return null;
-  }
+  // Temporarily show admin page for debugging - remove redirect check
+  // if (!isAdmin()) {
+  //   return null;
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4">
