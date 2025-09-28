@@ -11,6 +11,7 @@ export interface DailyEntry {
   name: string;
   count: number;
   timestamp: string;
+  extraInfo?: string; // For storing range info like "71 → 77"
 }
 
 interface DailySummaryProps {
@@ -139,6 +140,9 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                     // View Mode
                     <div>
                       <p className="font-medium text-foreground">{entry.name}</p>
+                      {entry.type === "quran" && entry.extraInfo && (
+                        <p className="text-sm text-muted-foreground">({entry.extraInfo})</p>
+                      )}
                       <div className="flex items-center gap-2 mt-1">
                         <Badge className={getTypeColor(entry.type)}>
                           {formatType(entry.type)}

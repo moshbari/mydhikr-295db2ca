@@ -128,7 +128,7 @@ const Index = () => {
     loadTodayData();
   }, [user, today, toast]);
 
-  const addEntry = async (type: "dhikr" | "quran" | "salah", name: string, count: number) => {
+  const addEntry = async (type: "dhikr" | "quran" | "salah", name: string, count: number, extraInfo?: string) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -194,6 +194,7 @@ const Index = () => {
               minute: '2-digit',
               hour12: true 
             }),
+            extra_info: extraInfo,
           })
           .select()
           .single();
@@ -206,6 +207,7 @@ const Index = () => {
           name,
           count,
           timestamp: data.timestamp,
+          extraInfo: extraInfo,
         };
 
         setEntries(prev => [newEntry, ...prev]);
@@ -440,7 +442,7 @@ const Index = () => {
           title="Quran Recitation"
           icon="📖"
           type="quran"
-          onAdd={(name, count) => addEntry("quran", name, count)}
+          onAdd={(name, count, extraInfo) => addEntry("quran", name, count, extraInfo)}
         />
 
         {/* Nafl Salah Section */}

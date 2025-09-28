@@ -10,7 +10,7 @@ interface TrackerSectionProps {
   title: string;
   icon: string;
   type: "dhikr" | "quran" | "salah";
-  onAdd: (name: string, count: number) => void;
+  onAdd: (name: string, count: number, extraInfo?: string) => void;
 }
 
 export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps) {
@@ -45,7 +45,8 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       const difference = end - start;
       
       if (name && !isNaN(start) && !isNaN(end) && difference > 0) {
-        onAdd(name, difference);
+        const rangeInfo = `${start} → ${end}`;
+        onAdd(name, difference, rangeInfo);
         setSelectedOption("");
         setCustomName("");
         setStartValue("");
@@ -201,10 +202,11 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                 
                 {startValue && endValue && !isNaN(parseInt(startValue)) && !isNaN(parseInt(endValue)) && (
                   <div className="p-3 bg-accent/50 rounded-lg text-center">
-                    <div className="text-sm text-muted-foreground">Pages/Verses Read</div>
+                    <div className="text-sm text-muted-foreground">
+                      {selectedOption || customName.trim() || "Verses Read"}
+                    </div>
                     <div className="text-2xl font-bold text-primary">
                       {parseInt(endValue) - parseInt(startValue)} 
-                      {parseInt(endValue) - parseInt(startValue) === 1 ? '' : ''}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       ({startValue} → {endValue})
