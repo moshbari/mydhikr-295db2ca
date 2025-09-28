@@ -12,24 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create a regular Supabase client to verify the user's JWT
-    const supabaseUser = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        },
-        global: {
-          headers: {
-            'Authorization': req.headers.get('Authorization') ?? ''
-          }
-        }
-      }
-    )
-
-    // Create a Supabase client with the service role key for admin operations
+    // Create a Supabase client with the service role key for all operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -51,36 +34,44 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log('Auth header present, verifying user...')
     const token = authHeader.replace('Bearer ', '')
+    console.log('Token received, length:', token.length)
 
-    // Verify the user is authenticated using the user client
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token)
+    // Verify the JWT token and get user info
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
     
-    console.log('User verification result:', { user: user?.id, authError })
+    console.log('User verification result:', { 
+      userId: user?.id, 
+      userEmail: user?.email,
+      authError: authError?.message 
+    })
     
     if (authError || !user) {
-      console.error('Authentication error:', authError)
+      console.error('Authentication failed:', authError)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized - Invalid token' }),
+        JSON.stringify({ error: `Authentication failed: ${authError?.message || 'Invalid token'}` }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Check if the user is an admin using the admin client
+    // Check if the user is an admin
     const { data: userRole, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .single()
 
+    console.log('Role check result:', { userRole: userRole?.role, roleError: roleError?.message })
+
     if (roleError || userRole?.role !== 'admin') {
-      console.error('Role check error:', roleError, 'User role:', userRole?.role)
+      console.error('Admin check failed:', roleError, 'User role:', userRole?.role)
       return new Response(
         JSON.stringify({ error: 'Forbidden - Admin access required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Admin verified, proceeding with user creation...')
 
     // Get the request body
     const { email, password, displayName, role = 'user' } = await req.json()
@@ -109,6 +100,8 @@ Deno.serve(async (req) => {
       )
     }
 
+    console.log('Creating user with email:', email)
+
     // Create the user using admin API
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -123,10 +116,12 @@ Deno.serve(async (req) => {
     if (createError) {
       console.error('User creation error:', createError)
       return new Response(
-        JSON.stringify({ error: createError.message }),
+        JSON.stringify({ error: `Failed to create user: ${createError.message}` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('User created successfully:', newUser.user.id)
 
     // Create profile entry will be handled by the database trigger
     // No need to manually insert into profiles table
