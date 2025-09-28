@@ -62,7 +62,10 @@ const Index = () => {
         const entriesMap = new Map();
         
         (entriesData || []).forEach(entry => {
-          const key = `${entry.type}-${entry.name}`;
+          // For Quran entries, include extra_info in the key to keep different verse ranges separate
+          const key = entry.type === 'quran' && entry.extra_info 
+            ? `${entry.type}-${entry.name}-${entry.extra_info}`
+            : `${entry.type}-${entry.name}`;
           const timestamp = entry.timestamp || new Date().toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit',
@@ -141,9 +144,11 @@ const Index = () => {
     }
     
     try {
-      // Check if entry with same type and name already exists today
+      // Check if entry with same type, name, and extraInfo (verse range) already exists today
       const existingEntry = entries.find(entry => 
-        entry.type === type && entry.name === name
+        entry.type === type && 
+        entry.name === name && 
+        (type !== "quran" || entry.extraInfo === extraInfo)
       );
 
       if (existingEntry) {
