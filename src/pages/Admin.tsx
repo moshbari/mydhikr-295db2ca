@@ -36,6 +36,14 @@ const Admin = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    email: "",
+    password: "",
+    displayName: "",
+    role: "user" as "user" | "admin"
+  });
+  const [creatingUser, setCreatingUser] = useState(false);
 
   // Redirect if not admin - but wait for auth to load and role to update
   useEffect(() => {
@@ -257,6 +265,70 @@ const Admin = () => {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!newUserData.email || !newUserData.password) {
+      toast({
+        title: "Error",
+        description: "Email and password are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newUserData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setCreatingUser(true);
+      
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email: newUserData.email,
+          password: newUserData.password,
+          displayName: newUserData.displayName,
+          role: newUserData.role
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to create user');
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "Success",
+        description: "User created successfully",
+      });
+
+      setShowCreateUser(false);
+      setNewUserData({
+        email: "",
+        password: "",
+        displayName: "",
+        role: "user"
+      });
+      fetchUsers();
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create user",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
   const filteredUsers = users.filter(user =>
     user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -285,6 +357,13 @@ const Admin = () => {
               <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
             </div>
           </div>
+          <Button 
+            onClick={() => setShowCreateUser(true)}
+            className="flex items-center gap-2"
+          >
+            <Users className="h-4 w-4" />
+            Add User
+          </Button>
         </div>
 
         {/* Search */}
@@ -316,6 +395,96 @@ const Admin = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Create User Dialog */}
+        {showCreateUser && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Create New User</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="new_email">Email *</Label>
+                    <Input
+                      id="new_email"
+                      type="email"
+                      value={newUserData.email}
+                      onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                      placeholder="Enter email address"
+                      autoComplete="email"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new_password">Password *</Label>
+                    <Input
+                      id="new_password"
+                      type="password"
+                      value={newUserData.password}
+                      onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                      placeholder="Enter password (min 6 chars)"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="new_display_name">Display Name</Label>
+                    <Input
+                      id="new_display_name"
+                      value={newUserData.displayName}
+                      onChange={(e) => setNewUserData({ ...newUserData, displayName: e.target.value })}
+                      placeholder="Enter display name"
+                      autoComplete="name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new_role">Role</Label>
+                    <Select
+                      value={newUserData.role}
+                      onValueChange={(value: "user" | "admin") => setNewUserData({ ...newUserData, role: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCreateUser}
+                    disabled={creatingUser || !newUserData.email || !newUserData.password}
+                    className="flex items-center gap-2"
+                  >
+                    <Users className="h-4 w-4" />
+                    {creatingUser ? "Creating..." : "Create User"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowCreateUser(false);
+                      setNewUserData({
+                        email: "",
+                        password: "",
+                        displayName: "",
+                        role: "user"
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Users List */}
         <div className="grid gap-4">
