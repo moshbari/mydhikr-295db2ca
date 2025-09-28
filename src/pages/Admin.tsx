@@ -177,7 +177,7 @@ const Admin = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      const response = await fetch('/functions/v1/admin-delete-user', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
@@ -234,7 +234,7 @@ const Admin = () => {
       
       const { data: { session } } = await supabase.auth.getSession();
       
-      const response = await fetch('/functions/v1/admin-change-password', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-change-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
