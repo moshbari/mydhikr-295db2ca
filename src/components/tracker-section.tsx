@@ -18,6 +18,10 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   const [customName, setCustomName] = useState<string>("");
   const [numberValue, setNumberValue] = useState<string>("1");
   const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
+  
+  // Special state for Quran start/end tracking
+  const [startValue, setStartValue] = useState<string>("");
+  const [endValue, setEndValue] = useState<string>("");
 
   const getOptions = () => {
     switch (type) {
@@ -34,21 +38,45 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
 
   const handleAdd = () => {
     const name = showCustomInput ? customName.trim() : selectedOption;
-    const count = parseInt(numberValue);
     
-    if (name && count > 0) {
-      onAdd(name, count);
-      setSelectedOption("");
-      setCustomName("");
-      setNumberValue("1");
-      setShowCustomInput(false);
+    if (type === "quran") {
+      const start = parseInt(startValue);
+      const end = parseInt(endValue);
+      const difference = end - start;
+      
+      if (name && !isNaN(start) && !isNaN(end) && difference > 0) {
+        onAdd(name, difference);
+        setSelectedOption("");
+        setCustomName("");
+        setStartValue("");
+        setEndValue("");
+        setShowCustomInput(false);
+      }
+    } else {
+      const count = parseInt(numberValue);
+      
+      if (name && count > 0) {
+        onAdd(name, count);
+        setSelectedOption("");
+        setCustomName("");
+        setNumberValue("1");
+        setShowCustomInput(false);
+      }
     }
   };
 
   const isAddDisabled = () => {
     const name = showCustomInput ? customName.trim() : selectedOption;
-    const count = parseInt(numberValue);
-    return !name || count <= 0 || isNaN(count);
+    
+    if (type === "quran") {
+      const start = parseInt(startValue);
+      const end = parseInt(endValue);
+      const difference = end - start;
+      return !name || isNaN(start) || isNaN(end) || difference <= 0;
+    } else {
+      const count = parseInt(numberValue);
+      return !name || count <= 0 || isNaN(count);
+    }
   };
 
   return (
@@ -136,12 +164,63 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
 
         {/* Number Pad Column */}
         <div>
-          <NumberPad
-            value={numberValue}
-            onChange={setNumberValue}
-            onAdd={handleAdd}
-            disabled={isAddDisabled()}
-          />
+          {type === "quran" ? (
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">Page/Verse Range</h3>
+              
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="start-input" className="text-xs text-muted-foreground mb-1 block">
+                    Start (Page/Verse)
+                  </label>
+                  <Input
+                    id="start-input"
+                    type="number"
+                    placeholder="Start"
+                    value={startValue}
+                    onChange={(e) => setStartValue(e.target.value)}
+                    className="text-center text-lg font-medium"
+                    min="1"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="end-input" className="text-xs text-muted-foreground mb-1 block">
+                    End (Page/Verse)
+                  </label>
+                  <Input
+                    id="end-input"
+                    type="number"
+                    placeholder="End"
+                    value={endValue}
+                    onChange={(e) => setEndValue(e.target.value)}
+                    className="text-center text-lg font-medium"
+                    min="1"
+                  />
+                </div>
+                
+                {startValue && endValue && !isNaN(parseInt(startValue)) && !isNaN(parseInt(endValue)) && (
+                  <div className="p-3 bg-accent/50 rounded-lg text-center">
+                    <div className="text-sm text-muted-foreground">Pages/Verses Read</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {parseInt(endValue) - parseInt(startValue)} 
+                      {parseInt(endValue) - parseInt(startValue) === 1 ? '' : ''}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      ({startValue} → {endValue})
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <NumberPad
+              value={numberValue}
+              onChange={setNumberValue}
+              onAdd={handleAdd}
+              disabled={isAddDisabled()}
+            />
+          )}
         </div>
       </div>
     </div>
