@@ -66,10 +66,11 @@ const Admin = () => {
   }, [user, authLoading, isAdmin, navigate]);
 
   useEffect(() => {
-    if (user && user.role === 'admin') {
+    if (user) {
+      // Always try to fetch users if user exists, let the backend handle permissions
       fetchUsers();
     }
-  }, [user?.role]);
+  }, [user?.id]);
 
   const fetchUsers = async () => {
     try {
