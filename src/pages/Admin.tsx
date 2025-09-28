@@ -359,7 +359,8 @@ const Admin = () => {
           </div>
           <Button 
             onClick={() => setShowCreateUser(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+            size="default"
           >
             <Users className="h-4 w-4" />
             Add User
