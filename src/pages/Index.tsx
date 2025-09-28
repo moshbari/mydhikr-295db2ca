@@ -51,7 +51,7 @@ const Index = () => {
         // Load entries
         const { data: entriesData, error: entriesError } = await supabase
           .from('daily_entries')
-          .select('*')
+          .select('*, extra_info')
           .eq('user_id', user.id)
           .eq('entry_date', today)
           .order('created_at', { ascending: false });
@@ -88,6 +88,7 @@ const Index = () => {
               count: entry.count,
               timestamp: timestamp,
               created_at: entry.created_at,
+              extraInfo: entry.extra_info,
             });
           }
         });
@@ -98,6 +99,7 @@ const Index = () => {
           name: entry.name,
           count: entry.count,
           timestamp: entry.timestamp,
+          extraInfo: entry.extraInfo,
         }));
 
         setEntries(transformedEntries);

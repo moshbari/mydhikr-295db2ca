@@ -19,6 +19,7 @@ export type Database = {
           count: number
           created_at: string
           entry_date: string
+          extra_info: string | null
           id: string
           name: string
           timestamp: string
@@ -29,6 +30,7 @@ export type Database = {
           count: number
           created_at?: string
           entry_date?: string
+          extra_info?: string | null
           id?: string
           name: string
           timestamp?: string
@@ -39,6 +41,7 @@ export type Database = {
           count?: number
           created_at?: string
           entry_date?: string
+          extra_info?: string | null
           id?: string
           name?: string
           timestamp?: string
