@@ -15,11 +15,16 @@ Deno.serve(async (req) => {
     // Create a regular Supabase client to verify the user's JWT
     const supabaseUser = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '',
       {
         auth: {
           autoRefreshToken: false,
           persistSession: false
+        },
+        global: {
+          headers: {
+            'Authorization': req.headers.get('Authorization') ?? ''
+          }
         }
       }
     )
@@ -39,21 +44,25 @@ Deno.serve(async (req) => {
     // Get the authorization header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
+      console.error('Missing Authorization header')
       return new Response(
         JSON.stringify({ error: 'Missing Authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
+    console.log('Auth header present, verifying user...')
     const token = authHeader.replace('Bearer ', '')
 
     // Verify the user is authenticated using the user client
     const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token)
     
+    console.log('User verification result:', { user: user?.id, authError })
+    
     if (authError || !user) {
       console.error('Authentication error:', authError)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Unauthorized - Invalid token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
