@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { NumberPad } from "@/components/ui/number-pad";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
 
 interface TrackerSectionProps {
@@ -22,6 +22,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   // Special state for Quran start/end tracking
   const [startValue, setStartValue] = useState<string>("");
   const [endValue, setEndValue] = useState<string>("");
+  const [verseError, setVerseError] = useState<string>("");
 
   const getOptions = () => {
     switch (type) {
@@ -36,6 +37,47 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
     }
   };
 
+  const extractVerseCount = (surahOption: string): number => {
+    const match = surahOption.match(/\((\d+) verses?\)/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  const validateVerseRange = (start: number, end: number, selectedSurah: string): string => {
+    if (selectedSurah) {
+      const maxVerses = extractVerseCount(selectedSurah);
+      if (maxVerses > 0) {
+        if (start > maxVerses) {
+          return `Start verse ${start} exceeds available verses (${maxVerses}) for this surah.`;
+        }
+        if (end > maxVerses) {
+          return `End verse ${end} exceeds available verses (${maxVerses}) for this surah.`;
+        }
+      }
+    }
+    return "";
+  };
+
+  // Clear error when selection changes
+  useEffect(() => {
+    setVerseError("");
+  }, [selectedOption, customName]);
+
+  // Validate verses when start/end values change
+  useEffect(() => {
+    if (type === "quran" && startValue && endValue) {
+      const start = parseInt(startValue);
+      const end = parseInt(endValue);
+      const selectedSurah = showCustomInput ? customName.trim() : selectedOption;
+      
+      if (!isNaN(start) && !isNaN(end) && selectedSurah) {
+        const error = validateVerseRange(start, end, selectedSurah);
+        setVerseError(error);
+      } else {
+        setVerseError("");
+      }
+    }
+  }, [startValue, endValue, selectedOption, customName, type, showCustomInput]);
+
   const handleAdd = () => {
     const name = showCustomInput ? customName.trim() : selectedOption;
     
@@ -44,6 +86,11 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       const end = parseInt(endValue);
       const difference = end - start + 1; // +1 because start verse is also read
       
+      // Check for verse validation errors
+      if (verseError) {
+        return; // Don't add if there are validation errors
+      }
+      
       if (name && !isNaN(start) && !isNaN(end) && difference > 0) {
         const rangeInfo = `${start} → ${end}`;
         onAdd(name, difference, rangeInfo);
@@ -51,6 +98,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         setCustomName("");
         setStartValue("");
         setEndValue("");
+        setVerseError("");
         setShowCustomInput(false);
       }
     } else {
@@ -73,7 +121,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       const start = parseInt(startValue);
       const end = parseInt(endValue);
       const difference = end - start + 1; // +1 because start verse is also read
-      return !name || isNaN(start) || isNaN(end) || difference <= 0;
+      return !name || isNaN(start) || isNaN(end) || difference <= 0 || !!verseError;
     } else {
       const count = parseInt(numberValue);
       return !name || count <= 0 || isNaN(count);
@@ -200,7 +248,17 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                   />
                 </div>
                 
-                {startValue && endValue && !isNaN(parseInt(startValue)) && !isNaN(parseInt(endValue)) && (
+                {verseError && (
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertCircle className="w-4 h-4" />
+                      <span className="text-sm font-medium">Invalid Range</span>
+                    </div>
+                    <p className="text-sm text-destructive/80 mt-1">{verseError}</p>
+                  </div>
+                )}
+                
+                {startValue && endValue && !isNaN(parseInt(startValue)) && !isNaN(parseInt(endValue)) && !verseError && (
                   <div className="p-3 bg-accent/50 rounded-lg text-center">
                     <div className="text-sm text-muted-foreground">
                       {selectedOption || customName.trim() || "Verses Read"}
