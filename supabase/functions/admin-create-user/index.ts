@@ -98,20 +98,8 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Create profile entry (this should be handled by the trigger, but let's be explicit)
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert({
-        user_id: newUser.user.id,
-        display_name: displayName,
-        email: email,
-        is_active: true
-      })
-
-    if (profileError) {
-      console.error('Profile creation error:', profileError)
-      // Don't fail the request if profile creation fails, as the trigger should handle it
-    }
+    // Create profile entry will be handled by the database trigger
+    // No need to manually insert into profiles table
 
     // Set user role if different from default
     if (role !== 'user') {
