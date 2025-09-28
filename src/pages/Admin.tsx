@@ -45,42 +45,16 @@ const Admin = () => {
   });
   const [creatingUser, setCreatingUser] = useState(false);
 
-  // Redirect if not admin - but wait for auth to load and role to update
+  // Simple admin check - no complex loading logic
   useEffect(() => {
-    console.log('Admin page - user:', user, 'user.role:', user?.role, 'isAdmin:', isAdmin(), 'authLoading:', authLoading);
-    
-    // Don't redirect while auth is still loading
-    if (authLoading) return;
-    
-    if (!user) {
-      console.log('No user after loading, redirecting to auth');
-      navigate('/auth', { replace: true });
-      return;
+    if (user && !authLoading) {
+      console.log('Admin page - user role:', user.role, 'isAdmin:', isAdmin());
+      if (!isAdmin()) {
+        console.log('User is not admin, redirecting to home');
+        navigate('/', { replace: true });
+      }
     }
-    
-    // Give extra time for role to load if user exists but role is still 'user'
-    // We know from the database that this user should be admin
-    if (user && user.role === 'user') {
-      console.log('User exists but role is still user, waiting for role update...');
-      
-      // Set a timeout to check again after role has time to update
-      const timeoutId = setTimeout(() => {
-        console.log('Timeout reached, checking role again:', user.role);
-        if (user.role !== 'admin') {
-          console.log('Role still not admin after timeout, redirecting to home');
-          navigate('/', { replace: true });
-        }
-      }, 1000); // Wait 1 second for role update
-      
-      return () => clearTimeout(timeoutId);
-    }
-    
-    if (!isAdmin()) {
-      console.log('User is not admin after loading, redirecting to home');
-      navigate('/', { replace: true });
-      return;
-    }
-  }, [user, isAdmin, navigate, authLoading]);
+  }, [user, authLoading, isAdmin, navigate]);
 
   useEffect(() => {
     if (user && user.role === 'admin') {
@@ -334,6 +308,35 @@ const Admin = () => {
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Show loading state while auth is still loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <span className="text-2xl">🕌</span>
+          </div>
+          <p className="text-muted-foreground">Loading Admin Panel...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading if user role is still being determined
+  if (user && !user.role) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <span className="text-2xl">🔑</span>
+          </div>
+          <p className="text-muted-foreground">Checking permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not admin (redirect will handle this)
   if (!isAdmin()) {
     return null;
   }
