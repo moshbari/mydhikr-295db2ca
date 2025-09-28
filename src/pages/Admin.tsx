@@ -358,11 +358,15 @@ const Admin = () => {
             </div>
           </div>
           <Button 
-            onClick={() => setShowCreateUser(true)}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 font-medium"
+            onClick={() => {
+              console.log('Add User button clicked');
+              setShowCreateUser(true);
+            }}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-semibold rounded-lg shadow-lg"
             size="default"
+            type="button"
           >
-            <Users className="h-4 w-4" />
+            <Users className="h-5 w-5" />
             Add User
           </Button>
         </div>
