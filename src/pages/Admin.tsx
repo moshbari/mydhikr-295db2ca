@@ -175,18 +175,23 @@ const Admin = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      // Delete from auth.users (this will cascade to profiles and user_roles)
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (error) {
-        console.error('Delete error:', error);
-        // Fallback: delete from profiles table
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .delete()
-          .eq('user_id', userId);
-        
-        if (profileError) throw profileError;
+      const response = await fetch('/functions/v1/admin-delete-user', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete user');
       }
 
       toast({
@@ -199,7 +204,7 @@ const Admin = () => {
       console.error('Error deleting user:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user",
+        description: error instanceof Error ? error.message : "Failed to delete user",
         variant: "destructive",
       });
     }
