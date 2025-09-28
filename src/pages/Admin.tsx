@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Users, Edit3, Trash2, Save, Shield } from "lucide-react";
+import { ArrowLeft, Users, Edit3, Trash2, Save, Shield, Key } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +32,10 @@ const Admin = () => {
   const [loading, setLoading] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [passwordChangeUser, setPasswordChangeUser] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   // Redirect if not admin - but wait for auth to load and role to update
   useEffect(() => {
@@ -201,7 +205,69 @@ const Admin = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => 
+  const handleChangePassword = async (userId: string) => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch('/functions/v1/admin-change-password', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          newPassword,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to change password');
+      }
+
+      toast({
+        title: "Success",
+        description: "Password changed successfully",
+      });
+
+      setPasswordChangeUser(null);
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to change password",
+        variant: "destructive",
+      });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
     user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -315,6 +381,60 @@ const Admin = () => {
                       <Label htmlFor="is_active">Active</Label>
                     </div>
 
+                    {/* Password Change Section */}
+                    {passwordChangeUser === editingUser.user_id && (
+                      <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Key className="h-4 w-4" />
+                          Change Password
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="new_password">New Password</Label>
+                            <Input
+                              id="new_password"
+                              type="password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="Enter new password"
+                              autoComplete="new-password"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="confirm_password">Confirm Password</Label>
+                            <Input
+                              id="confirm_password"
+                              type="password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              placeholder="Confirm new password"
+                              autoComplete="new-password"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleChangePassword(editingUser.user_id)}
+                            disabled={changingPassword || !newPassword || !confirmPassword}
+                            size="sm"
+                          >
+                            {changingPassword ? "Changing..." : "Change Password"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setPasswordChangeUser(null);
+                              setNewPassword("");
+                              setConfirmPassword("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleSaveUser(editingUser)}
@@ -325,10 +445,25 @@ const Admin = () => {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => setEditingUser(null)}
+                        onClick={() => {
+                          setEditingUser(null);
+                          setPasswordChangeUser(null);
+                          setNewPassword("");
+                          setConfirmPassword("");
+                        }}
                       >
                         Cancel
                       </Button>
+                      {passwordChangeUser !== editingUser.user_id && (
+                        <Button
+                          variant="secondary"
+                          onClick={() => setPasswordChangeUser(editingUser.user_id)}
+                          className="flex items-center gap-2"
+                        >
+                          <Key className="h-4 w-4" />
+                          Change Password
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ) : (
