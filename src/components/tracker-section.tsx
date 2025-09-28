@@ -73,22 +73,6 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       const start = parseInt(startValue);
       const end = parseInt(endValue);
       const difference = end - start;
-      
-      // Debug logging for Quran
-      console.log('Quran isAddDisabled check:', {
-        name: name,
-        startValue: startValue,
-        endValue: endValue,
-        start: start,
-        end: end,
-        difference: difference,
-        hasName: !!name,
-        startValid: !isNaN(start),
-        endValid: !isNaN(end),
-        diffPositive: difference > 0,
-        result: !name || isNaN(start) || isNaN(end) || difference <= 0
-      });
-      
       return !name || isNaN(start) || isNaN(end) || difference <= 0;
     } else {
       const count = parseInt(numberValue);
@@ -176,11 +160,6 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
           >
             <Plus className="w-4 h-4 mr-2" />
             Add {title}
-            {type === "quran" && (
-              <span className="ml-2 text-xs">
-                (Disabled: {isAddDisabled() ? 'Yes' : 'No'})
-              </span>
-            )}
           </Button>
         </div>
 

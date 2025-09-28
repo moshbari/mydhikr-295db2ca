@@ -141,7 +141,16 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                     <div>
                       <p className="font-medium text-foreground">{entry.name}</p>
                       {entry.type === "quran" && entry.extraInfo && (
-                        <p className="text-sm text-muted-foreground">({entry.extraInfo})</p>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {(() => {
+                            const [start, end] = entry.extraInfo.split(' → ').map(v => v.trim());
+                            return (
+                              <span>
+                                Verses {start} → {end} ({entry.count} verses)
+                              </span>
+                            );
+                          })()}
+                        </div>
                       )}
                       <div className="flex items-center gap-2 mt-1">
                         <Badge className={getTypeColor(entry.type)}>
