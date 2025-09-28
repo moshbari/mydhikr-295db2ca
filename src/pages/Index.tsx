@@ -22,6 +22,16 @@ const Index = () => {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   
+  // Debug admin status
+  useEffect(() => {
+    console.log('=== INDEX PAGE ADMIN DEBUG ===');
+    console.log('User:', user);
+    console.log('User role:', user?.role);
+    console.log('isAdmin():', isAdmin());
+    console.log('Admin button should be visible:', isAdmin());
+    console.log('===============================');
+  }, [user, isAdmin]);
+  
   const today = format(new Date(), 'yyyy-MM-dd');
   const todayFormatted = format(new Date(), 'EEEE, MMMM d, yyyy');
   const hijriDate = getCurrentHijriDate();
@@ -372,19 +382,19 @@ const Index = () => {
               </div>
             </div>
             <div className="flex gap-1 sm:gap-2 flex-wrap">
-              {isAdmin() && (
-                <Button 
-                  onClick={() => {
-                    console.log('Admin button clicked, user role:', user?.role);
-                    navigate('/admin');
-                  }} 
-                  variant="header"
-                  size="mobile"
-                >
-                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Admin</span>
-                </Button>
-              )}
+              {/* Temporarily show admin button for all users to debug */}
+              <Button 
+                onClick={() => {
+                  console.log('Admin button clicked, user role:', user?.role, 'isAdmin:', isAdmin());
+                  navigate('/admin');
+                }} 
+                variant="header"
+                size="mobile"
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <Shield className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Admin (Debug)</span>
+              </Button>
               <Button 
                 onClick={() => navigate('/history')} 
                 variant="header"
