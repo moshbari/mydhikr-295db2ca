@@ -11,18 +11,18 @@ export const dhikrOptions = [
 ];
 
 export const quranOptions = [
-  "1. Al-Fatiha", "2. Al-Baqarah", "3. Ali 'Imran", "4. An-Nisa", "5. Al-Ma'idah", "6. Al-An'am", "7. Al-A'raf", "8. Al-Anfal", "9. At-Tawbah", "10. Yunus",
-  "11. Hud", "12. Yusuf", "13. Ar-Ra'd", "14. Ibrahim", "15. Al-Hijr", "16. An-Nahl", "17. Al-Isra", "18. Al-Kahf", "19. Maryam", "20. Ta-Ha",
-  "21. Al-Anbya", "22. Al-Hajj", "23. Al-Mu'minun", "24. An-Nur", "25. Al-Furqan", "26. Ash-Shu'ara", "27. An-Naml", "28. Al-Qasas", "29. Al-'Ankabut", "30. Ar-Rum",
-  "31. Luqman", "32. As-Sajdah", "33. Al-Ahzab", "34. Saba", "35. Fatir", "36. Ya-Sin", "37. As-Saffat", "38. Sad", "39. Az-Zumar", "40. Ghafir",
-  "41. Fussilat", "42. Ash-Shuraa", "43. Az-Zukhruf", "44. Ad-Dukhan", "45. Al-Jathiyah", "46. Al-Ahqaf", "47. Muhammad", "48. Al-Fath", "49. Al-Hujurat", "50. Qaf",
-  "51. Adh-Dhariyat", "52. At-Tur", "53. An-Najm", "54. Al-Qamar", "55. Ar-Rahman", "56. Al-Waqi'ah", "57. Al-Hadid", "58. Al-Mujadila", "59. Al-Hashr", "60. Al-Mumtahanah",
-  "61. As-Saff", "62. Al-Jumu'ah", "63. Al-Munafiqun", "64. At-Taghabun", "65. At-Talaq", "66. At-Tahrim", "67. Al-Mulk", "68. Al-Qalam", "69. Al-Haqqah", "70. Al-Ma'arij",
-  "71. Nuh", "72. Al-Jinn", "73. Al-Muzzammil", "74. Al-Muddaththir", "75. Al-Qiyamah", "76. Al-Insan", "77. Al-Mursalat", "78. An-Naba", "79. An-Nazi'at", "80. 'Abasa",
-  "81. At-Takwir", "82. Al-Infitar", "83. Al-Mutaffifin", "84. Al-Inshiqaq", "85. Al-Buruj", "86. At-Tariq", "87. Al-A'la", "88. Al-Ghashiyah", "89. Al-Fajr", "90. Al-Balad",
-  "91. Ash-Shams", "92. Al-Layl", "93. Ad-Duhaa", "94. Ash-Sharh", "95. At-Tin", "96. Al-'Alaq", "97. Al-Qadr", "98. Al-Bayyinah", "99. Az-Zalzalah", "100. Al-'Adiyat",
-  "101. Al-Qari'ah", "102. At-Takathur", "103. Al-'Asr", "104. Al-Humazah", "105. Al-Fil", "106. Quraysh", "107. Al-Ma'un", "108. Al-Kawthar", "109. Al-Kafirun", "110. An-Nasr",
-  "111. Al-Masad", "112. Al-Ikhlas", "113. Al-Falaq", "114. An-Nas", "Juz/Para (specify number)", "General Pages",
+  "1. Al-Fatiha (7 verses)", "2. Al-Baqarah (286 verses)", "3. Ali 'Imran (200 verses)", "4. An-Nisa (176 verses)", "5. Al-Ma'idah (120 verses)", "6. Al-An'am (165 verses)", "7. Al-A'raf (206 verses)", "8. Al-Anfal (75 verses)", "9. At-Tawbah (129 verses)", "10. Yunus (109 verses)",
+  "11. Hud (123 verses)", "12. Yusuf (111 verses)", "13. Ar-Ra'd (43 verses)", "14. Ibrahim (52 verses)", "15. Al-Hijr (99 verses)", "16. An-Nahl (128 verses)", "17. Al-Isra (111 verses)", "18. Al-Kahf (110 verses)", "19. Maryam (98 verses)", "20. Ta-Ha (135 verses)",
+  "21. Al-Anbya (112 verses)", "22. Al-Hajj (78 verses)", "23. Al-Mu'minun (118 verses)", "24. An-Nur (64 verses)", "25. Al-Furqan (77 verses)", "26. Ash-Shu'ara (227 verses)", "27. An-Naml (93 verses)", "28. Al-Qasas (88 verses)", "29. Al-'Ankabut (69 verses)", "30. Ar-Rum (60 verses)",
+  "31. Luqman (34 verses)", "32. As-Sajdah (30 verses)", "33. Al-Ahzab (73 verses)", "34. Saba (54 verses)", "35. Fatir (45 verses)", "36. Ya-Sin (83 verses)", "37. As-Saffat (182 verses)", "38. Sad (88 verses)", "39. Az-Zumar (75 verses)", "40. Ghafir (85 verses)",
+  "41. Fussilat (54 verses)", "42. Ash-Shuraa (53 verses)", "43. Az-Zukhruf (89 verses)", "44. Ad-Dukhan (59 verses)", "45. Al-Jathiyah (37 verses)", "46. Al-Ahqaf (35 verses)", "47. Muhammad (38 verses)", "48. Al-Fath (29 verses)", "49. Al-Hujurat (18 verses)", "50. Qaf (45 verses)",
+  "51. Adh-Dhariyat (60 verses)", "52. At-Tur (49 verses)", "53. An-Najm (62 verses)", "54. Al-Qamar (55 verses)", "55. Ar-Rahman (78 verses)", "56. Al-Waqi'ah (96 verses)", "57. Al-Hadid (29 verses)", "58. Al-Mujadila (22 verses)", "59. Al-Hashr (24 verses)", "60. Al-Mumtahanah (13 verses)",
+  "61. As-Saff (14 verses)", "62. Al-Jumu'ah (11 verses)", "63. Al-Munafiqun (11 verses)", "64. At-Taghabun (18 verses)", "65. At-Talaq (12 verses)", "66. At-Tahrim (12 verses)", "67. Al-Mulk (30 verses)", "68. Al-Qalam (52 verses)", "69. Al-Haqqah (52 verses)", "70. Al-Ma'arij (44 verses)",
+  "71. Nuh (28 verses)", "72. Al-Jinn (28 verses)", "73. Al-Muzzammil (20 verses)", "74. Al-Muddaththir (56 verses)", "75. Al-Qiyamah (40 verses)", "76. Al-Insan (31 verses)", "77. Al-Mursalat (50 verses)", "78. An-Naba (40 verses)", "79. An-Nazi'at (46 verses)", "80. 'Abasa (42 verses)",
+  "81. At-Takwir (29 verses)", "82. Al-Infitar (19 verses)", "83. Al-Mutaffifin (36 verses)", "84. Al-Inshiqaq (25 verses)", "85. Al-Buruj (22 verses)", "86. At-Tariq (17 verses)", "87. Al-A'la (19 verses)", "88. Al-Ghashiyah (26 verses)", "89. Al-Fajr (30 verses)", "90. Al-Balad (20 verses)",
+  "91. Ash-Shams (15 verses)", "92. Al-Layl (21 verses)", "93. Ad-Duhaa (11 verses)", "94. Ash-Sharh (8 verses)", "95. At-Tin (8 verses)", "96. Al-'Alaq (19 verses)", "97. Al-Qadr (5 verses)", "98. Al-Bayyinah (8 verses)", "99. Az-Zalzalah (8 verses)", "100. Al-'Adiyat (11 verses)",
+  "101. Al-Qari'ah (11 verses)", "102. At-Takathur (8 verses)", "103. Al-'Asr (3 verses)", "104. Al-Humazah (9 verses)", "105. Al-Fil (5 verses)", "106. Quraysh (4 verses)", "107. Al-Ma'un (7 verses)", "108. Al-Kawthar (3 verses)", "109. Al-Kafirun (6 verses)", "110. An-Nasr (3 verses)",
+  "111. Al-Masad (5 verses)", "112. Al-Ikhlas (4 verses)", "113. Al-Falaq (5 verses)", "114. An-Nas (6 verses)", "Juz/Para (specify number)", "General Pages",
 ];
 
 export const salahOptions = [
