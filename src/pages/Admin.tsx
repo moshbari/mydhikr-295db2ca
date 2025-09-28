@@ -342,7 +342,7 @@ const Admin = () => {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -359,7 +359,7 @@ const Admin = () => {
           </div>
           <Button 
             onClick={() => setShowCreateUser(true)}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 font-medium"
             size="default"
           >
             <Users className="h-4 w-4" />
