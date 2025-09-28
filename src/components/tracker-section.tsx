@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { NumberPad } from "@/components/ui/number-pad";
 import { Button } from "@/components/ui/button";
@@ -166,8 +166,10 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         {/* Number Pad Column */}
         <div>
           {type === "quran" ? (
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">Page/Verse Range</h3>
+            <div className="space-y-4 border border-red-500 p-4 rounded">
+              <h3 className="text-sm font-medium text-foreground mb-3 bg-yellow-200 p-2 rounded">
+                DEBUG: Quran Section - Page/Verse Range
+              </h3>
               
               <div className="space-y-3">
                 <div>
@@ -180,7 +182,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                     placeholder="Start"
                     value={startValue}
                     onChange={(e) => setStartValue(e.target.value)}
-                    className="text-center text-lg font-medium"
+                    className="text-center text-lg font-medium border-2 border-blue-500"
                     min="1"
                   />
                 </div>
@@ -195,13 +197,13 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                     placeholder="End"
                     value={endValue}
                     onChange={(e) => setEndValue(e.target.value)}
-                    className="text-center text-lg font-medium"
+                    className="text-center text-lg font-medium border-2 border-blue-500"
                     min="1"
                   />
                 </div>
                 
                 {startValue && endValue && !isNaN(parseInt(startValue)) && !isNaN(parseInt(endValue)) && (
-                  <div className="p-3 bg-accent/50 rounded-lg text-center">
+                  <div className="p-3 bg-accent/50 rounded-lg text-center border-2 border-green-500">
                     <div className="text-sm text-muted-foreground">
                       {selectedOption || customName.trim() || "Verses Read"}
                     </div>
@@ -216,12 +218,17 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
               </div>
             </div>
           ) : (
-            <NumberPad
-              value={numberValue}
-              onChange={setNumberValue}
-              onAdd={handleAdd}
-              disabled={isAddDisabled()}
-            />
+            <div className="space-y-2 border border-green-500 p-4 rounded">
+              <h4 className="text-sm bg-green-200 p-2 rounded">
+                DEBUG: Other Section ({type})
+              </h4>
+              <NumberPad
+                value={numberValue}
+                onChange={setNumberValue}
+                onAdd={handleAdd}
+                disabled={isAddDisabled()}
+              />
+            </div>
           )}
         </div>
       </div>
