@@ -42,7 +42,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
     if (type === "quran") {
       const start = parseInt(startValue);
       const end = parseInt(endValue);
-      const difference = end - start;
+      const difference = end - start + 1; // +1 because start verse is also read
       
       if (name && !isNaN(start) && !isNaN(end) && difference > 0) {
         const rangeInfo = `${start} → ${end}`;
@@ -72,7 +72,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
     if (type === "quran") {
       const start = parseInt(startValue);
       const end = parseInt(endValue);
-      const difference = end - start;
+      const difference = end - start + 1; // +1 because start verse is also read
       return !name || isNaN(start) || isNaN(end) || difference <= 0;
     } else {
       const count = parseInt(numberValue);
@@ -206,7 +206,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                       {selectedOption || customName.trim() || "Verses Read"}
                     </div>
                     <div className="text-2xl font-bold text-primary">
-                      {parseInt(endValue) - parseInt(startValue)} 
+                      {parseInt(endValue) - parseInt(startValue) + 1} 
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       ({startValue} → {endValue})
