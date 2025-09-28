@@ -175,23 +175,16 @@ const Admin = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-        }),
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId }
       });
 
-      const result = await response.json();
+      if (error) {
+        throw new Error(error.message || 'Failed to delete user');
+      }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to delete user');
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
@@ -232,24 +225,16 @@ const Admin = () => {
     try {
       setChangingPassword(true);
       
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-change-password`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          newPassword,
-        }),
+      const { data, error } = await supabase.functions.invoke('admin-change-password', {
+        body: { userId, newPassword }
       });
 
-      const result = await response.json();
+      if (error) {
+        throw new Error(error.message || 'Failed to change password');
+      }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to change password');
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
