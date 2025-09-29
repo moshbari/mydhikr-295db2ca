@@ -23,6 +23,19 @@ interface HistoricalData {
   totalSalah: number;
 }
 
+interface ActivitySummary {
+  name: string;
+  count: number;
+  type: "dhikr" | "quran" | "salah";
+}
+
+interface PeriodSummary {
+  totalDhikr: number;
+  totalQuran: number;
+  totalSalah: number;
+  activities: ActivitySummary[];
+}
+
 const History = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -205,6 +218,42 @@ const History = () => {
     }
   };
 
+  const calculatePeriodSummary = (data: HistoricalData[]): PeriodSummary => {
+    const summary: PeriodSummary = {
+      totalDhikr: 0,
+      totalQuran: 0,
+      totalSalah: 0,
+      activities: []
+    };
+
+    const activityTotals: { [key: string]: { count: number; type: "dhikr" | "quran" | "salah" } } = {};
+
+    data.forEach(dayData => {
+      summary.totalDhikr += dayData.totalDhikr;
+      summary.totalQuran += dayData.totalQuran;
+      summary.totalSalah += dayData.totalSalah;
+
+      dayData.entries.forEach(entry => {
+        const key = `${entry.type}-${entry.name}`;
+        if (!activityTotals[key]) {
+          activityTotals[key] = { count: 0, type: entry.type };
+        }
+        activityTotals[key].count += entry.count;
+      });
+    });
+
+    // Convert to array and sort by count descending
+    summary.activities = Object.entries(activityTotals)
+      .map(([key, value]) => ({
+        name: key.split('-').slice(1).join('-'),
+        count: value.count,
+        type: value.type
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    return summary;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -322,6 +371,76 @@ const History = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Period Summary */}
+        {data.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Period Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const summary = calculatePeriodSummary(data);
+                return (
+                  <div className="space-y-6">
+                    {/* Overall Totals */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">📿</span>
+                          <h3 className="font-semibold text-emerald-800">Total Dhikr</h3>
+                        </div>
+                        <p className="text-3xl font-bold text-emerald-600">{summary.totalDhikr}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">📖</span>
+                          <h3 className="font-semibold text-blue-800">Total Quran</h3>
+                        </div>
+                        <p className="text-3xl font-bold text-blue-600">{summary.totalQuran}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">🕌</span>
+                          <h3 className="font-semibold text-purple-800">Total Salah</h3>
+                        </div>
+                        <p className="text-3xl font-bold text-purple-600">{summary.totalSalah}</p>
+                      </div>
+                    </div>
+
+                    {/* Activity Breakdown */}
+                    {summary.activities.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-3">Activity Breakdown</h3>
+                        <div className="grid gap-2">
+                          {summary.activities.map((activity, index) => (
+                            <div
+                              key={`${activity.type}-${activity.name}-${index}`}
+                              className={cn(
+                                "p-3 rounded-lg border flex items-center justify-between",
+                                getTypeColor(activity.type)
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{getTypeIcon(activity.type)}</span>
+                                <span className="font-medium capitalize">{activity.type}</span>
+                                <span className="text-sm opacity-75">• {activity.name}</span>
+                              </div>
+                              <span className="font-bold text-lg">×{activity.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Results */}
         {data.length > 0 && (
