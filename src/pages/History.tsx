@@ -111,7 +111,7 @@ const History = () => {
       // Fetch entries
       const { data: entriesData, error: entriesError } = await supabase
         .from('daily_entries')
-        .select('*')
+        .select('*, extra_info')
         .eq('user_id', user.id)
         .gte('entry_date', startDateStr)
         .lte('entry_date', endDateStr)
@@ -157,6 +157,7 @@ const History = () => {
             minute: '2-digit',
             hour12: true 
           }),
+          extraInfo: entry.extra_info,
         };
 
         groupedData[date].entries.push(transformedEntry);
@@ -474,11 +475,18 @@ const History = () => {
                             )}
                           >
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg">{getTypeIcon(entry.type)}</span>
-                                <span className="font-medium capitalize">{entry.type}</span>
-                                <span className="text-sm opacity-75">• {entry.name}</span>
-                              </div>
+                               <div className="flex items-center gap-2">
+                                 <span className="text-lg">{getTypeIcon(entry.type)}</span>
+                                 <span className="font-medium capitalize">{entry.type}</span>
+                                 <span className="text-sm opacity-75">
+                                   • {entry.name}
+                                   {entry.type === 'quran' && entry.extraInfo && (
+                                     <span className="ml-1 text-xs opacity-60">
+                                       (verses {entry.extraInfo.replace(' → ', '-')})
+                                     </span>
+                                   )}
+                                 </span>
+                               </div>
                               <div className="flex items-center gap-2 text-sm">
                                 <span className="font-medium">×{entry.count}</span>
                                 <span className="opacity-75">{entry.timestamp}</span>

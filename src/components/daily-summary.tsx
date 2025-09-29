@@ -312,7 +312,14 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                 ) : (
                   // View Mode
                   <div>
-                    <p className="font-medium text-foreground">{entry.name}</p>
+                    <p className="font-medium text-foreground">
+                      {entry.name}
+                      {entry.type === 'quran' && entry.extraInfo && (
+                        <span className="ml-1 text-xs opacity-60">
+                          (verses {entry.extraInfo.replace(' → ', '-')})
+                        </span>
+                      )}
+                    </p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge className={getTypeColor(entry.type)}>
                         {formatType(entry.type)}
