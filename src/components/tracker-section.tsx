@@ -233,7 +233,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         <div>
           {type === "quran" ? (
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">Page/Verse Range</h3>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">Verse Range</h3>
               
               <div className="flex items-center space-x-2 mb-3">
                 <Checkbox 
@@ -252,7 +252,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
               <div className="space-y-3">
                 <div>
                   <label htmlFor="start-input" className="text-xs text-muted-foreground mb-1 block">
-                    Start (Page/Verse)
+                    Start (Verse)
                   </label>
                   <Input
                     id="start-input"
@@ -268,7 +268,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                 
                 <div>
                   <label htmlFor="end-input" className="text-xs text-muted-foreground mb-1 block">
-                    End (Page/Verse)
+                    End (Verse)
                   </label>
                   <Input
                     id="end-input"
