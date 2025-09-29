@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { NumberPad } from "@/components/ui/number-pad";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, AlertCircle } from "lucide-react";
 import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
 
@@ -23,6 +24,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   const [startValue, setStartValue] = useState<string>("");
   const [endValue, setEndValue] = useState<string>("");
   const [verseError, setVerseError] = useState<string>("");
+  const [isCompleteSurah, setIsCompleteSurah] = useState<boolean>(false);
 
   const getOptions = () => {
     switch (type) {
@@ -62,6 +64,20 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
     setVerseError("");
   }, [selectedOption, customName]);
 
+  // Handle complete surah checkbox
+  useEffect(() => {
+    if (type === "quran" && isCompleteSurah) {
+      const selectedSurah = showCustomInput ? customName.trim() : selectedOption;
+      if (selectedSurah) {
+        const maxVerses = extractVerseCount(selectedSurah);
+        if (maxVerses > 0) {
+          setStartValue("1");
+          setEndValue(maxVerses.toString());
+        }
+      }
+    }
+  }, [isCompleteSurah, selectedOption, customName, type, showCustomInput]);
+
   // Validate verses when start/end values change
   useEffect(() => {
     if (type === "quran" && startValue && endValue) {
@@ -99,6 +115,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         setStartValue("");
         setEndValue("");
         setVerseError("");
+        setIsCompleteSurah(false);
         setShowCustomInput(false);
       }
     } else {
@@ -109,6 +126,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         setSelectedOption("");
         setCustomName("");
         setNumberValue("1");
+        setIsCompleteSurah(false);
         setShowCustomInput(false);
       }
     }
@@ -217,6 +235,20 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Page/Verse Range</h3>
               
+              <div className="flex items-center space-x-2 mb-3">
+                <Checkbox 
+                  id="complete-surah"
+                  checked={isCompleteSurah}
+                  onCheckedChange={(checked) => setIsCompleteSurah(checked as boolean)}
+                />
+                <label 
+                  htmlFor="complete-surah" 
+                  className="text-sm font-medium text-foreground cursor-pointer"
+                >
+                  Complete Surah
+                </label>
+              </div>
+              
               <div className="space-y-3">
                 <div>
                   <label htmlFor="start-input" className="text-xs text-muted-foreground mb-1 block">
@@ -230,6 +262,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                     onChange={(e) => setStartValue(e.target.value)}
                     className="text-center text-lg font-medium"
                     min="1"
+                    disabled={isCompleteSurah}
                   />
                 </div>
                 
@@ -245,6 +278,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                     onChange={(e) => setEndValue(e.target.value)}
                     className="text-center text-lg font-medium"
                     min="1"
+                    disabled={isCompleteSurah}
                   />
                 </div>
                 
