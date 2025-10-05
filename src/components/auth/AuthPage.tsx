@@ -114,16 +114,28 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl">🕌</span>
-          </div>
-          <CardTitle className="text-2xl">My Dhikr</CardTitle>
-          <CardDescription>
-            {isLogin ? "Sign in to continue your spiritual journey" : "Create an account to start tracking your daily worship"}
-          </CardDescription>
-        </CardHeader>
+      <div className="w-full max-w-2xl space-y-8">
+        {/* Hero Section */}
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            Lost Your Dhikr Count Again? Forgot Your Nafl Prayers? Can't Remember Yesterday's Surah?
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground">
+            You're not alone. Finally, track your daily worship without the frustration. My Dhikr app keeps everything organized with simple taps.
+          </p>
+        </div>
+
+        {/* Auth Card */}
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🕌</span>
+            </div>
+            <CardTitle className="text-2xl">My Dhikr</CardTitle>
+            <CardDescription>
+              {isLogin ? "Sign in to continue your spiritual journey" : "Create an account to start tracking your daily worship"}
+            </CardDescription>
+          </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             <div className="space-y-2">
@@ -184,7 +196,8 @@ export default function AuthPage() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
