@@ -12,21 +12,15 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { DailyEntry, DailySummary } from "@/components/daily-summary";
+import { DailyReflections, DailyReflection } from "@/components/daily-reflections";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
-interface Reflection {
-  id: string;
-  note_text: string;
-  created_at: string;
-  updated_at: string;
-}
 
 interface HistoricalData {
   date: string;
   entries: DailyEntry[];
   notes: string;
-  reflections: Reflection[];
+  reflections: DailyReflection[];
   totalDhikr: number;
   totalQuran: number;
   totalSalah: number;
@@ -292,6 +286,64 @@ const History = () => {
     } catch (error) {
       console.error('Error deleting entry:', error);
       toast.error("Failed to delete entry");
+    }
+  };
+
+  const handleAddReflection = async (noteText: string, date: string) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('daily_reflections')
+        .insert({
+          user_id: user.id,
+          entry_date: date,
+          note_text: noteText,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success("Reflection added successfully");
+      fetchHistoricalData();
+    } catch (error) {
+      console.error('Error adding reflection:', error);
+      toast.error("Failed to add reflection");
+    }
+  };
+
+  const handleEditReflection = async (id: string, noteText: string) => {
+    try {
+      const { error } = await supabase
+        .from('daily_reflections')
+        .update({ note_text: noteText })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success("Reflection updated successfully");
+      fetchHistoricalData();
+    } catch (error) {
+      console.error('Error updating reflection:', error);
+      toast.error("Failed to update reflection");
+    }
+  };
+
+  const handleDeleteReflection = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('daily_reflections')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success("Reflection deleted successfully");
+      fetchHistoricalData();
+    } catch (error) {
+      console.error('Error deleting reflection:', error);
+      toast.error("Failed to delete reflection");
     }
   };
 
@@ -562,20 +614,12 @@ const History = () => {
                   {/* Reflections */}
                   {dayData.reflections && dayData.reflections.length > 0 && (
                     <div>
-                      <h4 className="font-medium mb-2">Notes & Reflections</h4>
-                      <div className="space-y-2">
-                        {dayData.reflections.map((reflection) => (
-                          <div key={reflection.id} className="p-3 bg-muted/50 rounded-lg">
-                            <p className="text-sm whitespace-pre-wrap mb-1">{reflection.note_text}</p>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(reflection.created_at), 'h:mm a')}
-                              {reflection.updated_at !== reflection.created_at && (
-                                <span className="ml-2">(edited)</span>
-                              )}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                      <DailyReflections
+                        reflections={dayData.reflections}
+                        onAdd={(noteText) => handleAddReflection(noteText, dayData.date)}
+                        onEdit={handleEditReflection}
+                        onDelete={handleDeleteReflection}
+                      />
                     </div>
                   )}
 
