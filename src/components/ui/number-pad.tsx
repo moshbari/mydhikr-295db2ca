@@ -4,10 +4,9 @@ interface NumberPadProps {
   value: string;
   onChange: (value: string) => void;
   onAdd: () => void;
-  disabled?: boolean;
 }
 
-export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) {
+export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
   const handleNumberClick = (num: string) => {
     if (value === "") {
       // If empty, set to the clicked number
@@ -42,7 +41,6 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
             key={num}
             onClick={() => handleNumberClick(num)}
             className="number-pad-button"
-            disabled={disabled}
             variant="outline"
           >
             {num}
@@ -55,7 +53,6 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
         <Button
           onClick={handleClear}
           className="number-pad-button col-span-1 text-destructive"
-          disabled={disabled}
           variant="outline"
         >
           Clear
@@ -63,7 +60,6 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
         <Button
           onClick={() => handleNumberClick("0")}
           className="number-pad-button"
-          disabled={disabled}
           variant="outline"
         >
           0
@@ -71,7 +67,7 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
         <Button
           onClick={onAdd}
           className="islamic-button col-span-1 text-sm"
-          disabled={disabled || value === "" || parseInt(value) <= 0 || isNaN(parseInt(value))}
+          disabled={value === "" || parseInt(value) <= 0 || isNaN(parseInt(value))}
         >
           Add
         </Button>

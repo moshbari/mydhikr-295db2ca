@@ -312,7 +312,6 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
               value={numberValue}
               onChange={setNumberValue}
               onAdd={handleAdd}
-              disabled={isAddDisabled()}
             />
           )}
         </div>
