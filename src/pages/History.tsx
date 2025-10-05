@@ -15,10 +15,18 @@ import { DailyEntry, DailySummary } from "@/components/daily-summary";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+interface Reflection {
+  id: string;
+  note_text: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface HistoricalData {
   date: string;
   entries: DailyEntry[];
   notes: string;
+  reflections: Reflection[];
   totalDhikr: number;
   totalQuran: number;
   totalSalah: number;
@@ -121,7 +129,7 @@ const History = () => {
 
       if (entriesError) throw entriesError;
 
-      // Fetch notes
+      // Fetch notes (legacy)
       const { data: notesData, error: notesError } = await supabase
         .from('daily_notes')
         .select('*')
@@ -130,6 +138,17 @@ const History = () => {
         .lte('entry_date', endDateStr);
 
       if (notesError) throw notesError;
+
+      // Fetch reflections
+      const { data: reflectionsData, error: reflectionsError } = await supabase
+        .from('daily_reflections')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('entry_date', startDateStr)
+        .lte('entry_date', endDateStr)
+        .order('created_at', { ascending: false });
+
+      if (reflectionsError) throw reflectionsError;
 
       // Group data by date
       const groupedData: { [key: string]: HistoricalData } = {};
@@ -142,6 +161,7 @@ const History = () => {
             date,
             entries: [],
             notes: "",
+            reflections: [],
             totalDhikr: 0,
             totalQuran: 0,
             totalSalah: 0,
@@ -173,7 +193,7 @@ const History = () => {
         }
       });
 
-      // Process notes
+      // Process notes (legacy)
       notesData?.forEach(note => {
         const date = note.entry_date;
         if (!groupedData[date]) {
@@ -181,12 +201,30 @@ const History = () => {
             date,
             entries: [],
             notes: "",
+            reflections: [],
             totalDhikr: 0,
             totalQuran: 0,
             totalSalah: 0,
           };
         }
         groupedData[date].notes = note.notes || "";
+      });
+
+      // Process reflections
+      reflectionsData?.forEach(reflection => {
+        const date = reflection.entry_date;
+        if (!groupedData[date]) {
+          groupedData[date] = {
+            date,
+            entries: [],
+            notes: "",
+            reflections: [],
+            totalDhikr: 0,
+            totalQuran: 0,
+            totalSalah: 0,
+          };
+        }
+        groupedData[date].reflections.push(reflection);
       });
 
       // Convert to array and sort by date
@@ -511,18 +549,38 @@ const History = () => {
                     </div>
                   )}
 
-                  {/* Notes */}
+                  {/* Notes (legacy) */}
                   {dayData.notes && (
                     <div>
-                      <h4 className="font-medium mb-2">Notes</h4>
+                      <h4 className="font-medium mb-2">Notes (Legacy)</h4>
                       <div className="p-3 bg-muted/50 rounded-lg">
                         <p className="text-sm whitespace-pre-wrap">{dayData.notes}</p>
                       </div>
                     </div>
                   )}
 
+                  {/* Reflections */}
+                  {dayData.reflections && dayData.reflections.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-2">Notes & Reflections</h4>
+                      <div className="space-y-2">
+                        {dayData.reflections.map((reflection) => (
+                          <div key={reflection.id} className="p-3 bg-muted/50 rounded-lg">
+                            <p className="text-sm whitespace-pre-wrap mb-1">{reflection.note_text}</p>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(reflection.created_at), 'h:mm a')}
+                              {reflection.updated_at !== reflection.created_at && (
+                                <span className="ml-2">(edited)</span>
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Empty state */}
-                  {dayData.entries.length === 0 && !dayData.notes && (
+                  {dayData.entries.length === 0 && !dayData.notes && dayData.reflections.length === 0 && (
                     <p className="text-center text-muted-foreground py-4">
                       No activities recorded for this day
                     </p>

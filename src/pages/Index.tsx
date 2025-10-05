@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { TrackerSection } from "@/components/tracker-section";
 import { DailySummary, DailyEntry } from "@/components/daily-summary";
-import { NotesSection } from "@/components/notes-section";
+import { ReflectionsSection } from "@/components/reflections-section";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -460,11 +460,8 @@ const Index = () => {
           onAdd={(name, count) => addEntry("salah", name, count)}
         />
 
-        {/* Notes Section */}
-        <NotesSection 
-          notes={notes} 
-          onNotesChange={handleNotesChange} 
-        />
+        {/* Reflections Section */}
+        <ReflectionsSection />
 
         {/* Reset Controls */}
         <div className="tracker-card">
