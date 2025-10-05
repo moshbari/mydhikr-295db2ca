@@ -9,12 +9,9 @@ interface NumberPadProps {
 
 export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) {
   const handleNumberClick = (num: string) => {
-    if (value === "1") {
-      // If current value is 1, replace it with the clicked number (unless it's 0)
-      onChange(num === "0" ? "10" : num);
-    } else if (value === "0") {
-      // If current value is 0, replace it with the clicked number (unless it's 0)
-      onChange(num === "0" ? "10" : num);
+    if (value === "") {
+      // If empty, set to the clicked number
+      onChange(num);
     } else {
       // Otherwise append the number
       onChange(value + num);
@@ -22,7 +19,7 @@ export function NumberPad({ value, onChange, onAdd, disabled }: NumberPadProps) 
   };
 
   const handleClear = () => {
-    onChange("1");
+    onChange("");
   };
 
   const numbers = [
