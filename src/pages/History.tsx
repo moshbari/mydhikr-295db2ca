@@ -11,8 +11,9 @@ import { format, subDays, subWeeks, subMonths, subYears, startOfWeek, startOfMon
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { DailyEntry } from "@/components/daily-summary";
+import { DailyEntry, DailySummary } from "@/components/daily-summary";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface HistoricalData {
   date: string;
@@ -216,6 +217,43 @@ const History = () => {
       case 'quran': return '📖';
       case 'salah': return '🕌';
       default: return '📝';
+    }
+  };
+
+  const handleEdit = async (id: string, newCount: number, newName: string) => {
+    try {
+      const { error } = await supabase
+        .from('daily_entries')
+        .update({ 
+          count: newCount,
+          name: newName
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success("Entry updated successfully");
+      fetchHistoricalData(); // Refresh data
+    } catch (error) {
+      console.error('Error updating entry:', error);
+      toast.error("Failed to update entry");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('daily_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success("Entry deleted successfully");
+      fetchHistoricalData(); // Refresh data
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      toast.error("Failed to delete entry");
     }
   };
 
@@ -465,36 +503,11 @@ const History = () => {
                   {dayData.entries.length > 0 && (
                     <div>
                       <h4 className="font-medium mb-2">Activities</h4>
-                      <div className="grid gap-2">
-                        {dayData.entries.map((entry) => (
-                          <div
-                            key={entry.id}
-                            className={cn(
-                              "p-3 rounded-lg border",
-                              getTypeColor(entry.type)
-                            )}
-                          >
-                            <div className="flex items-center justify-between">
-                               <div className="flex items-center gap-2">
-                                 <span className="text-lg">{getTypeIcon(entry.type)}</span>
-                                 <span className="font-medium capitalize">{entry.type}</span>
-                                 <span className="text-sm opacity-75">
-                                   • {entry.name}
-                                   {entry.type === 'quran' && entry.extraInfo && (
-                                     <span className="ml-1 text-xs opacity-60">
-                                       (verses {entry.extraInfo.replace(' → ', '-')})
-                                     </span>
-                                   )}
-                                 </span>
-                               </div>
-                              <div className="flex items-center gap-2 text-sm">
-                                <span className="font-medium">×{entry.count}</span>
-                                <span className="opacity-75">{entry.timestamp}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <DailySummary
+                        entries={dayData.entries}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
                     </div>
                   )}
 
