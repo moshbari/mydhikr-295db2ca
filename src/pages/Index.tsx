@@ -574,9 +574,6 @@ const Index = () => {
           onDelete={handleDeleteReflection}
         />
 
-        {/* Reflections Section */}
-        <ReflectionsSection />
-
         {/* Reset Controls */}
         <div className="tracker-card">
           <div className="flex justify-center">
