@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { TrackerSection } from "@/components/tracker-section";
 import { DailySummary, DailyEntry } from "@/components/daily-summary";
+import { DailyReflections, DailyReflection } from "@/components/daily-reflections";
 import { ReflectionsSection } from "@/components/reflections-section";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,7 @@ const Index = () => {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [entries, setEntries] = useState<DailyEntry[]>([]);
+  const [reflections, setReflections] = useState<DailyReflection[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   
@@ -106,6 +108,17 @@ const Index = () => {
         }));
 
         setEntries(transformedEntries);
+
+        // Load reflections
+        const { data: reflectionsData, error: reflectionsError } = await supabase
+          .from('daily_reflections')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('entry_date', today)
+          .order('created_at', { ascending: false });
+
+        if (reflectionsError) throw reflectionsError;
+        setReflections(reflectionsData || []);
 
         // Load notes
         const { data: notesData, error: notesError } = await supabase
@@ -325,6 +338,99 @@ const Index = () => {
     }
   };
 
+  const handleAddReflection = async (noteText: string) => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('daily_reflections')
+        .insert({
+          user_id: user.id,
+          entry_date: today,
+          note_text: noteText,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setReflections(prev => [data, ...prev]);
+
+      toast({
+        title: "Reflection added",
+        description: "Your note has been saved.",
+      });
+    } catch (error) {
+      console.error('Error adding reflection:', error);
+      toast({
+        title: "Error adding reflection",
+        description: "There was an issue saving your note.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditReflection = async (id: string, noteText: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('daily_reflections')
+        .update({ note_text: noteText })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setReflections(prev => 
+        prev.map(reflection => 
+          reflection.id === id 
+            ? { ...reflection, note_text: noteText, updated_at: new Date().toISOString() }
+            : reflection
+        )
+      );
+
+      toast({
+        title: "Reflection updated",
+        description: "Your note has been updated.",
+      });
+    } catch (error) {
+      console.error('Error updating reflection:', error);
+      toast({
+        title: "Error updating reflection",
+        description: "There was an issue updating your note.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteReflection = async (id: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('daily_reflections')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setReflections(prev => prev.filter(reflection => reflection.id !== id));
+
+      toast({
+        title: "Reflection deleted",
+        description: "Your note has been removed.",
+      });
+    } catch (error) {
+      console.error('Error deleting reflection:', error);
+      toast({
+        title: "Error deleting reflection",
+        description: "There was an issue deleting your note.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleResetAll = async () => {
     if (!user) return;
@@ -458,6 +564,14 @@ const Index = () => {
           icon="🤲"
           type="salah"
           onAdd={(name, count) => addEntry("salah", name, count)}
+        />
+
+        {/* Daily Reflections */}
+        <DailyReflections
+          reflections={reflections}
+          onAdd={handleAddReflection}
+          onEdit={handleEditReflection}
+          onDelete={handleDeleteReflection}
         />
 
         {/* Reflections Section */}
