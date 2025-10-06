@@ -17,7 +17,7 @@ interface TrackerSectionProps {
 export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps) {
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [customName, setCustomName] = useState<string>("");
-  const [numberValue, setNumberValue] = useState<string>("1");
+  const [numberValue, setNumberValue] = useState<string>("");
   const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
   
   // Special state for Quran start/end tracking
@@ -125,7 +125,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         onAdd(name, count);
         setSelectedOption("");
         setCustomName("");
-        setNumberValue("1");
+        setNumberValue("");
         setIsCompleteSurah(false);
         setShowCustomInput(false);
       }
