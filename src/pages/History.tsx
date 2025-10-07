@@ -49,6 +49,7 @@ const History = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
 
   const presetPeriods = [
+    { label: "Today", value: "today" },
     { label: "Yesterday", value: "yesterday" },
     { label: "This Week", value: "this_week" },
     { label: "Last 7 Days", value: "last_7_days" },
@@ -66,6 +67,8 @@ const History = () => {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
     switch (period) {
+      case "today":
+        return { start: today, end: today };
       case "yesterday":
         const yesterday = subDays(today, 1);
         return { start: yesterday, end: yesterday };
