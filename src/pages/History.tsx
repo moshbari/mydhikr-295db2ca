@@ -510,7 +510,10 @@ const History = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                Period Summary
+                {selectedPeriod 
+                  ? `${presetPeriods.find(p => p.value === selectedPeriod)?.label}'s Summary`
+                  : 'Period Summary'
+                }
               </CardTitle>
             </CardHeader>
             <CardContent>
