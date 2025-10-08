@@ -528,21 +528,21 @@ const History = () => {
                           <span className="text-2xl">📿</span>
                           <h3 className="font-semibold text-emerald-800">Total Dhikr</h3>
                         </div>
-                        <p className="text-3xl font-bold text-emerald-600">{summary.totalDhikr}</p>
+                        <p className="text-3xl font-bold text-emerald-600">{summary.totalDhikr.toLocaleString()}</p>
                       </div>
                       <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">📖</span>
                           <h3 className="font-semibold text-blue-800">Total Quran</h3>
                         </div>
-                        <p className="text-3xl font-bold text-blue-600">{summary.totalQuran}</p>
+                        <p className="text-3xl font-bold text-blue-600">{summary.totalQuran.toLocaleString()}</p>
                       </div>
                       <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">🕌</span>
                           <h3 className="font-semibold text-purple-800">Total Salah</h3>
                         </div>
-                        <p className="text-3xl font-bold text-purple-600">{summary.totalSalah}</p>
+                        <p className="text-3xl font-bold text-purple-600">{summary.totalSalah.toLocaleString()}</p>
                       </div>
                     </div>
 
@@ -564,7 +564,7 @@ const History = () => {
                                 <span className="font-medium capitalize">{activity.type}</span>
                                 <span className="text-sm opacity-75">• {activity.name}</span>
                               </div>
-                              <span className="font-bold text-lg">×{activity.count}</span>
+                              <span className="font-bold text-lg">×{activity.count.toLocaleString()}</span>
                             </div>
                           ))}
                         </div>
@@ -588,9 +588,9 @@ const History = () => {
                       {format(new Date(dayData.date), 'EEEE, MMMM d, yyyy')}
                     </CardTitle>
                     <div className="flex gap-4 text-sm">
-                      <span className="text-emerald-600">Dhikr: {dayData.totalDhikr}</span>
-                      <span className="text-blue-600">Quran: {dayData.totalQuran}</span>
-                      <span className="text-purple-600">Salah: {dayData.totalSalah}</span>
+                      <span className="text-emerald-600">Dhikr: {dayData.totalDhikr.toLocaleString()}</span>
+                      <span className="text-blue-600">Quran: {dayData.totalQuran.toLocaleString()}</span>
+                      <span className="text-purple-600">Salah: {dayData.totalSalah.toLocaleString()}</span>
                     </div>
                   </div>
                 </CardHeader>
