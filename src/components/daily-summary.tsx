@@ -138,7 +138,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                 </div>
               </div>
               <div className="text-xl font-bold text-primary">
-                {surahEntries.reduce((total, entry) => total + entry.count, 0)}
+                {surahEntries.reduce((total, entry) => total + entry.count, 0).toLocaleString()}
               </div>
             </div>
 
@@ -186,7 +186,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                               const [start, end] = entry.extraInfo.split(' → ').map(v => v.trim());
                               return (
                                 <span>
-                                  Verses {start} → {end} ({entry.count} verses)
+                                  Verses {start} → {end} ({entry.count.toLocaleString()} verses)
                                 </span>
                               );
                             })()}
@@ -204,7 +204,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   {editingId === entry.id ? (
                     // Edit Mode Actions
                     <div className="flex items-center gap-1">
-                      <span className="text-xl font-bold text-primary mr-2">{editCount}</span>
+                      <span className="text-xl font-bold text-primary mr-2">{editCount.toLocaleString()}</span>
                       <Button
                         size="sm"
                         variant="outline"
@@ -225,7 +225,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   ) : (
                     // View Mode Actions
                     <div className="flex items-center gap-1">
-                      <span className="text-xl font-bold text-primary mr-2">{entry.count}</span>
+                      <span className="text-xl font-bold text-primary mr-2">{entry.count.toLocaleString()}</span>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -335,7 +335,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
               {editingId === entry.id ? (
                 // Edit Mode Actions
                 <div className="flex items-center gap-1">
-                  <span className="text-xl font-bold text-primary mr-2">{editCount}</span>
+                  <span className="text-xl font-bold text-primary mr-2">{editCount.toLocaleString()}</span>
                   <Button
                     size="sm"
                     variant="outline"
@@ -356,7 +356,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
               ) : (
                 // View Mode Actions
                 <div className="flex items-center gap-1">
-                  <span className="text-xl font-bold text-primary mr-2">{entry.count}</span>
+                  <span className="text-xl font-bold text-primary mr-2">{entry.count.toLocaleString()}</span>
                   <Button
                     size="sm"
                     variant="ghost"
