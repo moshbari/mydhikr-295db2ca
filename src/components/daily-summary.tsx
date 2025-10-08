@@ -76,7 +76,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
       case "quran":
         return "Quran";
       case "salah":
-        return "Salah";
+        return "Nafl Salah";
       default:
         return type;
     }

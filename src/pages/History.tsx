@@ -540,7 +540,7 @@ const History = () => {
                       <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">🕌</span>
-                          <h3 className="font-semibold text-purple-800">Total Salah</h3>
+                          <h3 className="font-semibold text-purple-800">Total Nafl Salah</h3>
                         </div>
                         <p className="text-3xl font-bold text-purple-600">{summary.totalSalah.toLocaleString()}</p>
                       </div>
@@ -590,7 +590,7 @@ const History = () => {
                     <div className="flex gap-4 text-sm">
                       <span className="text-emerald-600">Dhikr: {dayData.totalDhikr.toLocaleString()}</span>
                       <span className="text-blue-600">Quran: {dayData.totalQuran.toLocaleString()}</span>
-                      <span className="text-purple-600">Salah: {dayData.totalSalah.toLocaleString()}</span>
+                      <span className="text-purple-600">Nafl Salah: {dayData.totalSalah.toLocaleString()}</span>
                     </div>
                   </div>
                 </CardHeader>
