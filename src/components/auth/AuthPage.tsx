@@ -218,7 +218,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-6xl space-y-8">
         {/* Hero Section */}
-        <div className="text-center space-y-4 mx-auto" style={{ maxWidth: headlineSettings.headline_width }}>
+        <div className="text-center space-y-4 mx-auto pt-8 md:pt-0" style={{ maxWidth: headlineSettings.headline_width }}>
           <h1 
             className={`text-${headlineSettings.headline_font_size} md:text-${headlineSettings.headline_font_size === '3xl' ? '4xl' : headlineSettings.headline_font_size} font-bold`}
             style={{ color: headlineSettings.headline_color }}
