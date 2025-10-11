@@ -199,6 +199,20 @@ export default function AuthPage() {
 
         {/* Desktop Layout */}
         <div className="grid md:grid-cols-2 gap-8 items-center">
+          {/* Video - Desktop */}
+          {videoUrl && (
+            <div className="hidden md:block">
+              <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
+                <iframe
+                  src={getEmbedUrl(videoUrl)}
+                  className="w-full h-full"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              </AspectRatio>
+            </div>
+          )}
+
           {/* Auth Card */}
           <Card className={`w-full ${!videoUrl ? 'max-w-md mx-auto md:col-span-2' : ''}`}>
             <CardHeader className="text-center">
@@ -310,20 +324,6 @@ export default function AuthPage() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Video - Desktop */}
-          {videoUrl && (
-            <div className="hidden md:block">
-              <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
-                <iframe
-                  src={getEmbedUrl(videoUrl)}
-                  className="w-full h-full"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                />
-              </AspectRatio>
-            </div>
-          )}
         </div>
       </div>
     </div>
