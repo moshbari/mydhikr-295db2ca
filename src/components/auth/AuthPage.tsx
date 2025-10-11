@@ -174,7 +174,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-6xl space-y-8">
         {/* Hero Section */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 md:max-w-[592px] md:mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
             Lost Your Dhikr Count Again? Forgot Your Nafl Prayers? Can't Remember Yesterday's Surah?
           </h1>
