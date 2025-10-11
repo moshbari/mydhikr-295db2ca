@@ -609,11 +609,11 @@ const Admin = () => {
                     <Label htmlFor="headline_color">Text Color</Label>
                     <Input
                       id="headline_color"
+                      type="color"
                       value={headlineSettings.headline_color}
                       onChange={(e) => setHeadlineSettings({ ...headlineSettings, headline_color: e.target.value })}
                       disabled={!editingHeadline}
-                      placeholder="hsl(var(--foreground))"
-                      className="mt-1"
+                      className="mt-1 h-12 cursor-pointer"
                     />
                   </div>
 
@@ -671,11 +671,11 @@ const Admin = () => {
                     <Label htmlFor="subheadline_color">Text Color</Label>
                     <Input
                       id="subheadline_color"
+                      type="color"
                       value={headlineSettings.subheadline_color}
                       onChange={(e) => setHeadlineSettings({ ...headlineSettings, subheadline_color: e.target.value })}
                       disabled={!editingHeadline}
-                      placeholder="hsl(var(--muted-foreground))"
-                      className="mt-1"
+                      className="mt-1 h-12 cursor-pointer"
                     />
                   </div>
 
@@ -716,11 +716,11 @@ const Admin = () => {
                   <Label htmlFor="highlight_color">Highlight Color</Label>
                   <Input
                     id="highlight_color"
+                    type="color"
                     value={headlineSettings.highlight_color}
                     onChange={(e) => setHeadlineSettings({ ...headlineSettings, highlight_color: e.target.value })}
                     disabled={!editingHeadline}
-                    placeholder="hsl(var(--primary))"
-                    className="mt-1"
+                    className="mt-1 h-12 cursor-pointer"
                   />
                 </div>
               </div>
