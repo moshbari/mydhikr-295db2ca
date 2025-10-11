@@ -198,11 +198,11 @@ export default function AuthPage() {
         )}
 
         {/* Desktop Layout */}
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="grid md:grid-cols-2 gap-8 items-start">
           {/* Video - Desktop */}
           {videoUrl && (
-            <div className="hidden md:block">
-              <AspectRatio ratio={9 / 16} className="bg-muted rounded-lg overflow-hidden">
+            <div className="hidden md:block max-h-[600px]">
+              <AspectRatio ratio={9 / 16} className="bg-muted rounded-lg overflow-hidden max-h-[600px]">
                 <iframe
                   src={getEmbedUrl(videoUrl)}
                   className="w-full h-full"
