@@ -44,6 +44,9 @@ const Admin = () => {
     role: "user" as "user" | "admin"
   });
   const [creatingUser, setCreatingUser] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [editingVideo, setEditingVideo] = useState(false);
+  const [savingVideo, setSavingVideo] = useState(false);
 
   // Simple admin check with debugging
   useEffect(() => {
@@ -69,8 +72,64 @@ const Admin = () => {
     if (user) {
       // Always try to fetch users if user exists, let the backend handle permissions
       fetchUsers();
+      fetchVideoUrl();
     }
   }, [user?.id]);
+
+  const fetchVideoUrl = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('auth_page_settings')
+        .select('video_url')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data) {
+        setVideoUrl(data.video_url || '');
+      }
+    } catch (error) {
+      console.error('Error fetching video URL:', error);
+    }
+  };
+
+  const handleSaveVideoUrl = async () => {
+    try {
+      setSavingVideo(true);
+      
+      const { data: existing } = await supabase
+        .from('auth_page_settings')
+        .select('id')
+        .single();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('auth_page_settings')
+          .update({ video_url: videoUrl })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Video URL updated successfully",
+      });
+
+      setEditingVideo(false);
+    } catch (error) {
+      console.error('Error saving video URL:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update video URL",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingVideo(false);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -383,6 +442,57 @@ const Admin = () => {
             Add User
           </Button>
         </div>
+
+        {/* Auth Page Video Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Auth Page Video</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="video_url">Video URL (YouTube, Loom, or Self-hosted)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="video_url"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=... or https://loom.com/share/..."
+                    disabled={!editingVideo}
+                  />
+                  {editingVideo ? (
+                    <>
+                      <Button
+                        onClick={handleSaveVideoUrl}
+                        disabled={savingVideo}
+                        className="whitespace-nowrap"
+                      >
+                        {savingVideo ? "Saving..." : "Save"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingVideo(false);
+                          fetchVideoUrl();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={() => setEditingVideo(true)}>
+                      <Edit3 className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This video will be displayed on the authentication page
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Search */}
         <Card>

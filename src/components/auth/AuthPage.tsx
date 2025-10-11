@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }),
@@ -19,6 +20,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [videoUrl, setVideoUrl] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -31,6 +33,19 @@ export default function AuthPage() {
       }
     };
     checkAuth();
+
+    // Fetch video URL
+    const fetchVideoUrl = async () => {
+      const { data } = await supabase
+        .from('auth_page_settings')
+        .select('video_url')
+        .single();
+      
+      if (data?.video_url) {
+        setVideoUrl(data.video_url);
+      }
+    };
+    fetchVideoUrl();
   }, [navigate]);
 
   const validateForm = () => {
@@ -134,9 +149,30 @@ export default function AuthPage() {
     }
   };
 
+  const getEmbedUrl = (url: string) => {
+    if (!url) return "";
+    
+    // YouTube
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      const videoId = url.includes("youtu.be") 
+        ? url.split("youtu.be/")[1]?.split("?")[0]
+        : url.split("v=")[1]?.split("&")[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Loom
+    if (url.includes("loom.com")) {
+      const videoId = url.split("share/")[1]?.split("?")[0];
+      return `https://www.loom.com/embed/${videoId}`;
+    }
+    
+    // Self-hosted or direct video URLs
+    return url;
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl space-y-8">
+      <div className="w-full max-w-6xl space-y-8">
         {/* Hero Section */}
         <div className="text-center space-y-4">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
@@ -147,8 +183,38 @@ export default function AuthPage() {
           </p>
         </div>
 
-        {/* Auth Card */}
-        <Card className="w-full max-w-md mx-auto">
+        {/* Video - Mobile */}
+        {videoUrl && (
+          <div className="md:hidden">
+            <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
+              <iframe
+                src={getEmbedUrl(videoUrl)}
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            </AspectRatio>
+          </div>
+        )}
+
+        {/* Desktop Layout */}
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          {/* Video - Desktop */}
+          {videoUrl && (
+            <div className="hidden md:block">
+              <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
+                <iframe
+                  src={getEmbedUrl(videoUrl)}
+                  className="w-full h-full"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              </AspectRatio>
+            </div>
+          )}
+
+          {/* Auth Card */}
+          <Card className={`w-full ${!videoUrl ? 'max-w-md mx-auto' : ''}`}>
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
               <span className="text-2xl">🕌</span>
@@ -258,6 +324,7 @@ export default function AuthPage() {
           </div>
         </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );

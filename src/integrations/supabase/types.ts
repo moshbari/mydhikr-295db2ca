@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_page_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       daily_entries: {
         Row: {
           count: number
