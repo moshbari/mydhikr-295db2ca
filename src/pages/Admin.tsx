@@ -47,6 +47,20 @@ const Admin = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const [editingVideo, setEditingVideo] = useState(false);
   const [savingVideo, setSavingVideo] = useState(false);
+  const [headlineSettings, setHeadlineSettings] = useState({
+    headline_text: "Lost Your Dhikr Count Again? Forgot Your Nafl Prayers? Can't Remember Yesterday's Surah?",
+    subheadline_text: "You're not alone. Finally, track your daily worship without the frustration. My Dhikr app keeps everything organized with simple taps.",
+    headline_font_size: "3xl",
+    headline_color: "hsl(var(--foreground))",
+    subheadline_font_size: "lg",
+    subheadline_color: "hsl(var(--muted-foreground))",
+    highlight_words: "",
+    highlight_color: "hsl(var(--primary))",
+    headline_width: "592px",
+    subheadline_width: "592px"
+  });
+  const [editingHeadline, setEditingHeadline] = useState(false);
+  const [savingHeadline, setSavingHeadline] = useState(false);
 
   // Simple admin check with debugging
   useEffect(() => {
@@ -80,7 +94,7 @@ const Admin = () => {
     try {
       const { data, error } = await supabase
         .from('auth_page_settings')
-        .select('video_url')
+        .select('*')
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -89,9 +103,21 @@ const Admin = () => {
 
       if (data) {
         setVideoUrl(data.video_url || '');
+        setHeadlineSettings({
+          headline_text: data.headline_text || "Lost Your Dhikr Count Again? Forgot Your Nafl Prayers? Can't Remember Yesterday's Surah?",
+          subheadline_text: data.subheadline_text || "You're not alone. Finally, track your daily worship without the frustration. My Dhikr app keeps everything organized with simple taps.",
+          headline_font_size: data.headline_font_size || "3xl",
+          headline_color: data.headline_color || "hsl(var(--foreground))",
+          subheadline_font_size: data.subheadline_font_size || "lg",
+          subheadline_color: data.subheadline_color || "hsl(var(--muted-foreground))",
+          highlight_words: data.highlight_words || "",
+          highlight_color: data.highlight_color || "hsl(var(--primary))",
+          headline_width: data.headline_width || "592px",
+          subheadline_width: data.subheadline_width || "592px"
+        });
       }
     } catch (error) {
-      console.error('Error fetching video URL:', error);
+      console.error('Error fetching settings:', error);
     }
   };
 
@@ -128,6 +154,48 @@ const Admin = () => {
       });
     } finally {
       setSavingVideo(false);
+    }
+  };
+
+  const handleSaveHeadlineSettings = async () => {
+    try {
+      setSavingHeadline(true);
+      
+      const { data: existing } = await supabase
+        .from('auth_page_settings')
+        .select('id')
+        .single();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('auth_page_settings')
+          .update(headlineSettings)
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('auth_page_settings')
+          .insert([headlineSettings]);
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Headline settings updated successfully",
+      });
+
+      setEditingHeadline(false);
+    } catch (error) {
+      console.error('Error saving headline settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update headline settings",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingHeadline(false);
     }
   };
 
@@ -489,6 +557,201 @@ const Admin = () => {
                 <p className="text-sm text-muted-foreground mt-2">
                   This video will be displayed on the authentication page
                 </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Auth Page Headline Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Auth Page Headline & Subheadline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Headline Settings */}
+              <div className="space-y-4 p-4 border rounded-lg">
+                <h3 className="font-semibold text-lg">Headline</h3>
+                
+                <div>
+                  <Label htmlFor="headline_text">Headline Text</Label>
+                  <Input
+                    id="headline_text"
+                    value={headlineSettings.headline_text}
+                    onChange={(e) => setHeadlineSettings({ ...headlineSettings, headline_text: e.target.value })}
+                    disabled={!editingHeadline}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="headline_font_size">Font Size</Label>
+                    <Select
+                      value={headlineSettings.headline_font_size}
+                      onValueChange={(value) => setHeadlineSettings({ ...headlineSettings, headline_font_size: value })}
+                      disabled={!editingHeadline}
+                    >
+                      <SelectTrigger id="headline_font_size" className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="xl">XL</SelectItem>
+                        <SelectItem value="2xl">2XL</SelectItem>
+                        <SelectItem value="3xl">3XL</SelectItem>
+                        <SelectItem value="4xl">4XL</SelectItem>
+                        <SelectItem value="5xl">5XL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="headline_color">Text Color</Label>
+                    <Input
+                      id="headline_color"
+                      value={headlineSettings.headline_color}
+                      onChange={(e) => setHeadlineSettings({ ...headlineSettings, headline_color: e.target.value })}
+                      disabled={!editingHeadline}
+                      placeholder="hsl(var(--foreground))"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="headline_width">Max Width (px)</Label>
+                    <Input
+                      id="headline_width"
+                      value={headlineSettings.headline_width}
+                      onChange={(e) => setHeadlineSettings({ ...headlineSettings, headline_width: e.target.value })}
+                      disabled={!editingHeadline}
+                      placeholder="592px"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Subheadline Settings */}
+              <div className="space-y-4 p-4 border rounded-lg">
+                <h3 className="font-semibold text-lg">Subheadline</h3>
+                
+                <div>
+                  <Label htmlFor="subheadline_text">Subheadline Text</Label>
+                  <Input
+                    id="subheadline_text"
+                    value={headlineSettings.subheadline_text}
+                    onChange={(e) => setHeadlineSettings({ ...headlineSettings, subheadline_text: e.target.value })}
+                    disabled={!editingHeadline}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="subheadline_font_size">Font Size</Label>
+                    <Select
+                      value={headlineSettings.subheadline_font_size}
+                      onValueChange={(value) => setHeadlineSettings({ ...headlineSettings, subheadline_font_size: value })}
+                      disabled={!editingHeadline}
+                    >
+                      <SelectTrigger id="subheadline_font_size" className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sm">Small</SelectItem>
+                        <SelectItem value="base">Base</SelectItem>
+                        <SelectItem value="lg">Large</SelectItem>
+                        <SelectItem value="xl">XL</SelectItem>
+                        <SelectItem value="2xl">2XL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="subheadline_color">Text Color</Label>
+                    <Input
+                      id="subheadline_color"
+                      value={headlineSettings.subheadline_color}
+                      onChange={(e) => setHeadlineSettings({ ...headlineSettings, subheadline_color: e.target.value })}
+                      disabled={!editingHeadline}
+                      placeholder="hsl(var(--muted-foreground))"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="subheadline_width">Max Width (px)</Label>
+                    <Input
+                      id="subheadline_width"
+                      value={headlineSettings.subheadline_width}
+                      onChange={(e) => setHeadlineSettings({ ...headlineSettings, subheadline_width: e.target.value })}
+                      disabled={!editingHeadline}
+                      placeholder="592px"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Highlight Settings */}
+              <div className="space-y-4 p-4 border rounded-lg">
+                <h3 className="font-semibold text-lg">Text Highlighting</h3>
+                
+                <div>
+                  <Label htmlFor="highlight_words">Words/Phrases to Highlight (comma-separated)</Label>
+                  <Input
+                    id="highlight_words"
+                    value={headlineSettings.highlight_words}
+                    onChange={(e) => setHeadlineSettings({ ...headlineSettings, highlight_words: e.target.value })}
+                    disabled={!editingHeadline}
+                    placeholder="e.g., Dhikr, Nafl Prayers, Surah"
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter words or phrases from the headline/subheadline that you want to highlight
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="highlight_color">Highlight Color</Label>
+                  <Input
+                    id="highlight_color"
+                    value={headlineSettings.highlight_color}
+                    onChange={(e) => setHeadlineSettings({ ...headlineSettings, highlight_color: e.target.value })}
+                    disabled={!editingHeadline}
+                    placeholder="hsl(var(--primary))"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {editingHeadline ? (
+                  <>
+                    <Button
+                      onClick={handleSaveHeadlineSettings}
+                      disabled={savingHeadline}
+                      className="whitespace-nowrap"
+                    >
+                      {savingHeadline ? "Saving..." : "Save Changes"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setEditingHeadline(false);
+                        fetchVideoUrl();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <Button onClick={() => setEditingHeadline(true)}>
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Edit Headline Settings
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

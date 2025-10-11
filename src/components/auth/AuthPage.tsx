@@ -21,6 +21,18 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [videoUrl, setVideoUrl] = useState("");
+  const [headlineSettings, setHeadlineSettings] = useState({
+    headline_text: "Lost Your Dhikr Count Again? Forgot Your Nafl Prayers? Can't Remember Yesterday's Surah?",
+    subheadline_text: "You're not alone. Finally, track your daily worship without the frustration. My Dhikr app keeps everything organized with simple taps.",
+    headline_font_size: "3xl",
+    headline_color: "hsl(var(--foreground))",
+    subheadline_font_size: "lg",
+    subheadline_color: "hsl(var(--muted-foreground))",
+    highlight_words: "",
+    highlight_color: "hsl(var(--primary))",
+    headline_width: "592px",
+    subheadline_width: "592px"
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -34,18 +46,32 @@ export default function AuthPage() {
     };
     checkAuth();
 
-    // Fetch video URL
-    const fetchVideoUrl = async () => {
+    // Fetch settings
+    const fetchSettings = async () => {
       const { data } = await supabase
         .from('auth_page_settings')
-        .select('video_url')
+        .select('*')
         .single();
       
-      if (data?.video_url) {
-        setVideoUrl(data.video_url);
+      if (data) {
+        if (data.video_url) {
+          setVideoUrl(data.video_url);
+        }
+        setHeadlineSettings({
+          headline_text: data.headline_text || "Lost Your Dhikr Count Again? Forgot Your Nafl Prayers? Can't Remember Yesterday's Surah?",
+          subheadline_text: data.subheadline_text || "You're not alone. Finally, track your daily worship without the frustration. My Dhikr app keeps everything organized with simple taps.",
+          headline_font_size: data.headline_font_size || "3xl",
+          headline_color: data.headline_color || "hsl(var(--foreground))",
+          subheadline_font_size: data.subheadline_font_size || "lg",
+          subheadline_color: data.subheadline_color || "hsl(var(--muted-foreground))",
+          highlight_words: data.highlight_words || "",
+          highlight_color: data.highlight_color || "hsl(var(--primary))",
+          headline_width: data.headline_width || "592px",
+          subheadline_width: data.subheadline_width || "592px"
+        });
       }
     };
-    fetchVideoUrl();
+    fetchSettings();
   }, [navigate]);
 
   const validateForm = () => {
@@ -170,17 +196,43 @@ export default function AuthPage() {
     return url;
   };
 
+  const highlightText = (text: string, wordsToHighlight: string, highlightColor: string) => {
+    if (!wordsToHighlight) return text;
+    
+    const words = wordsToHighlight.split(',').map(w => w.trim()).filter(w => w.length > 0);
+    if (words.length === 0) return text;
+    
+    let highlightedText = text;
+    words.forEach(word => {
+      const regex = new RegExp(`(${word})`, 'gi');
+      highlightedText = highlightedText.replace(
+        regex, 
+        `<span style="color: ${highlightColor}; font-weight: 600;">$1</span>`
+      );
+    });
+    
+    return highlightedText;
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-6xl space-y-8">
         {/* Hero Section */}
-        <div className="text-center space-y-4 md:max-w-[592px] md:mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            Lost Your Dhikr Count Again? Forgot Your Nafl Prayers? Can't Remember Yesterday's Surah?
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground">
-            You're not alone. Finally, track your daily worship without the frustration. My Dhikr app keeps everything organized with simple taps.
-          </p>
+        <div className="text-center space-y-4 mx-auto" style={{ maxWidth: headlineSettings.headline_width }}>
+          <h1 
+            className={`text-${headlineSettings.headline_font_size} md:text-${headlineSettings.headline_font_size === '3xl' ? '4xl' : headlineSettings.headline_font_size} font-bold`}
+            style={{ color: headlineSettings.headline_color }}
+            dangerouslySetInnerHTML={{
+              __html: highlightText(headlineSettings.headline_text, headlineSettings.highlight_words, headlineSettings.highlight_color)
+            }}
+          />
+          <p 
+            className={`text-${headlineSettings.subheadline_font_size} md:text-${headlineSettings.subheadline_font_size === 'lg' ? 'xl' : headlineSettings.subheadline_font_size}`}
+            style={{ color: headlineSettings.subheadline_color, maxWidth: headlineSettings.subheadline_width, margin: '0 auto' }}
+            dangerouslySetInnerHTML={{
+              __html: highlightText(headlineSettings.subheadline_text, headlineSettings.highlight_words, headlineSettings.highlight_color)
+            }}
+          />
         </div>
 
         {/* Video - Mobile */}

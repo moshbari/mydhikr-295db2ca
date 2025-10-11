@@ -17,19 +17,49 @@ export type Database = {
       auth_page_settings: {
         Row: {
           created_at: string | null
+          headline_color: string | null
+          headline_font_size: string | null
+          headline_text: string | null
+          headline_width: string | null
+          highlight_color: string | null
+          highlight_words: string | null
           id: string
+          subheadline_color: string | null
+          subheadline_font_size: string | null
+          subheadline_text: string | null
+          subheadline_width: string | null
           updated_at: string | null
           video_url: string | null
         }
         Insert: {
           created_at?: string | null
+          headline_color?: string | null
+          headline_font_size?: string | null
+          headline_text?: string | null
+          headline_width?: string | null
+          highlight_color?: string | null
+          highlight_words?: string | null
           id?: string
+          subheadline_color?: string | null
+          subheadline_font_size?: string | null
+          subheadline_text?: string | null
+          subheadline_width?: string | null
           updated_at?: string | null
           video_url?: string | null
         }
         Update: {
           created_at?: string | null
+          headline_color?: string | null
+          headline_font_size?: string | null
+          headline_text?: string | null
+          headline_width?: string | null
+          highlight_color?: string | null
+          highlight_words?: string | null
           id?: string
+          subheadline_color?: string | null
+          subheadline_font_size?: string | null
+          subheadline_text?: string | null
+          subheadline_width?: string | null
           updated_at?: string | null
           video_url?: string | null
         }
