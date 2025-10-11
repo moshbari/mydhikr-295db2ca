@@ -237,15 +237,13 @@ export default function AuthPage() {
 
         {/* Video - Mobile */}
         {videoUrl && (
-          <div className="md:hidden max-w-[350px] mx-auto">
-            <AspectRatio ratio={9 / 16} className="bg-white rounded-lg overflow-hidden">
-              <iframe
-                src={getEmbedUrl(videoUrl)}
-                className="w-full h-full"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-              />
-            </AspectRatio>
+          <div className="md:hidden w-[280px] h-[605px] mx-auto bg-white rounded-lg overflow-hidden">
+            <iframe
+              src={getEmbedUrl(videoUrl)}
+              className="w-full h-full"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
           </div>
         )}
 
