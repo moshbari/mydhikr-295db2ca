@@ -186,7 +186,7 @@ export default function AuthPage() {
         {/* Video - Mobile */}
         {videoUrl && (
           <div className="md:hidden">
-            <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
+            <AspectRatio ratio={9 / 16} className="bg-muted rounded-lg overflow-hidden">
               <iframe
                 src={getEmbedUrl(videoUrl)}
                 className="w-full h-full"
@@ -202,7 +202,7 @@ export default function AuthPage() {
           {/* Video - Desktop */}
           {videoUrl && (
             <div className="hidden md:block">
-              <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
+              <AspectRatio ratio={9 / 16} className="bg-muted rounded-lg overflow-hidden">
                 <iframe
                   src={getEmbedUrl(videoUrl)}
                   className="w-full h-full"
