@@ -185,7 +185,7 @@ export default function AuthPage() {
 
         {/* Video - Mobile */}
         {videoUrl && (
-          <div className="md:hidden">
+          <div className="md:hidden max-w-[350px] mx-auto">
             <AspectRatio ratio={9 / 16} className="bg-muted rounded-lg overflow-hidden">
               <iframe
                 src={getEmbedUrl(videoUrl)}
@@ -212,7 +212,7 @@ export default function AuthPage() {
           )}
 
           {/* Auth Card */}
-          <Card className={`${!videoUrl ? 'max-w-md mx-auto' : 'w-[280px] h-[605px]'} overflow-y-auto`}>
+          <Card className={`${!videoUrl ? 'max-w-md mx-auto' : 'md:w-[280px] md:h-[605px]'} max-w-[350px] mx-auto md:mx-0 overflow-y-auto`}>
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
                 <span className="text-2xl">🕌</span>
