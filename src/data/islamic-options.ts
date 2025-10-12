@@ -1,4 +1,5 @@
 export const dhikrOptions = [
+  "Istegfar + Durood",
   "Subhan Allah",
   "Alhamdulillah",
   "Allahu Akbar",
