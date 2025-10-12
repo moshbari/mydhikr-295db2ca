@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, AlertCircle } from "lucide-react";
-import { dhikrOptions, quranOptions, salahOptions } from "@/data/islamic-options";
+import { useIslamicOptions } from "@/hooks/use-islamic-options";
 
 interface TrackerSectionProps {
   title: string;
@@ -15,6 +15,7 @@ interface TrackerSectionProps {
 }
 
 export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps) {
+  const { options: dbOptions, loading: optionsLoading } = useIslamicOptions(type);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [customName, setCustomName] = useState<string>("");
   const [numberValue, setNumberValue] = useState<string>("");
@@ -27,16 +28,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   const [isCompleteSurah, setIsCompleteSurah] = useState<boolean>(false);
 
   const getOptions = () => {
-    switch (type) {
-      case "dhikr":
-        return dhikrOptions;
-      case "quran":
-        return quranOptions;
-      case "salah":
-        return salahOptions;
-      default:
-        return [];
-    }
+    return dbOptions.map(opt => opt.name);
   };
 
   const extractVerseCount = (surahOption: string): number => {
@@ -158,9 +150,9 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         <div className="space-y-3">
           {!showCustomInput ? (
             <>
-              <Select value={selectedOption} onValueChange={setSelectedOption}>
+              <Select value={selectedOption} onValueChange={setSelectedOption} disabled={optionsLoading}>
                 <SelectTrigger className="w-full bg-background border border-input">
-                  <SelectValue placeholder={`Select ${title.toLowerCase()}...`} />
+                  <SelectValue placeholder={optionsLoading ? "Loading..." : `Select ${title.toLowerCase()}...`} />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-input shadow-lg z-50 max-h-60">
                   {getOptions().map((option) => (

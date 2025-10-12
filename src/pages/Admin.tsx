@@ -12,6 +12,7 @@ import { ArrowLeft, Users, Edit3, Trash2, Save, Shield, Key } from "lucide-react
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { IslamicOptionsManager } from "@/components/admin/IslamicOptionsManager";
 
 interface UserProfile {
   id: string;
@@ -510,6 +511,9 @@ const Admin = () => {
             Add User
           </Button>
         </div>
+
+        {/* Islamic Options Manager */}
+        <IslamicOptionsManager />
 
         {/* Auth Page Video Settings */}
         <Card>

@@ -1,3 +1,7 @@
+// NOTE: These options are now managed through the database (islamic_options table)
+// This file is kept for backwards compatibility but will be deprecated
+// Use the useIslamicOptions hook to fetch options dynamically
+
 export const dhikrOptions = [
   "Istegfar + Durood",
   "Subhan Allah",
