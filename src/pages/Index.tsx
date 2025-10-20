@@ -9,8 +9,11 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { getCurrentHijriDate, formatHijriDate } from "@/lib/hijri-calendar";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
-import { BarChart3, Shield } from "lucide-react";
+import { BarChart3, Shield, CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
 import { createAdminAccounts } from "@/lib/admin-setup";
@@ -19,6 +22,7 @@ const Index = () => {
   const { toast } = useToast();
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [reflections, setReflections] = useState<DailyReflection[]>([]);
   const [notes, setNotes] = useState("");
@@ -34,8 +38,8 @@ const Index = () => {
     console.log('===============================');
   }, [user, isAdmin]);
   
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const todayFormatted = format(new Date(), 'EEEE, MMMM d, yyyy');
+  const today = format(selectedDate, 'yyyy-MM-dd');
+  const todayFormatted = format(selectedDate, 'EEEE, MMMM d, yyyy');
   const hijriDate = getCurrentHijriDate();
   const hijriFormatted = formatHijriDate(hijriDate);
 
@@ -144,7 +148,7 @@ const Index = () => {
     };
 
     loadTodayData();
-  }, [user, today, toast]);
+  }, [user, today, toast, selectedDate]);
 
   const addEntry = async (type: "dhikr" | "quran" | "salah", name: string, count: number, extraInfo?: string) => {
     if (!user) {
@@ -535,6 +539,33 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        {/* Date Selector */}
+        <div className="flex justify-center mb-4">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full sm:w-auto justify-start text-left font-normal",
+                  !selectedDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                initialFocus
+                disabled={(date) => date > new Date()}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
         {/* Daily Summary */}
         <DailySummary 
           entries={entries} 
