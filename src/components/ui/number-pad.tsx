@@ -40,7 +40,7 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
           <Button
             key={num}
             onClick={() => handleNumberClick(num)}
-            className="number-pad-button h-14 text-lg"
+            className="number-pad-button h-14 text-lg px-8 min-w-[80px]"
             variant="outline"
           >
             {num}
@@ -52,21 +52,21 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
       <div className="grid grid-cols-3 gap-3">
         <Button
           onClick={handleClear}
-          className="number-pad-button col-span-1 text-destructive h-14 text-lg"
+          className="number-pad-button col-span-1 text-destructive h-14 text-lg px-8 min-w-[80px]"
           variant="outline"
         >
           Clear
         </Button>
         <Button
           onClick={() => handleNumberClick("0")}
-          className="number-pad-button h-14 text-lg"
+          className="number-pad-button h-14 text-lg px-8 min-w-[80px]"
           variant="outline"
         >
           0
         </Button>
         <Button
           onClick={onAdd}
-          className="islamic-button col-span-1 h-14 text-base"
+          className="islamic-button col-span-1 h-14 text-base px-8 min-w-[80px]"
           disabled={value === "" || parseInt(value) <= 0 || isNaN(parseInt(value))}
         >
           Add
