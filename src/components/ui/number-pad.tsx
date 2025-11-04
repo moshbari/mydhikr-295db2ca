@@ -30,8 +30,8 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
   return (
     <div className="flex flex-col gap-3">
       {/* Display */}
-      <div className="bg-muted/50 rounded-lg p-3 text-center min-h-[60px] flex items-center justify-center">
-        <span className="text-2xl font-bold text-foreground">{value || "\u00A0"}</span>
+      <div className="bg-muted/50 rounded-lg p-3 text-center">
+        <span className="text-2xl font-bold text-foreground">{value}</span>
       </div>
 
       {/* Number pad */}
