@@ -35,12 +35,12 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
       </div>
 
       {/* Number pad */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         {numbers.flat().map((num) => (
           <Button
             key={num}
             onClick={() => handleNumberClick(num)}
-            className="number-pad-button"
+            className="number-pad-button h-14 text-lg"
             variant="outline"
           >
             {num}
@@ -49,24 +49,24 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
       </div>
 
       {/* Bottom row */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         <Button
           onClick={handleClear}
-          className="number-pad-button col-span-1 text-destructive"
+          className="number-pad-button col-span-1 text-destructive h-14 text-lg"
           variant="outline"
         >
           Clear
         </Button>
         <Button
           onClick={() => handleNumberClick("0")}
-          className="number-pad-button"
+          className="number-pad-button h-14 text-lg"
           variant="outline"
         >
           0
         </Button>
         <Button
           onClick={onAdd}
-          className="islamic-button col-span-1 text-sm"
+          className="islamic-button col-span-1 h-14 text-base"
           disabled={value === "" || parseInt(value) <= 0 || isNaN(parseInt(value))}
         >
           Add
