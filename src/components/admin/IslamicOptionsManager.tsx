@@ -5,8 +5,162 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ArrowUp, ArrowDown, Edit3, Trash2, Plus, Save, X } from "lucide-react";
+import { GripVertical, Edit3, Trash2, Plus, Save, X } from "lucide-react";
 import { useIslamicOptions, IslamicOption } from "@/hooks/use-islamic-options";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface SortableItemProps {
+  option: IslamicOption;
+  index: number;
+  isEditing: boolean;
+  editValue: string;
+  onStartEdit: (option: IslamicOption) => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+  onEditValueChange: (value: string) => void;
+  onDelete: (id: string) => void;
+}
+
+const SortableItem = ({
+  option,
+  index,
+  isEditing,
+  editValue,
+  onStartEdit,
+  onSaveEdit,
+  onCancelEdit,
+  onEditValueChange,
+  onDelete,
+}: SortableItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: option.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 p-3 border rounded-lg bg-background"
+    >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
+      </div>
+
+      {/* Order Number */}
+      <div className="text-sm font-medium text-muted-foreground w-8">
+        {index + 1}.
+      </div>
+
+      {/* Name (editable) */}
+      <div className="flex-1">
+        {isEditing ? (
+          <Input
+            value={editValue}
+            onChange={(e) => onEditValueChange(e.target.value)}
+            className="h-8"
+          />
+        ) : (
+          <span>{option.name}</span>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-1">
+        {isEditing ? (
+          <>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={onSaveEdit}
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={onCancelEdit}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={() => onStartEdit(option)}
+            >
+              <Edit3 className="h-4 w-4" />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Item</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{option.name}"? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => onDelete(option.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const IslamicOptionsManager = () => {
   const [selectedCategory, setSelectedCategory] = useState<'dhikr' | 'quran' | 'salah'>('dhikr');
@@ -16,20 +170,25 @@ export const IslamicOptionsManager = () => {
   const [newItemName, setNewItemName] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const categoryOptions = options.filter(opt => opt.category === selectedCategory);
 
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return;
-    const newOptions = [...categoryOptions];
-    [newOptions[index - 1], newOptions[index]] = [newOptions[index], newOptions[index - 1]];
-    reorderOptions(newOptions);
-  };
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const handleMoveDown = (index: number) => {
-    if (index === categoryOptions.length - 1) return;
-    const newOptions = [...categoryOptions];
-    [newOptions[index + 1], newOptions[index]] = [newOptions[index], newOptions[index + 1]];
-    reorderOptions(newOptions);
+    if (over && active.id !== over.id) {
+      const oldIndex = categoryOptions.findIndex((item) => item.id === active.id);
+      const newIndex = categoryOptions.findIndex((item) => item.id === over.id);
+
+      const newOptions = arrayMove(categoryOptions, oldIndex, newIndex);
+      reorderOptions(newOptions);
+    }
   };
 
   const handleStartEdit = (option: IslamicOption) => {
@@ -145,117 +304,33 @@ export const IslamicOptionsManager = () => {
           ) : categoryOptions.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">No items found</p>
           ) : (
-            <div className="space-y-2">
-              {categoryOptions.map((option, index) => (
-                <div
-                  key={option.id}
-                  className="flex items-center gap-2 p-3 border rounded-lg bg-background"
-                >
-                  {/* Order Controls */}
-                  <div className="flex flex-col gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6"
-                      onClick={() => handleMoveUp(index)}
-                      disabled={index === 0}
-                    >
-                      <ArrowUp className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6"
-                      onClick={() => handleMoveDown(index)}
-                      disabled={index === categoryOptions.length - 1}
-                    >
-                      <ArrowDown className="h-3 w-3" />
-                    </Button>
-                  </div>
-
-                  {/* Order Number */}
-                  <div className="text-sm font-medium text-muted-foreground w-8">
-                    {index + 1}.
-                  </div>
-
-                  {/* Name (editable) */}
-                  <div className="flex-1">
-                    {editingId === option.id ? (
-                      <Input
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="h-8"
-                      />
-                    ) : (
-                      <span>{option.name}</span>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-1">
-                    {editingId === option.id ? (
-                      <>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={handleSaveEdit}
-                        >
-                          <Save className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={handleCancelEdit}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={() => handleStartEdit(option)}
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Item</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{option.name}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteOption(option.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </>
-                    )}
-                  </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={categoryOptions.map(opt => opt.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {categoryOptions.map((option, index) => (
+                    <SortableItem
+                      key={option.id}
+                      option={option}
+                      index={index}
+                      isEditing={editingId === option.id}
+                      editValue={editValue}
+                      onStartEdit={handleStartEdit}
+                      onSaveEdit={handleSaveEdit}
+                      onCancelEdit={handleCancelEdit}
+                      onEditValueChange={setEditValue}
+                      onDelete={deleteOption}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </CardContent>
