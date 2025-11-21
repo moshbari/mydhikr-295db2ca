@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { haptics } from "@/lib/haptics";
 
 interface NumberPadProps {
   value: string;
@@ -7,7 +8,8 @@ interface NumberPadProps {
 }
 
 export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
-  const handleNumberClick = (num: string) => {
+  const handleNumberClick = async (num: string) => {
+    await haptics.light();
     if (value === "") {
       // If empty, set to the clicked number
       onChange(num);
@@ -17,8 +19,14 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
     }
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
+    await haptics.medium();
     onChange("");
+  };
+
+  const handleAdd = async () => {
+    await haptics.success();
+    onAdd();
   };
 
   const numbers = [
@@ -65,7 +73,7 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
           0
         </Button>
         <Button
-          onClick={onAdd}
+          onClick={handleAdd}
           className="islamic-button col-span-1 h-14 text-base px-8 min-w-[80px]"
           disabled={value === "" || parseInt(value) <= 0 || isNaN(parseInt(value))}
         >
