@@ -43,7 +43,7 @@ export const OfflineIndicator = () => {
 
   if (!isOnline) {
     return (
-      <Badge variant="secondary" className="fixed top-4 right-4 z-50 gap-2">
+      <Badge variant="secondary" className="fixed top-20 right-4 z-50 gap-2 safe-top shadow-lg">
         <CloudOff className="h-4 w-4" />
         Offline Mode
         {unsyncedCount > 0 && ` (${unsyncedCount} pending)`}
@@ -53,17 +53,12 @@ export const OfflineIndicator = () => {
 
   if (unsyncedCount > 0) {
     return (
-      <Badge variant="secondary" className="fixed top-4 right-4 z-50 gap-2">
+      <Badge variant="secondary" className="fixed top-20 right-4 z-50 gap-2 safe-top shadow-lg">
         <RefreshCw className="h-4 w-4 animate-spin" />
         Syncing... ({unsyncedCount})
       </Badge>
     );
   }
 
-  return (
-    <Badge variant="secondary" className="fixed top-4 right-4 z-50 gap-2">
-      <Cloud className="h-4 w-4" />
-      Online
-    </Badge>
-  );
+  return null; // Don't show online indicator to reduce clutter
 };

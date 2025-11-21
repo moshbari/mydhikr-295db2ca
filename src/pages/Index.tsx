@@ -4,6 +4,7 @@ import { DailySummary, DailyEntry } from "@/components/daily-summary";
 import { DailyReflections, DailyReflection } from "@/components/daily-reflections";
 import { ReflectionsSection } from "@/components/reflections-section";
 import { Button } from "@/components/ui/button";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import { getCurrentHijriDate, formatHijriDate } from "@/lib/hijri-calendar";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 
 import { BarChart3, Shield, CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -49,11 +51,11 @@ const Index = () => {
   }, []);
 
   // Load today's data from database
-  useEffect(() => {
-    const loadTodayData = async () => {
-      if (!user) return;
-      
-      try {
+  const loadTodayData = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
         // Load entries
         const { data: entriesData, error: entriesError } = await supabase
           .from('daily_entries')
@@ -142,11 +144,12 @@ const Index = () => {
           description: "There was an issue loading your tracking data.",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
-      }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadTodayData();
   }, [user, today, toast, selectedDate]);
 
@@ -439,7 +442,9 @@ const Index = () => {
   const handleResetAll = async () => {
     if (!user) return;
     
+    await haptics.warning();
     if (window.confirm("Are you sure you want to reset all data for today? This action cannot be undone.")) {
+      await haptics.heavy();
       try {
         // Delete entries
         await supabase
@@ -490,7 +495,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="header-gradient text-white py-4 px-3 sm:py-6 sm:px-4">
+      <header className="header-gradient text-white py-4 px-3 sm:py-6 sm:px-4 safe-top">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center">
             <div className="text-center flex-1">
@@ -503,21 +508,26 @@ const Index = () => {
             <div className="flex gap-1 sm:gap-2 flex-wrap">
               {/* Temporarily show admin button for all users to debug */}
               <Button 
-                onClick={() => {
+                onClick={async () => {
+                  await haptics.medium();
                   console.log('Admin button clicked, user role:', user?.role, 'isAdmin:', isAdmin());
                   navigate('/admin');
                 }} 
                 variant="header"
                 size="mobile"
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 touch-target"
               >
                 <Shield className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden sm:inline">Admin (Debug)</span>
               </Button>
               <Button 
-                onClick={() => navigate('/history')} 
+                onClick={async () => {
+                  await haptics.medium();
+                  navigate('/history');
+                }} 
                 variant="header"
                 size="mobile"
+                className="touch-target"
               >
                 <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden sm:inline">History</span>
@@ -526,9 +536,13 @@ const Index = () => {
                 <ChangePasswordDialog />
               </div>
               <Button 
-                onClick={signOut} 
+                onClick={async () => {
+                  await haptics.medium();
+                  signOut();
+                }} 
                 variant="header"
                 size="mobile"
+                className="touch-target"
               >
                 <span className="text-xs sm:text-sm">Sign Out</span>
               </Button>
@@ -538,7 +552,8 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <PullToRefresh onRefresh={loadTodayData}>
+        <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Date Selector */}
         <div className="flex justify-center mb-4">
           <Popover>
@@ -608,15 +623,16 @@ const Index = () => {
         {/* Reset Controls */}
         <div className="tracker-card">
           <div className="flex justify-center">
-            <Button onClick={handleResetAll} variant="destructive">
+            <Button onClick={handleResetAll} variant="destructive" className="touch-target">
               🔄 Reset All Data
             </Button>
           </div>
         </div>
       </main>
+      </PullToRefresh>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-muted-foreground">
+      <footer className="text-center py-6 text-muted-foreground safe-bottom">
         <p className="text-sm">May Allah accept your worship and grant you success</p>
       </footer>
     </div>

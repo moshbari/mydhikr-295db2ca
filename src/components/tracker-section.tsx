@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, AlertCircle } from "lucide-react";
 import { useIslamicOptions } from "@/hooks/use-islamic-options";
+import { haptics } from "@/lib/haptics";
 
 interface TrackerSectionProps {
   title: string;
@@ -86,7 +87,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
     }
   }, [startValue, endValue, selectedOption, customName, type, showCustomInput]);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const name = showCustomInput ? customName.trim() : selectedOption;
     
     if (type === "quran") {
@@ -96,10 +97,12 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       
       // Check for verse validation errors
       if (verseError) {
+        await haptics.error();
         return; // Don't add if there are validation errors
       }
       
       if (name && !isNaN(start) && !isNaN(end) && difference > 0) {
+        await haptics.success();
         const rangeInfo = `${start} → ${end}`;
         onAdd(name, difference, rangeInfo);
         setSelectedOption("");
@@ -114,6 +117,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       const count = parseInt(numberValue);
       
       if (name && count > 0) {
+        await haptics.success();
         onAdd(name, count);
         setSelectedOption("");
         setCustomName("");
@@ -170,8 +174,11 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowCustomInput(true)}
-                className="w-full"
+                onClick={async () => {
+                  await haptics.light();
+                  setShowCustomInput(true);
+                }}
+                className="w-full touch-target"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Custom {title}
@@ -198,11 +205,12 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onClick={async () => {
+                    await haptics.light();
                     setShowCustomInput(false);
                     setCustomName("");
                   }}
-                  className="flex-1"
+                  className="flex-1 touch-target"
                 >
                   Back to List
                 </Button>
@@ -213,7 +221,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
           <Button 
             onClick={handleAdd} 
             disabled={isAddDisabled()}
-            className="w-full"
+            className="w-full touch-target"
             size="sm"
           >
             <Plus className="w-4 h-4 mr-2" />
