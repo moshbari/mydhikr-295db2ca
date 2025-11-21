@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarIcon, ArrowLeft, BarChart3 } from "lucide-react";
 import { format, subDays, subWeeks, subMonths, subYears, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ import { DailyEntry, DailySummary } from "@/components/daily-summary";
 import { DailyReflections, DailyReflection } from "@/components/daily-reflections";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 
 interface HistoricalData {
   date: string;
@@ -387,16 +389,19 @@ const History = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4 safe-top safe-bottom">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate('/')}
-              className="rounded-full"
+              onClick={async () => {
+                await haptics.medium();
+                navigate('/');
+              }}
+              className="rounded-full touch-target"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -495,9 +500,12 @@ const History = () => {
             </div>
 
             <Button 
-              onClick={fetchHistoricalData} 
+              onClick={async () => {
+                await haptics.medium();
+                fetchHistoricalData();
+              }} 
               disabled={!startDate || !endDate || loading}
-              className="w-full md:w-auto"
+              className="w-full md:w-auto touch-target"
             >
               {loading ? "Loading..." : "Load Data"}
             </Button>
@@ -578,7 +586,23 @@ const History = () => {
         )}
 
         {/* Results */}
-        {data.length > 0 && (
+        {loading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-64" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {!loading && data.length > 0 && (
           <div className="space-y-4">
             {data.map((dayData) => (
               <Card key={dayData.date} className="overflow-hidden">

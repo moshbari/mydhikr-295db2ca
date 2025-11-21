@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { SwipeableItem } from "@/components/ui/swipeable-item";
 import { Edit3, Trash2, Save, X } from "lucide-react";
+import { haptics } from "@/lib/haptics";
 
 export interface DailyEntry {
   id: string | number;
@@ -24,24 +26,44 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const [editCount, setEditCount] = useState<number>(0);
   const [editName, setEditName] = useState<string>("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<DailyEntry | null>(null);
 
-  const handleEditStart = (entry: DailyEntry) => {
+  const handleEditStart = async (entry: DailyEntry) => {
+    await haptics.light();
     setEditingId(entry.id);
     setEditCount(entry.count);
     setEditName(entry.name);
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (editingId && onEdit) {
+      await haptics.success();
       onEdit(editingId, editCount, editName);
       setEditingId(null);
     }
   };
 
-  const handleEditCancel = () => {
+  const handleEditCancel = async () => {
+    await haptics.light();
     setEditingId(null);
     setEditCount(0);
     setEditName("");
+  };
+
+  const handleDeleteStart = async (entry: DailyEntry) => {
+    await haptics.medium();
+    setEntryToDelete(entry);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (entryToDelete && onDelete) {
+      await haptics.heavy();
+      onDelete(entryToDelete.id);
+      setDeleteDialogOpen(false);
+      setEntryToDelete(null);
+    }
   };
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -144,10 +166,14 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
 
             {/* Sub-entries for each verse range */}
             {surahEntries.map((entry) => (
-              <div
+              <SwipeableItem
                 key={entry.id}
-                className="flex items-center justify-between p-3 ml-8 bg-muted/20 rounded-lg border border-border/30"
+                onEdit={() => handleEditStart(entry)}
+                onDelete={() => handleDeleteStart(entry)}
+                className="ml-8"
               >
+                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border border-border/30"
+                >
                 <div className="flex items-center gap-3 flex-1">
                   <span className="text-lg">📿</span>
                   <div className="flex-1">
@@ -230,53 +256,37 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleEditStart(entry)}
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 touch-target"
                       >
                         <Edit3 className="h-4 w-4" />
                       </Button>
                       
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Entry</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this {formatType(entry.type).toLowerCase()} entry for "{entry.name}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => onDelete?.(entry.id)}
-                              className="bg-destructive text-destructive-foreground"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteStart(entry)}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive touch-target"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   )}
                 </div>
               </div>
+              </SwipeableItem>
             ))}
           </div>
         ))}
 
         {/* Render other entries (Dhikr, Salah) normally */}
         {otherEntries.map((entry) => (
-          <div
+          <SwipeableItem
             key={entry.id}
-            className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50"
+            onEdit={() => handleEditStart(entry)}
+            onDelete={() => handleDeleteStart(entry)}
           >
+            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50"
+            >
             <div className="flex items-center gap-3 flex-1">
               <span className="text-lg">{getTypeIcon(entry.type)}</span>
               <div className="flex-1">
@@ -361,45 +371,59 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                     size="sm"
                     variant="ghost"
                     onClick={() => handleEditStart(entry)}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 touch-target"
                   >
                     <Edit3 className="h-4 w-4" />
                   </Button>
                   
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Entry</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this {formatType(entry.type).toLowerCase()} entry for "{entry.name}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => onDelete?.(entry.id)}
-                          className="bg-destructive text-destructive-foreground"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleDeleteStart(entry)}
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive touch-target"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               )}
             </div>
           </div>
+          </SwipeableItem>
         ))}
       </div>
+
+      {/* Delete Confirmation Bottom Sheet */}
+      <BottomSheet
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Entry?"
+        description="This action cannot be undone"
+      >
+        <div className="space-y-4">
+          <p className="text-foreground">
+            Are you sure you want to delete this {entryToDelete && formatType(entryToDelete.type).toLowerCase()} entry for "{entryToDelete?.name}"?
+          </p>
+          <div className="flex gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={async () => {
+                await haptics.light();
+                setDeleteDialogOpen(false);
+              }}
+              className="flex-1 touch-target"
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              className="flex-1 touch-target"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }
