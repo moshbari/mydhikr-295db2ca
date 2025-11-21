@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.09dfef1355cd483a893925d0ee1fe442',
+  appId: 'com.mydhikr.app',
   appName: 'mydhikr',
   webDir: 'dist',
   // Comment out the server section for production builds
