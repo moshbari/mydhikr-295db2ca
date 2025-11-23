@@ -4,7 +4,7 @@ import { DailySummary, DailyEntry } from "@/components/daily-summary";
 import { DailyReflections, DailyReflection } from "@/components/daily-reflections";
 import { ReflectionsSection } from "@/components/reflections-section";
 import { Button } from "@/components/ui/button";
-import { PullToRefresh } from "@/components/ui/pull-to-refresh";
+
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -541,87 +541,85 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Scrollable Main Content with Pull-to-Refresh */}
-      <div className="flex-1 min-h-0">
-        <PullToRefresh onRefresh={loadTodayData} className="h-full">
-          <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-            {/* Date Selector */}
-            <div className="flex justify-center mb-4">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full sm:w-auto justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="center">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
-                    initialFocus
-                    disabled={(date) => date > new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Daily Summary */}
-            <DailySummary 
-              entries={entries} 
-              onEdit={handleEditEntry}
-              onDelete={handleDeleteEntry}
-            />
-
-            {/* Dhikr & Tasbih Section */}
-            <TrackerSection
-              title="Dhikr & Tasbih"
-              icon="📿"
-              type="dhikr"
-              onAdd={(name, count) => addEntry("dhikr", name, count)}
-            />
-
-            {/* Quran Recitation Section */}
-            <TrackerSection
-              title="Quran Recitation"
-              icon="📖"
-              type="quran"
-              onAdd={(name, count, extraInfo) => addEntry("quran", name, count, extraInfo)}
-            />
-
-            {/* Nafl Salah Section */}
-            <TrackerSection
-              title="Nafl Salah"
-              icon="🤲"
-              type="salah"
-              onAdd={(name, count) => addEntry("salah", name, count)}
-            />
-
-            {/* Daily Reflections */}
-            <DailyReflections
-              reflections={reflections}
-              onAdd={handleAddReflection}
-              onEdit={handleEditReflection}
-              onDelete={handleDeleteReflection}
-            />
-
-            {/* Reset Controls */}
-            <div className="tracker-card">
-              <div className="flex justify-center">
-                <Button onClick={handleResetAll} variant="destructive" className="touch-target">
-                  🔄 Reset All Data
+      {/* Scrollable Main Content */}
+      <main className="flex-1 min-h-0 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+          {/* Date Selector */}
+          <div className="flex justify-center mb-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full sm:w-auto justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
                 </Button>
-              </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  initialFocus
+                  disabled={(date) => date > new Date()}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Daily Summary */}
+          <DailySummary 
+            entries={entries} 
+            onEdit={handleEditEntry}
+            onDelete={handleDeleteEntry}
+          />
+
+          {/* Dhikr & Tasbih Section */}
+          <TrackerSection
+            title="Dhikr & Tasbih"
+            icon="📿"
+            type="dhikr"
+            onAdd={(name, count) => addEntry("dhikr", name, count)}
+          />
+
+          {/* Quran Recitation Section */}
+          <TrackerSection
+            title="Quran Recitation"
+            icon="📖"
+            type="quran"
+            onAdd={(name, count, extraInfo) => addEntry("quran", name, count, extraInfo)}
+          />
+
+          {/* Nafl Salah Section */}
+          <TrackerSection
+            title="Nafl Salah"
+            icon="🤲"
+            type="salah"
+            onAdd={(name, count) => addEntry("salah", name, count)}
+          />
+
+          {/* Daily Reflections */}
+          <DailyReflections
+            reflections={reflections}
+            onAdd={handleAddReflection}
+            onEdit={handleEditReflection}
+            onDelete={handleDeleteReflection}
+          />
+
+          {/* Reset Controls */}
+          <div className="tracker-card">
+            <div className="flex justify-center">
+              <Button onClick={handleResetAll} variant="destructive" className="touch-target">
+                🔄 Reset All Data
+              </Button>
             </div>
-          </main>
-        </PullToRefresh>
-      </div>
+          </div>
+        </div>
+      </main>
 
       {/* Footer */}
       <footer className="text-center py-6 text-muted-foreground safe-bottom">
