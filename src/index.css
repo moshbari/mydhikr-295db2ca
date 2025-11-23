@@ -176,15 +176,8 @@ All colors in HSL format following Islamic green theme
   min-width: 44px;
 }
 
-/* Smooth scrolling for mobile */
-* {
-  -webkit-overflow-scrolling: touch;
-}
+/* Note: mobile scrolling now uses default browser behavior for reliability */
 
-/* Prevent pull-to-refresh on Chrome mobile except for our custom implementation */
-body {
-  overscroll-behavior-y: contain;
-}
 
 @layer components {
   /* Islamic app specific components */
