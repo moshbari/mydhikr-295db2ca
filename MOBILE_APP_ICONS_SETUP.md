@@ -41,6 +41,104 @@ android/app/src/main/res/
 - `ic_launcher.png` - Standard square icon with rounded corners
 - `ic_launcher_round.png` - Circular icon (for devices that support circular icons)
 
+### Android Adaptive Icons (API 26+)
+
+Adaptive icons provide better Material Design integration with foreground and background layers.
+
+**Location:** `android/app/src/main/res/`
+
+**Step 1:** Create vector drawable files for foreground and background:
+
+Create `android/app/src/main/res/drawable/ic_launcher_foreground.xml`:
+```xml
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Foreground icon content (centered in 72dp safe zone) -->
+    <group
+        android:translateX="18"
+        android:translateY="18"
+        android:scaleX="0.67"
+        android:scaleY="0.67">
+        <!-- Your icon design here -->
+        <!-- Example: Prayer beads icon -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M36,10c-8.3,0-15,6.7-15,15c0,5.5,3,10.3,7.4,12.9L21,50.5L28.5,58L41.1,45.4c3.3-3.3,3.3-8.7,0-12L36,28.5c2.8-1.2,4.8-4,4.8-7.2C40.8,16.7,38.8,10,36,10z"/>
+    </group>
+</vector>
+```
+
+Create `android/app/src/main/res/drawable/ic_launcher_background.xml`:
+```xml
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background solid color or gradient -->
+    <path
+        android:fillColor="#2E7D32"
+        android:pathData="M0,0h108v108h-108z"/>
+    <!-- Optional: Add gradient or pattern -->
+</vector>
+```
+
+**Step 2:** Create the adaptive icon XML:
+
+Create `android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background"/>
+    <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+</adaptive-icon>
+```
+
+Create `android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml`:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background"/>
+    <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+</adaptive-icon>
+```
+
+**Alternative:** Use PNG images instead of vector drawables:
+
+If you prefer PNG images, create these folders and add images:
+```
+android/app/src/main/res/
+├── drawable/
+│   ├── ic_launcher_foreground.png (432x432px)
+│   └── ic_launcher_background.png (432x432px)
+├── drawable-mdpi/
+│   ├── ic_launcher_foreground.png (108x108px)
+│   └── ic_launcher_background.png (108x108px)
+├── drawable-hdpi/
+│   ├── ic_launcher_foreground.png (162x162px)
+│   └── ic_launcher_background.png (162x162px)
+├── drawable-xhdpi/
+│   ├── ic_launcher_foreground.png (216x216px)
+│   └── ic_launcher_background.png (216x216px)
+├── drawable-xxhdpi/
+│   ├── ic_launcher_foreground.png (324x324px)
+│   └── ic_launcher_background.png (324x324px)
+└── drawable-xxxhdpi/
+    ├── ic_launcher_foreground.png (432x432px)
+    └── ic_launcher_background.png (432x432px)
+```
+
+**Important Design Guidelines:**
+- Total canvas: 108x108dp
+- Safe zone (visible area): 66x66dp centered
+- Foreground should fit within 72x72dp centered zone
+- Background fills entire 108x108dp canvas
+- Use transparency in foreground for icon shape
+- Background can be solid color, gradient, or pattern
+
 ### iOS Icons
 
 iOS requires a single high-resolution icon that it will automatically resize.
