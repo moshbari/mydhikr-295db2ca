@@ -118,6 +118,29 @@ All colors in HSL format following Islamic green theme
 
   body {
     @apply bg-background text-foreground font-sans;
+    font-size: 17px; /* Mobile-first base size */
+  }
+
+  /* Mobile-optimized headings */
+  h1 {
+    @apply text-2xl sm:text-3xl font-bold;
+  }
+
+  h2 {
+    @apply text-xl sm:text-2xl font-semibold;
+  }
+
+  h3 {
+    @apply text-lg sm:text-xl font-semibold;
+  }
+
+  h4 {
+    @apply text-base sm:text-lg font-medium;
+  }
+
+  /* Mobile-friendly paragraph spacing */
+  p {
+    @apply text-base leading-relaxed;
   }
 }
 
