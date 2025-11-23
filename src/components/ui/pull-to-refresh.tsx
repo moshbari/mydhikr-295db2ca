@@ -78,7 +78,7 @@ export function PullToRefresh({
   return (
     <div
       ref={containerRef}
-      className={cn("relative h-full overflow-y-auto", className)}
+      className={cn("relative min-h-0 overflow-y-auto", className)}
     >
       {/* Pull indicator */}
       <motion.div
