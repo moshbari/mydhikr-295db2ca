@@ -145,21 +145,21 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
           <div key={surahName} className="space-y-2">
             {/* Main Surah Header */}
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50">
-              <div className="flex items-center gap-3 flex-1">
-                <span className="text-lg">📖</span>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{surahName}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge className="bg-accent text-accent-foreground">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <span className="text-lg shrink-0">📖</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground text-sm sm:text-base truncate">{surahName}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <Badge className="bg-accent text-accent-foreground text-xs whitespace-nowrap">
                       Quran
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {surahEntries.length} session{surahEntries.length > 1 ? 's' : ''}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="text-xl font-bold text-primary">
+              <div className="text-lg sm:text-xl font-bold text-primary shrink-0">
                 {surahEntries.reduce((total, entry) => total + entry.count, 0).toLocaleString()}
               </div>
             </div>
@@ -174,9 +174,9 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
               >
                 <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border border-border/30"
                 >
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-lg">📿</span>
-                  <div className="flex-1">
+                 <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <span className="text-lg shrink-0">📿</span>
+                  <div className="flex-1 min-w-0">
                     {editingId === entry.id ? (
                       // Edit Mode
                       <div className="space-y-2">
@@ -207,7 +207,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                       // View Mode
                       <div>
                         {entry.extraInfo && (
-                          <div className="text-sm text-foreground">
+                          <div className="text-sm text-foreground break-words">
                             {(() => {
                               const [start, end] = entry.extraInfo.split(' → ').map(v => v.trim());
                               return (
@@ -219,7 +219,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                           </div>
                         )}
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-muted-foreground">{entry.timestamp}</span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">{entry.timestamp}</span>
                         </div>
                       </div>
                     )}
@@ -230,7 +230,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   {editingId === entry.id ? (
                     // Edit Mode Actions
                     <div className="flex items-center gap-1">
-                      <span className="text-xl font-bold text-primary mr-2">{editCount.toLocaleString()}</span>
+                      <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{editCount.toLocaleString()}</span>
                       <Button
                         size="sm"
                         variant="outline"
@@ -251,7 +251,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   ) : (
                     // View Mode Actions
                     <div className="flex items-center gap-1">
-                      <span className="text-xl font-bold text-primary mr-2">{entry.count.toLocaleString()}</span>
+                      <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{entry.count.toLocaleString()}</span>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -287,9 +287,9 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
           >
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50"
             >
-            <div className="flex items-center gap-3 flex-1">
-              <span className="text-lg">{getTypeIcon(entry.type)}</span>
-              <div className="flex-1">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <span className="text-lg shrink-0">{getTypeIcon(entry.type)}</span>
+              <div className="flex-1 min-w-0">
                 {editingId === entry.id ? (
                   // Edit Mode
                   <div className="space-y-2">
@@ -321,8 +321,8 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   </div>
                 ) : (
                   // View Mode
-                  <div>
-                    <p className="font-medium text-foreground">
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground text-sm sm:text-base truncate">
                       {entry.name}
                       {entry.type === 'quran' && entry.extraInfo && (
                         <span className="ml-1 text-xs opacity-60">
@@ -330,11 +330,11 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                         </span>
                       )}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge className={getTypeColor(entry.type)}>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <Badge className={`${getTypeColor(entry.type)} text-xs whitespace-nowrap`}>
                         {formatType(entry.type)}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{entry.timestamp}</span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{entry.timestamp}</span>
                     </div>
                   </div>
                 )}
@@ -345,7 +345,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
               {editingId === entry.id ? (
                 // Edit Mode Actions
                 <div className="flex items-center gap-1">
-                  <span className="text-xl font-bold text-primary mr-2">{editCount.toLocaleString()}</span>
+                  <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{editCount.toLocaleString()}</span>
                   <Button
                     size="sm"
                     variant="outline"
@@ -366,7 +366,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
               ) : (
                 // View Mode Actions
                 <div className="flex items-center gap-1">
-                  <span className="text-xl font-bold text-primary mr-2">{entry.count.toLocaleString()}</span>
+                  <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{entry.count.toLocaleString()}</span>
                   <Button
                     size="sm"
                     variant="ghost"
