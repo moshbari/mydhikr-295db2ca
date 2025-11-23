@@ -541,8 +541,8 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content - use natural page scrolling for better mobile support */}
-      <main className="flex-1">
+      {/* Scrollable Main Content */}
+      <main className="flex-1 min-h-0 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
           {/* Date Selector */}
           <div className="flex justify-center mb-4">
