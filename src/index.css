@@ -124,9 +124,7 @@ All colors in HSL format following Islamic green theme
   body {
     @apply bg-background text-foreground font-sans;
     font-size: 17px; /* Mobile-first base size */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain; /* Prevent browser pull-to-refresh while allowing scroll */
+    /* Use default browser scrolling for maximum compatibility on mobile devices */
   }
 
   #root {
