@@ -13,6 +13,16 @@ export default {
       },
     },
     extend: {
+      fontSize: {
+        xs: ['0.8125rem', { lineHeight: '1.25rem' }], // 13px
+        sm: ['0.9375rem', { lineHeight: '1.375rem' }], // 15px
+        base: ['1.0625rem', { lineHeight: '1.625rem' }], // 17px
+        lg: ['1.1875rem', { lineHeight: '1.75rem' }], // 19px
+        xl: ['1.375rem', { lineHeight: '1.875rem' }], // 22px
+        '2xl': ['1.625rem', { lineHeight: '2rem' }], // 26px
+        '3xl': ['2rem', { lineHeight: '2.25rem' }], // 32px
+        '4xl': ['2.5rem', { lineHeight: '2.75rem' }], // 40px
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
