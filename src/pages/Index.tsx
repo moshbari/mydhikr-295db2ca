@@ -483,7 +483,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="header-gradient text-white py-4 px-3 sm:py-6 sm:px-4 safe-top">
         <div className="max-w-4xl mx-auto">
@@ -542,8 +542,8 @@ const Index = () => {
       </header>
 
       {/* Scrollable Main Content */}
-      <main className="flex-1">
-        <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 safe-bottom">
+        <div className="space-y-4 sm:space-y-6">
           {/* Date Selector */}
           <div className="flex justify-center mb-4">
             <Popover>
@@ -619,12 +619,12 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="text-center py-6 text-muted-foreground safe-bottom">
-        <p className="text-sm">May Allah accept your worship and grant you success</p>
-      </footer>
+        {/* Footer */}
+        <footer className="text-center py-6 text-muted-foreground">
+          <p className="text-sm">May Allah accept your worship and grant you success</p>
+        </footer>
+      </main>
     </div>
   );
 };
