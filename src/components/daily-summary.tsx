@@ -6,6 +6,8 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { SwipeableItem } from "@/components/ui/swipeable-item";
 import { Edit3, Trash2, Save, X } from "lucide-react";
 import { haptics } from "@/lib/haptics";
+import { sounds } from "@/lib/sounds";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface DailyEntry {
   id: string | number;
@@ -31,6 +33,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
 
   const handleEditStart = async (entry: DailyEntry) => {
     await haptics.light();
+    sounds.tap();
     setEditingId(entry.id);
     setEditCount(entry.count);
     setEditName(entry.name);
@@ -39,6 +42,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   const handleEditSave = async () => {
     if (editingId && onEdit) {
       await haptics.success();
+      sounds.success();
       onEdit(editingId, editCount, editName);
       setEditingId(null);
     }
@@ -46,6 +50,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
 
   const handleEditCancel = async () => {
     await haptics.light();
+    sounds.tap();
     setEditingId(null);
     setEditCount(0);
     setEditName("");
@@ -53,6 +58,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
 
   const handleDeleteStart = async (entry: DailyEntry) => {
     await haptics.medium();
+    sounds.tap();
     setEntryToDelete(entry);
     setDeleteDialogOpen(true);
   };
@@ -60,6 +66,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   const handleDeleteConfirm = async () => {
     if (entryToDelete && onDelete) {
       await haptics.heavy();
+      sounds.delete();
       onDelete(entryToDelete.id);
       setDeleteDialogOpen(false);
       setEntryToDelete(null);
@@ -139,10 +146,18 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   return (
     <div className="tracker-card">
       <h3 className="text-lg font-semibold mb-4 text-foreground">📊 Daily Summary</h3>
-      <div className="space-y-3">
-        {/* Render grouped Quran entries */}
-        {Object.entries(quranGroups).map(([surahName, surahEntries]) => (
-          <div key={surahName} className="space-y-2">
+      <AnimatePresence mode="popLayout">
+        <div className="space-y-3">
+          {/* Render grouped Quran entries */}
+          {Object.entries(quranGroups).map(([surahName, surahEntries]) => (
+            <motion.div 
+              key={surahName}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="space-y-2"
+            >
             {/* Main Surah Header */}
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -166,12 +181,22 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
 
             {/* Sub-entries for each verse range */}
             {surahEntries.map((entry) => (
-              <SwipeableItem
+              <motion.div
                 key={entry.id}
-                onEdit={() => handleEditStart(entry)}
-                onDelete={() => handleDeleteStart(entry)}
-                className="ml-8"
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: editingId === entry.id ? 1.02 : 1,
+                  y: 0
+                }}
+                exit={{ opacity: 0, x: -100, height: 0, transition: { duration: 0.25 } }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               >
+                <SwipeableItem
+                  onEdit={() => handleEditStart(entry)}
+                  onDelete={() => handleDeleteStart(entry)}
+                  className="ml-8"
+                >
                 <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border border-border/30"
                 >
                  <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -272,19 +297,30 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                     </div>
                   )}
                 </div>
-              </div>
-              </SwipeableItem>
+                </div>
+                </SwipeableItem>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ))}
 
         {/* Render other entries (Dhikr, Salah) normally */}
         {otherEntries.map((entry) => (
-          <SwipeableItem
+          <motion.div
             key={entry.id}
-            onEdit={() => handleEditStart(entry)}
-            onDelete={() => handleDeleteStart(entry)}
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ 
+              opacity: 1, 
+              scale: editingId === entry.id ? 1.02 : 1,
+              y: 0
+            }}
+            exit={{ opacity: 0, x: -100, height: 0, transition: { duration: 0.25 } }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
+            <SwipeableItem
+              onEdit={() => handleEditStart(entry)}
+              onDelete={() => handleDeleteStart(entry)}
+            >
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50"
             >
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -389,8 +425,10 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
             </div>
           </div>
           </SwipeableItem>
+          </motion.div>
         ))}
-      </div>
+        </div>
+      </AnimatePresence>
 
       {/* Delete Confirmation Bottom Sheet */}
       <BottomSheet

@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, AlertCircle } from "lucide-react";
 import { useIslamicOptions } from "@/hooks/use-islamic-options";
 import { haptics } from "@/lib/haptics";
+import { sounds } from "@/lib/sounds";
 
 interface TrackerSectionProps {
   title: string;
@@ -98,11 +99,13 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       // Check for verse validation errors
       if (verseError) {
         await haptics.error();
+        sounds.error();
         return; // Don't add if there are validation errors
       }
       
       if (name && !isNaN(start) && !isNaN(end) && difference > 0) {
         await haptics.success();
+        sounds.add();
         const rangeInfo = `${start} → ${end}`;
         onAdd(name, difference, rangeInfo);
         setSelectedOption("");
@@ -118,6 +121,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
       
       if (name && count > 0) {
         await haptics.success();
+        sounds.add();
         onAdd(name, count);
         setSelectedOption("");
         setCustomName("");
