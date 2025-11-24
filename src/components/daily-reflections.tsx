@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Edit3, Trash2, Save, X, Plus } from "lucide-react";
 import { format } from "date-fns";
+import { sounds } from "@/lib/sounds";
+import { haptics } from "@/lib/haptics";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface DailyReflection {
   id: string;
@@ -26,38 +29,50 @@ export function DailyReflections({ reflections, onAdd, onEdit, onDelete }: Daily
   const [isAdding, setIsAdding] = useState(false);
   const [newNoteText, setNewNoteText] = useState("");
 
-  const handleEditStart = (reflection: DailyReflection) => {
+  const handleEditStart = async (reflection: DailyReflection) => {
+    await haptics.light();
+    sounds.tap();
     setEditingId(reflection.id);
     setEditText(reflection.note_text);
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (editingId && onEdit && editText.trim()) {
+      await haptics.success();
+      sounds.success();
       onEdit(editingId, editText);
       setEditingId(null);
       setEditText("");
     }
   };
 
-  const handleEditCancel = () => {
+  const handleEditCancel = async () => {
+    await haptics.light();
+    sounds.tap();
     setEditingId(null);
     setEditText("");
   };
 
-  const handleAddStart = () => {
+  const handleAddStart = async () => {
+    await haptics.light();
+    sounds.tap();
     setIsAdding(true);
     setNewNoteText("");
   };
 
-  const handleAddSave = () => {
+  const handleAddSave = async () => {
     if (newNoteText.trim()) {
+      await haptics.success();
+      sounds.add();
       onAdd(newNoteText);
       setIsAdding(false);
       setNewNoteText("");
     }
   };
 
-  const handleAddCancel = () => {
+  const handleAddCancel = async () => {
+    await haptics.light();
+    sounds.tap();
     setIsAdding(false);
     setNewNoteText("");
   };
@@ -78,10 +93,17 @@ export function DailyReflections({ reflections, onAdd, onEdit, onDelete }: Daily
         )}
       </div>
 
-      <div className="space-y-3">
-        {/* Add New Note Form */}
-        {isAdding && (
-          <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+      <AnimatePresence mode="popLayout">
+        <div className="space-y-3">
+          {/* Add New Note Form */}
+          {isAdding && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="p-4 bg-muted/30 rounded-lg border border-border/50"
+            >
             <Textarea
               id="new-note"
               name="newNote"
@@ -111,7 +133,7 @@ export function DailyReflections({ reflections, onAdd, onEdit, onDelete }: Daily
                 Save
               </Button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Existing Reflections */}
@@ -124,8 +146,16 @@ export function DailyReflections({ reflections, onAdd, onEdit, onDelete }: Daily
         )}
 
         {reflections.map((reflection) => (
-          <div
+          <motion.div
             key={reflection.id}
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ 
+              opacity: 1, 
+              scale: editingId === reflection.id ? 1.02 : 1,
+              y: 0
+            }}
+            exit={{ opacity: 0, x: -100, height: 0, transition: { duration: 0.25 } }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="p-4 bg-muted/30 rounded-lg border border-border/50"
           >
             {editingId === reflection.id ? (
@@ -217,9 +247,10 @@ export function DailyReflections({ reflections, onAdd, onEdit, onDelete }: Daily
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
-      </div>
+        </div>
+      </AnimatePresence>
     </div>
   );
 }

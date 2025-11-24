@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { haptics } from "@/lib/haptics";
+import { sounds } from "@/lib/sounds";
 
 interface NumberPadProps {
   value: string;
@@ -10,6 +11,7 @@ interface NumberPadProps {
 export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
   const handleNumberClick = async (num: string) => {
     await haptics.light();
+    sounds.tap();
     if (value === "") {
       // If empty, set to the clicked number
       onChange(num);
@@ -21,11 +23,13 @@ export function NumberPad({ value, onChange, onAdd }: NumberPadProps) {
 
   const handleClear = async () => {
     await haptics.medium();
+    sounds.tap();
     onChange("");
   };
 
   const handleAdd = async () => {
     await haptics.success();
+    sounds.add();
     onAdd();
   };
 
