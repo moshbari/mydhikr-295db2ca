@@ -14,6 +14,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { haptics } from "@/lib/haptics";
+import { sounds } from "@/lib/sounds";
 
 import { BarChart3, Shield, CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -228,7 +229,9 @@ const Index = () => {
         };
 
         setEntries(prev => [newEntry, ...prev]);
-
+        
+        sounds.add();
+        await haptics.success();
         toast({
           title: "Entry added",
           description: `${name}: ${count} recorded`,
@@ -268,6 +271,8 @@ const Index = () => {
         )
       );
 
+      sounds.success();
+      await haptics.success();
       toast({
         title: "Entry updated",
         description: `Updated to ${newName}: ${newCount}`,
@@ -297,6 +302,8 @@ const Index = () => {
       // Update local state
       setEntries(prev => prev.filter(entry => entry.id !== id));
 
+      sounds.delete();
+      await haptics.success();
       toast({
         title: "Entry deleted",
         description: "The entry has been removed.",
@@ -485,56 +492,57 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background p-4 safe-top safe-bottom">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <header className="header-gradient text-white py-4 px-3 sm:py-6 sm:px-4 rounded-xl shadow-md">
-          <div className="flex justify-between items-center">
-            <div className="text-center flex-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">🕌 My Dhikr</h1>
-              <div className="text-white/90 text-xs sm:text-sm">
-                <p className="font-medium">{todayFormatted}</p>
-                <p className="text-white/80 mt-1" style={{ fontFamily: 'Arial, sans-serif' }}>{hijriFormatted}</p>
+        {/* Header Card */}
+        <header className="header-gradient text-white py-5 px-4 sm:py-7 sm:px-6 rounded-2xl shadow-lg">
+          <div className="flex flex-col gap-4">
+            {/* Title and Date Section */}
+            <div className="text-center">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 drop-shadow-md">🕌 My Dhikr</h1>
+              <div className="space-y-2">
+                <p className="text-base sm:text-lg font-semibold text-white/95">{todayFormatted}</p>
+                <p className="text-sm sm:text-base text-white/85" style={{ fontFamily: 'Arial, sans-serif' }}>{hijriFormatted}</p>
               </div>
             </div>
-            <div className="flex gap-1 sm:gap-2 flex-wrap">
+            
+            {/* Action Buttons */}
+            <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
               {isAdmin() && (
                 <Button 
                   onClick={async () => {
                     await haptics.medium();
+                    sounds.navigate();
                     navigate('/admin');
                   }} 
-                  variant="header"
-                  size="mobile"
-                  className="touch-target"
+                  variant="ghost"
+                  className="header-button flex-1 sm:flex-none"
                 >
-                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                  <Shield className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Admin</span>
                 </Button>
               )}
               <Button
                 onClick={async () => {
                   await haptics.medium();
+                  sounds.navigate();
                   navigate('/history');
                 }} 
-                variant="header"
-                size="mobile"
-                className="touch-target"
+                variant="ghost"
+                className="header-button flex-1 sm:flex-none"
               >
-                <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <BarChart3 className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">History</span>
               </Button>
-              <div className="flex">
-                <ChangePasswordDialog />
-              </div>
+              <ChangePasswordDialog />
               <Button 
                 onClick={async () => {
                   await haptics.medium();
+                  sounds.tap();
                   signOut();
                 }} 
-                variant="header"
-                size="mobile"
-                className="touch-target"
+                variant="ghost"
+                className="header-button flex-1 sm:flex-none"
               >
-                <span className="text-xs sm:text-sm">Sign Out</span>
+                Sign Out
               </Button>
             </div>
           </div>
