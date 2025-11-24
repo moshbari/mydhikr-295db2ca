@@ -483,10 +483,10 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="header-gradient text-white py-4 px-3 sm:py-6 sm:px-4 safe-top">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background p-4 safe-top safe-bottom">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <header className="header-gradient text-white py-4 px-3 sm:py-6 sm:px-4 rounded-xl shadow-md">
           <div className="flex justify-between items-center">
             <div className="text-center flex-1">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">🕌 My Dhikr</h1>
@@ -538,93 +538,93 @@ const Index = () => {
               </Button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Scrollable Main Content */}
-      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 safe-bottom">
-        <div className="space-y-4 sm:space-y-6">
-          {/* Date Selector */}
-          <div className="flex justify-center mb-4">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full sm:w-auto justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+        {/* Scrollable Main Content */}
+        <main className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Date Selector */}
+            <div className="flex justify-center mb-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full sm:w-auto justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                    disabled={(date) => date > new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Daily Summary */}
+            <DailySummary 
+              entries={entries} 
+              onEdit={handleEditEntry}
+              onDelete={handleDeleteEntry}
+            />
+
+            {/* Dhikr & Tasbih Section */}
+            <TrackerSection
+              title="Dhikr & Tasbih"
+              icon="📿"
+              type="dhikr"
+              onAdd={(name, count) => addEntry("dhikr", name, count)}
+            />
+
+            {/* Quran Recitation Section */}
+            <TrackerSection
+              title="Quran Recitation"
+              icon="📖"
+              type="quran"
+              onAdd={(name, count, extraInfo) => addEntry("quran", name, count, extraInfo)}
+            />
+
+            {/* Nafl Salah Section */}
+            <TrackerSection
+              title="Nafl Salah"
+              icon="🤲"
+              type="salah"
+              onAdd={(name, count) => addEntry("salah", name, count)}
+            />
+
+            {/* Daily Reflections */}
+            <DailyReflections
+              reflections={reflections}
+              onAdd={handleAddReflection}
+              onEdit={handleEditReflection}
+              onDelete={handleDeleteReflection}
+            />
+
+            {/* Reset Controls */}
+            <div className="tracker-card">
+              <div className="flex justify-center">
+                <Button onClick={handleResetAll} variant="destructive" className="touch-target">
+                  🔄 Reset All Data
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
-                  initialFocus
-                  disabled={(date) => date > new Date()}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Daily Summary */}
-          <DailySummary 
-            entries={entries} 
-            onEdit={handleEditEntry}
-            onDelete={handleDeleteEntry}
-          />
-
-          {/* Dhikr & Tasbih Section */}
-          <TrackerSection
-            title="Dhikr & Tasbih"
-            icon="📿"
-            type="dhikr"
-            onAdd={(name, count) => addEntry("dhikr", name, count)}
-          />
-
-          {/* Quran Recitation Section */}
-          <TrackerSection
-            title="Quran Recitation"
-            icon="📖"
-            type="quran"
-            onAdd={(name, count, extraInfo) => addEntry("quran", name, count, extraInfo)}
-          />
-
-          {/* Nafl Salah Section */}
-          <TrackerSection
-            title="Nafl Salah"
-            icon="🤲"
-            type="salah"
-            onAdd={(name, count) => addEntry("salah", name, count)}
-          />
-
-          {/* Daily Reflections */}
-          <DailyReflections
-            reflections={reflections}
-            onAdd={handleAddReflection}
-            onEdit={handleEditReflection}
-            onDelete={handleDeleteReflection}
-          />
-
-          {/* Reset Controls */}
-          <div className="tracker-card">
-            <div className="flex justify-center">
-              <Button onClick={handleResetAll} variant="destructive" className="touch-target">
-                🔄 Reset All Data
-              </Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <footer className="text-center py-6 text-muted-foreground">
-          <p className="text-sm">May Allah accept your worship and grant you success</p>
-        </footer>
-      </main>
+          {/* Footer */}
+          <footer className="text-center py-6 text-muted-foreground">
+            <p className="text-sm">May Allah accept your worship and grant you success</p>
+          </footer>
+        </main>
+      </div>
     </div>
   );
 };
