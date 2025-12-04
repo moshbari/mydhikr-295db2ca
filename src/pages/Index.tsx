@@ -629,6 +629,20 @@ const Index = () => {
                   </div>
                   <span className="text-sm opacity-80">Track Progress →</span>
                 </button>
+                <button
+                  onClick={async () => {
+                    await haptics.medium();
+                    sounds.navigate();
+                    navigate('/sura-waqiah-last-read');
+                  }}
+                  className="w-full p-4 bg-gradient-to-r from-[#dc3545] to-[#c82333] text-white rounded-lg flex items-center justify-between hover:opacity-90 transition-opacity touch-target"
+                >
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5" />
+                    <span className="font-medium">Surah Al-Waqiah</span>
+                  </div>
+                  <span className="text-sm opacity-80">Track Progress →</span>
+                </button>
               </div>
             </div>
 

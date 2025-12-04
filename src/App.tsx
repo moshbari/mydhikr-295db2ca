@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import History from "./pages/History";
 import Admin from "./pages/Admin";
 import SurahYasin from "./pages/SurahYasin";
+import SurahWaqiah from "./pages/SurahWaqiah";
 import AuthPage from "./components/auth/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
           <Route path="/sura-yasin-last-read" element={<ProtectedRoute><SurahYasin /></ProtectedRoute>} />
+          <Route path="/sura-waqiah-last-read" element={<ProtectedRoute><SurahWaqiah /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
