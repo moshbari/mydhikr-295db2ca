@@ -101,17 +101,22 @@ const SurahYasin = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState<Record<number, boolean>>({});
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
+  const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
 
   // Load progress from localStorage on mount
   useEffect(() => {
     const savedProgress = localStorage.getItem("yasinProgress");
     const savedLastChecked = localStorage.getItem("lastCheckedAyah");
+    const savedLastTime = localStorage.getItem("yasinLastSaveTime");
     
     if (savedProgress) {
       setProgress(JSON.parse(savedProgress));
     }
     if (savedLastChecked) {
       setLastCheckedAyah(parseInt(savedLastChecked));
+    }
+    if (savedLastTime) {
+      setLastSaveTime(savedLastTime);
     }
   }, []);
 
@@ -120,6 +125,12 @@ const SurahYasin = () => {
     localStorage.setItem("yasinProgress", JSON.stringify(progress));
     if (lastCheckedAyah !== null) {
       localStorage.setItem("lastCheckedAyah", lastCheckedAyah.toString());
+      const now = new Date().toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
+      setLastSaveTime(now);
+      localStorage.setItem("yasinLastSaveTime", now);
     }
   }, [progress, lastCheckedAyah]);
 
@@ -161,8 +172,10 @@ const SurahYasin = () => {
       sounds.delete();
       setProgress({});
       setLastCheckedAyah(null);
+      setLastSaveTime(null);
       localStorage.removeItem("yasinProgress");
       localStorage.removeItem("lastCheckedAyah");
+      localStorage.removeItem("yasinLastSaveTime");
     }
   };
 
@@ -214,6 +227,11 @@ const SurahYasin = () => {
               {completedCount} / {TOTAL_AYAHS} ({progressPercent}%)
             </span>
           </div>
+          {lastSaveTime && (
+            <p className="text-center text-xs text-gray-500 mt-2">
+              Last saved: {lastSaveTime}
+            </p>
+          )}
         </div>
 
         {/* Reset Button */}
