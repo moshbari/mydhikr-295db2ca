@@ -8,6 +8,7 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import Index from "./pages/Index";
 import History from "./pages/History";
 import Admin from "./pages/Admin";
+import SurahYasin from "./pages/SurahYasin";
 import AuthPage from "./components/auth/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="/sura-yasin-last-read" element={<ProtectedRoute><SurahYasin /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
