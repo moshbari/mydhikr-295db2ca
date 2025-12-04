@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 
-import { BarChart3, Shield, CalendarIcon } from "lucide-react";
+import { BarChart3, Shield, CalendarIcon, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
 import { createAdminAccounts } from "@/lib/admin-setup";
@@ -608,6 +608,29 @@ const Index = () => {
               type="salah"
               onAdd={(name, count) => addEntry("salah", name, count)}
             />
+
+            {/* Last Read Section */}
+            <div className="tracker-card">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center gap-2">
+                📚 Last Read
+              </h2>
+              <div className="space-y-2">
+                <button
+                  onClick={async () => {
+                    await haptics.medium();
+                    sounds.navigate();
+                    navigate('/sura-yasin-last-read');
+                  }}
+                  className="w-full p-4 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-lg flex items-center justify-between hover:opacity-90 transition-opacity touch-target"
+                >
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5" />
+                    <span className="font-medium">Surah Yasin</span>
+                  </div>
+                  <span className="text-sm opacity-80">Track Progress →</span>
+                </button>
+              </div>
+            </div>
 
             {/* Daily Reflections */}
             <DailyReflections
