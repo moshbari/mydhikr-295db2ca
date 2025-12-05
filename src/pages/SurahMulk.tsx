@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { haptics } from "@/lib/haptics";
+import { cn } from "@/lib/utils";
+import { useSurahFontSize } from "@/hooks/use-surah-font-size";
+import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
 
 const AYAH_DATA = [
   { number: 1, text: "تَبَٰرَكَ ٱلَّذِي بِيَدِهِ ٱلۡمُلۡكُ وَهُوَ عَلَىٰ كُلِّ شَيۡءٖ قَدِيرٌ" },
@@ -46,6 +49,7 @@ const SurahMulk = () => {
   const [progress, setProgress] = useState<Record<number, boolean>>({});
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
+  const { fontSize, fontSizeClass, handleFontSizeChange } = useSurahFontSize();
 
   useEffect(() => {
     const savedProgress = localStorage.getItem("mulkProgress");
@@ -140,7 +144,14 @@ const SurahMulk = () => {
         </div>
       </header>
 
-      <div className="bg-gray-100 px-4 py-3 sm:px-6 sm:py-4">
+      {/* Font Size Selector */}
+      <FontSizeSelector 
+        fontSize={fontSize} 
+        onFontSizeChange={handleFontSizeChange}
+        accentColor="#1a237e"
+      />
+
+      <div className="bg-gray-100 px-4 py-2 sm:px-6 sm:py-3 border-t border-gray-200">
         <div className="max-w-2xl mx-auto">
           <div className="relative">
             <Progress value={progressPercent} className="h-6 sm:h-8" />
@@ -204,7 +215,7 @@ const SurahMulk = () => {
                 {ayah.number}
               </span>
               <p 
-                className="text-base sm:text-lg leading-loose flex-1"
+                className={cn("leading-loose flex-1", fontSizeClass)}
                 style={{ fontFamily: "'Scheherazade New', serif", lineHeight: "2.2" }}
               >
                 {getAyahText(ayah.number)}

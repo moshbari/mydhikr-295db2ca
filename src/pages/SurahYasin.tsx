@@ -7,6 +7,8 @@ import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
+import { useSurahFontSize } from "@/hooks/use-surah-font-size";
+import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
 
 // Ayah data for Surah Yasin
 const AYAH_DATA = [
@@ -102,6 +104,7 @@ const SurahYasin = () => {
   const [progress, setProgress] = useState<Record<number, boolean>>({});
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
+  const { fontSize, fontSizeClass, handleFontSizeChange } = useSurahFontSize();
 
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -213,8 +216,15 @@ const SurahYasin = () => {
           <p className="text-white/80 text-sm md:text-base">Surah Yasin - 83 Ayahs</p>
         </div>
 
+        {/* Font Size Selector */}
+        <FontSizeSelector 
+          fontSize={fontSize} 
+          onFontSizeChange={handleFontSizeChange}
+          accentColor="#1e3c72"
+        />
+
         {/* Progress Bar Section */}
-        <div className="bg-[#f8f9fa] px-4 py-3 md:px-6 md:py-4">
+        <div className="bg-[#f8f9fa] px-4 py-2 md:px-6 md:py-3 border-t border-gray-200">
           <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
             <div 
               className="h-full rounded-full transition-all duration-300"
@@ -297,7 +307,7 @@ const SurahYasin = () => {
                     {ayah.number}
                   </span>
                   <p 
-                    className="flex-1 text-lg md:text-xl leading-loose"
+                    className={cn("flex-1 leading-loose", fontSizeClass)}
                     style={{ fontFamily: "'Scheherazade New', serif", lineHeight: 2.2 }}
                   >
                     {ayah.first} ... {ayah.last}
