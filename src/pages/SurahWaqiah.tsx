@@ -2,10 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
+
+const FONT_SIZES = [
+  { label: "S", value: "text-base", size: 16 },
+  { label: "M", value: "text-lg", size: 18 },
+  { label: "L", value: "text-xl", size: 20 },
+  { label: "XL", value: "text-2xl", size: 24 },
+];
 
 // Ayah data for Surah Waqiah (96 Ayahs)
 const AYAH_DATA = [
@@ -114,12 +121,14 @@ const SurahWaqiah = () => {
   const [progress, setProgress] = useState<Record<number, boolean>>({});
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
+  const [fontSize, setFontSize] = useState(1); // Index into FONT_SIZES
 
   // Load progress from localStorage on mount
   useEffect(() => {
     const savedProgress = localStorage.getItem("waqiahProgress");
     const savedLastChecked = localStorage.getItem("waqiahLastCheckedAyah");
     const savedLastTime = localStorage.getItem("waqiahLastSaveTime");
+    const savedFontSize = localStorage.getItem("waqiahFontSize");
     
     if (savedProgress) {
       setProgress(JSON.parse(savedProgress));
@@ -130,7 +139,16 @@ const SurahWaqiah = () => {
     if (savedLastTime) {
       setLastSaveTime(savedLastTime);
     }
+    if (savedFontSize) {
+      setFontSize(parseInt(savedFontSize));
+    }
   }, []);
+
+  const handleFontSizeChange = (index: number) => {
+    setFontSize(index);
+    localStorage.setItem("waqiahFontSize", index.toString());
+    haptics.light();
+  };
 
   // Save progress to localStorage whenever it changes
   useEffect(() => {
@@ -225,8 +243,30 @@ const SurahWaqiah = () => {
           <p className="text-white/80 text-sm md:text-base">Surah Al-Waqiah - 96 Ayahs</p>
         </div>
 
+        {/* Font Size Selector */}
+        <div className="bg-[#f8f9fa] px-4 py-3 md:px-6 md:py-4 flex items-center justify-center gap-2">
+          <Type className="w-4 h-4 text-gray-500" />
+          <span className="text-sm text-gray-600 mr-2">Font:</span>
+          <div className="flex gap-1">
+            {FONT_SIZES.map((size, index) => (
+              <button
+                key={size.label}
+                onClick={() => handleFontSizeChange(index)}
+                className={cn(
+                  "w-8 h-8 rounded-md text-sm font-medium transition-all",
+                  fontSize === index
+                    ? "bg-[#1e3c72] text-white"
+                    : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-100"
+                )}
+              >
+                {size.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Progress Bar Section */}
-        <div className="bg-[#f8f9fa] px-4 py-3 md:px-6 md:py-4">
+        <div className="bg-[#f8f9fa] px-4 py-2 md:px-6 md:py-3 border-t border-gray-200">
           <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
             <div 
               className="h-full rounded-full transition-all duration-300"
@@ -309,7 +349,7 @@ const SurahWaqiah = () => {
                     {ayah.number}
                   </span>
                   <p 
-                    className="flex-1 text-lg md:text-xl leading-loose"
+                    className={cn("flex-1 leading-loose", FONT_SIZES[fontSize].value)}
                     style={{ fontFamily: "'Scheherazade New', serif", lineHeight: 2.2 }}
                   >
                     {ayah.first} ... {ayah.last}
