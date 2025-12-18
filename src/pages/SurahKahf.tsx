@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { haptics } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { useSurahFontSize } from "@/hooks/use-surah-font-size";
 import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
+import { VoiceAyahSearch } from "@/components/surah/VoiceAyahSearch";
 
 const AYAH_DATA = [
   { number: 1, text: "ٱلۡحَمۡدُ لِلَّهِ ٱلَّذِيٓ أَنزَلَ عَلَىٰ عَبۡدِهِ ٱلۡكِتَٰبَ وَلَمۡ يَجۡعَل لَّهُۥ عِوَجَاۜ" },
@@ -130,6 +131,18 @@ const SurahKahf = () => {
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
   const { fontSize, fontSizeClass, handleFontSizeChange } = useSurahFontSize();
+  const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  const scrollToAyah = (ayahNumber: number) => {
+    const ref = ayahRefs.current[ayahNumber];
+    if (ref) {
+      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      ref.classList.add('ring-4', 'ring-yellow-400');
+      setTimeout(() => {
+        ref.classList.remove('ring-4', 'ring-yellow-400');
+      }, 2000);
+    }
+  };
 
   // Load progress from localStorage
   useEffect(() => {
@@ -218,7 +231,12 @@ const SurahKahf = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #2d5016 0%, #4a7c23 100%)" }}>
       {/* Header */}
-      <header className="text-white py-4 px-4 sm:py-6 sm:px-6" style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}>
+      <header className="text-white py-4 px-4 sm:py-6 sm:px-6 relative" style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}>
+        <VoiceAyahSearch 
+          ayahs={AYAH_DATA} 
+          onAyahFound={scrollToAyah}
+          accentColor="#2d5016"
+        />
         <div className="max-w-2xl mx-auto">
           <Button
             variant="ghost"
@@ -305,6 +323,7 @@ const SurahKahf = () => {
           {AYAH_DATA.map((ayah) => (
             <div
               key={ayah.number}
+              ref={(el) => { ayahRefs.current[ayah.number] = el; }}
               className={`p-3 sm:p-4 rounded-lg flex items-center gap-3 transition-all ${
                 progress[ayah.number]
                   ? "bg-green-100 border-r-4 border-green-600"
