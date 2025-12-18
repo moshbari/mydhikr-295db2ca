@@ -213,13 +213,14 @@ export const VoiceAyahSearch = ({
       size="icon"
       onClick={handleClick}
       disabled={isProcessing}
-      className="text-white hover:bg-white/20 absolute top-4 right-4"
+      className="hover:bg-gray-200 text-gray-600"
+      style={{ color: accentColor }}
       title="Voice search for ayah"
     >
       {isProcessing ? (
         <Loader2 className="w-5 h-5 animate-spin" />
       ) : isRecording ? (
-        <MicOff className="w-5 h-5 text-red-400" />
+        <MicOff className="w-5 h-5 text-red-500" />
       ) : (
         <Mic className="w-5 h-5" />
       )}
