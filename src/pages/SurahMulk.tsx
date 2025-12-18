@@ -145,11 +145,6 @@ const SurahMulk = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #1a237e 0%, #3949ab 100%)" }}>
       <header className="text-white py-4 px-4 sm:py-6 sm:px-6 relative" style={{ background: "linear-gradient(135deg, #0d1642 0%, #1a237e 100%)" }}>
-        <VoiceAyahSearch 
-          ayahs={AYAH_DATA} 
-          onAyahFound={handleVoiceAyahFound}
-          accentColor="#1a237e"
-        />
         <div className="max-w-2xl mx-auto">
           <Button
             variant="ghost"
@@ -174,6 +169,13 @@ const SurahMulk = () => {
         fontSize={fontSize} 
         onFontSizeChange={handleFontSizeChange}
         accentColor="#1a237e"
+        rightElement={
+          <VoiceAyahSearch 
+            ayahs={AYAH_DATA} 
+            onAyahFound={handleVoiceAyahFound}
+            accentColor="#1a237e"
+          />
+        }
       />
 
       <div className="bg-gray-100 px-4 py-2 sm:px-6 sm:py-3 border-t border-gray-200">
