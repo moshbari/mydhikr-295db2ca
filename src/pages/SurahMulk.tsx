@@ -64,6 +64,13 @@ const SurahMulk = () => {
     }
   };
 
+  const handleVoiceAyahFound = (ayahNumber: number) => {
+    scrollToAyah(ayahNumber);
+    if (!progress[ayahNumber]) {
+      handleCheckAyah(ayahNumber, true);
+    }
+  };
+
   useEffect(() => {
     const savedProgress = localStorage.getItem("mulkProgress");
     const savedLastAyah = localStorage.getItem("mulkLastCheckedAyah");
@@ -140,7 +147,7 @@ const SurahMulk = () => {
       <header className="text-white py-4 px-4 sm:py-6 sm:px-6 relative" style={{ background: "linear-gradient(135deg, #0d1642 0%, #1a237e 100%)" }}>
         <VoiceAyahSearch 
           ayahs={AYAH_DATA} 
-          onAyahFound={scrollToAyah}
+          onAyahFound={handleVoiceAyahFound}
           accentColor="#1a237e"
         />
         <div className="max-w-2xl mx-auto">

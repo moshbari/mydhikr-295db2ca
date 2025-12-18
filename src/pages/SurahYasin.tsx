@@ -112,11 +112,18 @@ const SurahYasin = () => {
     const ref = ayahRefs.current[ayahNumber];
     if (ref) {
       ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Briefly highlight the ayah
       ref.classList.add('ring-4', 'ring-yellow-400');
       setTimeout(() => {
         ref.classList.remove('ring-4', 'ring-yellow-400');
       }, 2000);
+    }
+  };
+
+  const handleVoiceAyahFound = (ayahNumber: number) => {
+    scrollToAyah(ayahNumber);
+    // Automatically mark as read/last read
+    if (!progress[ayahNumber]) {
+      handleCheckAyah(ayahNumber, true);
     }
   };
 
@@ -223,7 +230,7 @@ const SurahYasin = () => {
         >
           <VoiceAyahSearch 
             ayahs={AYAH_DATA} 
-            onAyahFound={scrollToAyah}
+            onAyahFound={handleVoiceAyahFound}
             accentColor="#1e3c72"
           />
           <h1 
