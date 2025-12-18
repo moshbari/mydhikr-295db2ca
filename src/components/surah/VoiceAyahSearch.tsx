@@ -27,6 +27,7 @@ export const VoiceAyahSearch = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const mimeTypeRef = useRef<string>("audio/webm");
 
   const normalizeArabicText = (text: string): string => {
     // Remove diacritics and normalize Arabic text for better matching
@@ -88,9 +89,19 @@ export const VoiceAyahSearch = ({
         } 
       });
       
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
-      });
+      const preferredTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+      ];
+
+      const chosenMimeType = preferredTypes.find((t) => MediaRecorder.isTypeSupported(t)) ?? '';
+
+      const mediaRecorder = chosenMimeType
+        ? new MediaRecorder(stream, { mimeType: chosenMimeType })
+        : new MediaRecorder(stream);
+
+      mimeTypeRef.current = mediaRecorder.mimeType || chosenMimeType || 'audio/webm';
       
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -106,7 +117,8 @@ export const VoiceAyahSearch = ({
         await processRecording();
       };
 
-      mediaRecorder.start();
+      // A small timeslice improves reliability on some browsers (ensures dataavailable fires)
+      mediaRecorder.start(250);
       setIsRecording(true);
       await haptics.light();
       toast.info("Recording... Tap again to stop");
@@ -133,7 +145,7 @@ export const VoiceAyahSearch = ({
     setIsProcessing(true);
 
     try {
-      const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+      const audioBlob = new Blob(chunksRef.current, { type: mimeTypeRef.current || 'audio/webm' });
       
       // Convert to base64
       const reader = new FileReader();
@@ -150,7 +162,7 @@ export const VoiceAyahSearch = ({
 
       // Call edge function
       const { data, error } = await supabase.functions.invoke('transcribe-ayah', {
-        body: { audio: base64Audio }
+        body: { audio: base64Audio, mimeType: audioBlob.type }
       });
 
       if (error) {

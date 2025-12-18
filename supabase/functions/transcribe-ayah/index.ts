@@ -42,7 +42,7 @@ serve(async (req) => {
   }
 
   try {
-    const { audio } = await req.json();
+    const { audio, mimeType } = await req.json();
     
     if (!audio) {
       throw new Error('No audio data provided');
@@ -60,8 +60,22 @@ serve(async (req) => {
     
     // Prepare form data
     const formData = new FormData();
-    const blob = new Blob([binaryAudio], { type: 'audio/webm' });
-    formData.append('file', blob, 'audio.webm');
+    const safeMimeType = (typeof mimeType === 'string' && mimeType.trim().length > 0)
+      ? mimeType
+      : 'audio/webm';
+
+    const fileName = safeMimeType.includes('mp4')
+      ? 'audio.mp4'
+      : safeMimeType.includes('mpeg')
+        ? 'audio.mp3'
+        : safeMimeType.includes('wav')
+          ? 'audio.wav'
+          : 'audio.webm';
+
+    console.log('Audio mimeType:', safeMimeType, 'bytes:', binaryAudio.byteLength);
+
+    const blob = new Blob([binaryAudio], { type: safeMimeType });
+    formData.append('file', blob, fileName);
     formData.append('model', 'whisper-1');
     formData.append('language', 'ar'); // Arabic language for Quran
 
