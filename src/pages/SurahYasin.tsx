@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,6 +9,7 @@ import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 import { useSurahFontSize } from "@/hooks/use-surah-font-size";
 import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
+import { VoiceAyahSearch } from "@/components/surah/VoiceAyahSearch";
 
 // Ayah data for Surah Yasin
 const AYAH_DATA = [
@@ -105,6 +106,19 @@ const SurahYasin = () => {
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
   const { fontSize, fontSizeClass, handleFontSizeChange } = useSurahFontSize();
+  const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  const scrollToAyah = (ayahNumber: number) => {
+    const ref = ayahRefs.current[ayahNumber];
+    if (ref) {
+      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Briefly highlight the ayah
+      ref.classList.add('ring-4', 'ring-yellow-400');
+      setTimeout(() => {
+        ref.classList.remove('ring-4', 'ring-yellow-400');
+      }, 2000);
+    }
+  };
 
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -204,9 +218,14 @@ const SurahYasin = () => {
       <div className="flex-1 bg-white md:rounded-t-3xl flex flex-col overflow-hidden">
         {/* Header */}
         <div 
-          className="text-center py-5 px-4 md:py-7 md:px-6 md:rounded-t-3xl"
+          className="text-center py-5 px-4 md:py-7 md:px-6 md:rounded-t-3xl relative"
           style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
         >
+          <VoiceAyahSearch 
+            ayahs={AYAH_DATA} 
+            onAyahFound={scrollToAyah}
+            accentColor="#1e3c72"
+          />
           <h1 
             className="text-2xl md:text-3xl font-bold text-white mb-1"
             style={{ fontFamily: "'Scheherazade New', serif" }}
@@ -290,6 +309,7 @@ const SurahYasin = () => {
               return (
                 <div
                   key={ayah.number}
+                  ref={(el) => { ayahRefs.current[ayah.number] = el; }}
                   className={cn(
                     "p-3 md:p-4 rounded-lg transition-all duration-200 flex items-center gap-3",
                     isChecked 
