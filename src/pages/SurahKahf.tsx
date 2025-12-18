@@ -239,11 +239,6 @@ const SurahKahf = () => {
     <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #2d5016 0%, #4a7c23 100%)" }}>
       {/* Header */}
       <header className="text-white py-4 px-4 sm:py-6 sm:px-6 relative" style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}>
-        <VoiceAyahSearch 
-          ayahs={AYAH_DATA} 
-          onAyahFound={handleVoiceAyahFound}
-          accentColor="#2d5016"
-        />
         <div className="max-w-2xl mx-auto">
           <Button
             variant="ghost"
@@ -271,6 +266,13 @@ const SurahKahf = () => {
         fontSize={fontSize} 
         onFontSizeChange={handleFontSizeChange}
         accentColor="#2d5016"
+        rightElement={
+          <VoiceAyahSearch 
+            ayahs={AYAH_DATA} 
+            onAyahFound={handleVoiceAyahFound}
+            accentColor="#2d5016"
+          />
+        }
       />
 
       {/* Progress Section */}

@@ -228,11 +228,6 @@ const SurahYasin = () => {
           className="text-center py-5 px-4 md:py-7 md:px-6 md:rounded-t-3xl relative"
           style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
         >
-          <VoiceAyahSearch 
-            ayahs={AYAH_DATA} 
-            onAyahFound={handleVoiceAyahFound}
-            accentColor="#1e3c72"
-          />
           <h1 
             className="text-2xl md:text-3xl font-bold text-white mb-1"
             style={{ fontFamily: "'Scheherazade New', serif" }}
@@ -247,6 +242,13 @@ const SurahYasin = () => {
           fontSize={fontSize} 
           onFontSizeChange={handleFontSizeChange}
           accentColor="#1e3c72"
+          rightElement={
+            <VoiceAyahSearch 
+              ayahs={AYAH_DATA} 
+              onAyahFound={handleVoiceAyahFound}
+              accentColor="#1e3c72"
+            />
+          }
         />
 
         {/* Progress Bar Section */}
