@@ -131,6 +131,13 @@ const SurahWaqiah = () => {
     }
   };
 
+  const handleVoiceAyahFound = (ayahNumber: number) => {
+    scrollToAyah(ayahNumber);
+    if (!progress[ayahNumber]) {
+      handleCheckAyah(ayahNumber, true);
+    }
+  };
+
   // Load progress from localStorage on mount
   useEffect(() => {
     const savedProgress = localStorage.getItem("waqiahProgress");
@@ -234,7 +241,7 @@ const SurahWaqiah = () => {
         >
           <VoiceAyahSearch 
             ayahs={AYAH_DATA} 
-            onAyahFound={scrollToAyah}
+            onAyahFound={handleVoiceAyahFound}
             accentColor="#1e3c72"
           />
           <h1 

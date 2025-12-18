@@ -144,6 +144,13 @@ const SurahKahf = () => {
     }
   };
 
+  const handleVoiceAyahFound = (ayahNumber: number) => {
+    scrollToAyah(ayahNumber);
+    if (!progress[ayahNumber]) {
+      handleCheckAyah(ayahNumber, true);
+    }
+  };
+
   // Load progress from localStorage
   useEffect(() => {
     const savedProgress = localStorage.getItem("kahfProgress");
@@ -234,7 +241,7 @@ const SurahKahf = () => {
       <header className="text-white py-4 px-4 sm:py-6 sm:px-6 relative" style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}>
         <VoiceAyahSearch 
           ayahs={AYAH_DATA} 
-          onAyahFound={scrollToAyah}
+          onAyahFound={handleVoiceAyahFound}
           accentColor="#2d5016"
         />
         <div className="max-w-2xl mx-auto">
