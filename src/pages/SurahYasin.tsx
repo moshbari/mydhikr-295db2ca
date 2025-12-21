@@ -348,7 +348,6 @@ const SurahYasin = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
