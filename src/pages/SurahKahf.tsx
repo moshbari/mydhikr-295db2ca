@@ -257,17 +257,9 @@ const SurahKahf = () => {
       <div className="sticky top-0 z-10">
         {/* Header */}
         <div 
-          className="text-center py-5 px-4 md:py-7 md:px-6 relative"
+          className="text-center py-5 px-4 md:py-7 md:px-6"
           style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}
         >
-          {/* Mic button in top right */}
-          <div className="absolute top-3 right-3">
-            <VoiceAyahSearch 
-              ayahs={AYAH_DATA} 
-              onAyahFound={handleVoiceAyahFound}
-              accentColor="#ffffff"
-            />
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Scheherazade New', serif" }}>
             سورة الكهف
           </h1>
@@ -290,6 +282,14 @@ const SurahKahf = () => {
               dir="rtl"
               onClick={() => scrollToAyah(lastCheckedAyah)}
             >
+              {/* Mic button */}
+              <div className="flex-shrink-0" dir="ltr">
+                <VoiceAyahSearch 
+                  ayahs={AYAH_DATA} 
+                  onAyahFound={handleVoiceAyahFound}
+                  accentColor="#4a7c23"
+                />
+              </div>
               <div 
                 className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0"
                 style={{ background: "linear-gradient(135deg, #4a7c23 0%, #6b9b3a 100%)" }}
