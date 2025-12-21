@@ -8,7 +8,7 @@ import { haptics } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { useSurahFontSize } from "@/hooks/use-surah-font-size";
 import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
-import { VoiceAyahSearch } from "@/components/surah/VoiceAyahSearch";
+import { FloatingVoiceAyahSearch } from "@/components/surah/FloatingVoiceAyahSearch";
 
 const AYAH_DATA = [
   { number: 1, text: "تَبَٰرَكَ ٱلَّذِي بِيَدِهِ ٱلۡمُلۡكُ وَهُوَ عَلَىٰ كُلِّ شَيۡءٖ قَدِيرٌ" },
@@ -164,14 +164,7 @@ const SurahMulk = () => {
           className="text-center py-5 px-4 md:py-7 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #0d1642 0%, #1a237e 100%)" }}
         >
-          {/* Mic button in bottom left */}
-          <div className="absolute bottom-3 left-3">
-            <VoiceAyahSearch 
-              ayahs={AYAH_DATA} 
-              onAyahFound={handleVoiceAyahFound}
-              accentColor="#ffffff"
-            />
-          </div>
+          {/* Mic moved to floating bottom position */}
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Scheherazade New', serif" }}>
             سورة الملك
           </h1>
@@ -239,7 +232,7 @@ const SurahMulk = () => {
 
       {/* Ayah List */}
       <div className="flex-1 bg-white">
-        <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-2 sm:space-y-3">
+        <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-28 space-y-2 sm:space-y-3">
           {AYAH_DATA.map((ayah) => (
             <div
               key={ayah.number}
@@ -269,6 +262,12 @@ const SurahMulk = () => {
           ))}
         </div>
       </div>
+
+      <FloatingVoiceAyahSearch
+        ayahs={AYAH_DATA}
+        onAyahFound={handleVoiceAyahFound}
+        accentColor="#1a237e"
+      />
     </div>
   );
 };

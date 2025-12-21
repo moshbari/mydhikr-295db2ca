@@ -9,7 +9,7 @@ import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 import { useSurahFontSize } from "@/hooks/use-surah-font-size";
 import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
-import { VoiceAyahSearch } from "@/components/surah/VoiceAyahSearch";
+import { FloatingVoiceAyahSearch } from "@/components/surah/FloatingVoiceAyahSearch";
 
 // Ayah data for Surah Yasin
 const AYAH_DATA = [
@@ -228,14 +228,7 @@ const SurahYasin = () => {
           className="text-center py-5 px-4 md:py-7 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
         >
-          {/* Mic button in bottom left */}
-          <div className="absolute bottom-3 left-3">
-            <VoiceAyahSearch 
-              ayahs={AYAH_DATA} 
-              onAyahFound={handleVoiceAyahFound}
-              accentColor="#ffffff"
-            />
-          </div>
+          {/* Mic moved to floating bottom position */}
           <h1 
             className="text-2xl md:text-3xl font-bold text-white mb-1"
             style={{ fontFamily: "'Scheherazade New', serif" }}
@@ -317,7 +310,7 @@ const SurahYasin = () => {
       </div>
 
       {/* Ayah List */}
-      <div className="flex-1 px-4 md:px-6 pb-6 safe-bottom bg-white">
+      <div className="flex-1 px-4 md:px-6 pb-24 safe-bottom bg-white">
           <div className="space-y-2 md:space-y-3">
             {AYAH_DATA.map((ayah) => {
               const isChecked = progress[ayah.number] || false;
@@ -352,7 +345,13 @@ const SurahYasin = () => {
             })}
           </div>
         </div>
-      </div>
+
+      <FloatingVoiceAyahSearch
+        ayahs={AYAH_DATA}
+        onAyahFound={handleVoiceAyahFound}
+        accentColor="#1e3c72"
+      />
+    </div>
   );
 };
 
