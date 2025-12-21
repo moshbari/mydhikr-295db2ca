@@ -157,13 +157,21 @@ const SurahMulk = () => {
         </Button>
       </div>
 
-      {/* Sticky Header with Surah Name and Last Recited */}
+      {/* Sticky Header with Surah Name, Last Recited, and Mic */}
       <div className="sticky top-0 z-10">
         {/* Header */}
         <div 
-          className="text-center py-5 px-4 md:py-7 md:px-6"
+          className="text-center py-5 px-4 md:py-7 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #0d1642 0%, #1a237e 100%)" }}
         >
+          {/* Mic button in top right */}
+          <div className="absolute top-3 right-3">
+            <VoiceAyahSearch 
+              ayahs={AYAH_DATA} 
+              onAyahFound={handleVoiceAyahFound}
+              accentColor="#ffffff"
+            />
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Scheherazade New', serif" }}>
             سورة الملك
           </h1>
@@ -205,13 +213,6 @@ const SurahMulk = () => {
         fontSize={fontSize} 
         onFontSizeChange={handleFontSizeChange}
         accentColor="#1a237e"
-        rightElement={
-          <VoiceAyahSearch 
-            ayahs={AYAH_DATA} 
-            onAyahFound={handleVoiceAyahFound}
-            accentColor="#1a237e"
-          />
-        }
       />
 
       <div className="bg-gray-100 px-4 py-2 sm:px-6 sm:py-3 border-t border-gray-200">

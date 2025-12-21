@@ -253,13 +253,21 @@ const SurahKahf = () => {
         </Button>
       </div>
 
-      {/* Sticky Header with Surah Name and Last Recited */}
+      {/* Sticky Header with Surah Name, Last Recited, and Mic */}
       <div className="sticky top-0 z-10">
         {/* Header */}
         <div 
-          className="text-center py-5 px-4 md:py-7 md:px-6"
+          className="text-center py-5 px-4 md:py-7 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}
         >
+          {/* Mic button in top right */}
+          <div className="absolute top-3 right-3">
+            <VoiceAyahSearch 
+              ayahs={AYAH_DATA} 
+              onAyahFound={handleVoiceAyahFound}
+              accentColor="#ffffff"
+            />
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Scheherazade New', serif" }}>
             سورة الكهف
           </h1>
@@ -301,13 +309,6 @@ const SurahKahf = () => {
         fontSize={fontSize} 
         onFontSizeChange={handleFontSizeChange}
         accentColor="#2d5016"
-        rightElement={
-          <VoiceAyahSearch 
-            ayahs={AYAH_DATA} 
-            onAyahFound={handleVoiceAyahFound}
-            accentColor="#2d5016"
-          />
-        }
       />
 
       {/* Progress Section */}
