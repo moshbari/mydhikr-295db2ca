@@ -234,92 +234,48 @@ const SurahWaqiah = () => {
 
       {/* Main Container */}
       <div className="flex-1 bg-white md:rounded-t-3xl flex flex-col overflow-hidden">
-        {/* Header */}
-        <div 
-          className="text-center py-5 px-4 md:py-7 md:px-6 md:rounded-t-3xl relative"
-          style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
-        >
-          <h1 
-            className="text-2xl md:text-3xl font-bold text-white mb-1"
-            style={{ fontFamily: "'Scheherazade New', serif" }}
+        {/* Sticky Header with Surah Name and Last Recited */}
+        <div className="sticky top-0 z-10">
+          {/* Header */}
+          <div 
+            className="text-center py-5 px-4 md:py-7 md:px-6 md:rounded-t-3xl relative"
+            style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
           >
-            سورة الواقعة
-          </h1>
-          <p className="text-white/80 text-sm md:text-base">Surah Al-Waqiah - 96 Ayahs</p>
-        </div>
-
-        {/* Font Size Selector */}
-        <FontSizeSelector 
-          fontSize={fontSize} 
-          onFontSizeChange={handleFontSizeChange}
-          accentColor="#1e3c72"
-          rightElement={
-            <VoiceAyahSearch 
-              ayahs={AYAH_DATA} 
-              onAyahFound={handleVoiceAyahFound}
-              accentColor="#1e3c72"
-            />
-          }
-        />
-
-        {/* Progress Bar Section */}
-        <div className="bg-[#f8f9fa] px-4 py-2 md:px-6 md:py-3 border-t border-gray-200">
-          <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full rounded-full transition-all duration-300"
-              style={{ 
-                width: `${progressPercent}%`,
-                background: "linear-gradient(90deg, #11998e 0%, #38ef7d 100%)"
-              }}
-            />
-            <span className="absolute inset-0 flex items-center justify-center text-xs md:text-sm font-semibold text-gray-700">
-              {completedCount} / {TOTAL_AYAHS} ({progressPercent}%)
-            </span>
+            <h1 
+              className="text-2xl md:text-3xl font-bold text-white mb-1"
+              style={{ fontFamily: "'Scheherazade New', serif" }}
+            >
+              سورة الواقعة
+            </h1>
+            <p className="text-white/80 text-sm md:text-base">Surah Al-Waqiah - 96 Ayahs</p>
           </div>
-          {lastSaveTime && (
-            <p className="text-center text-xs text-gray-500 mt-2">
-              Last saved: {lastSaveTime}
-            </p>
+
+          {/* Last Recited Ayah Section - Right after surah name */}
+          {lastCheckedAyahData && (
+            <div 
+              className="px-4 md:px-6 py-3"
+              style={{ background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}
+            >
+              <p className="text-white text-xs md:text-sm font-semibold mb-2 text-center">
+                آخر آية تمت قراءتها - Last Recited Ayah:
+              </p>
+              <div className="bg-white rounded-lg p-3 flex items-center gap-3" dir="rtl">
+                <div 
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}
+                >
+                  <span className="text-white font-bold text-sm md:text-base">{lastCheckedAyahData.number}</span>
+                </div>
+                <p 
+                  className="text-base md:text-lg leading-relaxed"
+                  style={{ fontFamily: "'Scheherazade New', serif" }}
+                >
+                  {lastCheckedAyahData.first} ... {lastCheckedAyahData.last}
+                </p>
+              </div>
+            </div>
           )}
         </div>
-
-        {/* Reset Button */}
-        <div className="flex justify-center py-2">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleReset}
-            className="text-xs md:text-sm"
-          >
-            إعادة تعيين الكل - Reset All
-          </Button>
-        </div>
-
-        {/* Last Recited Ayah Section */}
-        {lastCheckedAyahData && (
-          <div 
-            className="mx-4 md:mx-6 mb-4 p-3 md:p-4 rounded-xl"
-            style={{ background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}
-          >
-            <p className="text-white text-xs md:text-sm font-semibold mb-2 text-center">
-              آخر آية تمت قراءتها - Last Recited Ayah:
-            </p>
-            <div className="bg-white rounded-lg p-3 flex items-center gap-3" dir="rtl">
-              <div 
-                className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}
-              >
-                <span className="text-white font-bold text-sm md:text-base">{lastCheckedAyahData.number}</span>
-              </div>
-              <p 
-                className="text-base md:text-lg leading-relaxed"
-                style={{ fontFamily: "'Scheherazade New', serif" }}
-              >
-                {lastCheckedAyahData.first} ... {lastCheckedAyahData.last}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Ayah List */}
         <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-6 safe-bottom">
