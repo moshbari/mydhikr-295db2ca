@@ -1,9 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { haptics } from "@/lib/haptics";
+
+const MAX_RECORDING_TIME_MS = 30000; // 30 seconds
 
 interface AyahData {
   number: number;
@@ -28,6 +30,16 @@ export const VoiceAyahSearch = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const mimeTypeRef = useRef<string>("audio/webm");
+  const autoStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear auto-stop timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoStopTimerRef.current) {
+        clearTimeout(autoStopTimerRef.current);
+      }
+    };
+  }, []);
 
   const normalizeArabicText = (text: string): string => {
     // Remove diacritics and normalize Arabic text for better matching
@@ -121,7 +133,18 @@ export const VoiceAyahSearch = ({
       mediaRecorder.start(250);
       setIsRecording(true);
       await haptics.light();
-      toast.info("Recording... Tap again to stop");
+      toast.info("Recording... Tap again to stop (max 30s)");
+
+      // Auto-stop after 30 seconds
+      autoStopTimerRef.current = setTimeout(async () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          console.log('Auto-stopping recording after 30 seconds');
+          toast.info("Auto-stopped after 30 seconds");
+          mediaRecorderRef.current.stop();
+          setIsRecording(false);
+          await haptics.light();
+        }
+      }, MAX_RECORDING_TIME_MS);
     } catch (error) {
       console.error('Error accessing microphone:', error);
       toast.error("Could not access microphone. Please allow microphone access.");
@@ -129,6 +152,11 @@ export const VoiceAyahSearch = ({
   };
 
   const stopRecording = async () => {
+    // Clear auto-stop timer
+    if (autoStopTimerRef.current) {
+      clearTimeout(autoStopTimerRef.current);
+      autoStopTimerRef.current = null;
+    }
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
@@ -213,16 +241,15 @@ export const VoiceAyahSearch = ({
       size="icon"
       onClick={handleClick}
       disabled={isProcessing}
-      className="hover:bg-gray-200 text-gray-600"
-      style={{ color: accentColor }}
+      className={`h-12 w-12 rounded-full ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
       title="Voice search for ayah"
     >
       {isProcessing ? (
-        <Loader2 className="w-5 h-5 animate-spin" />
+        <Loader2 className="w-6 h-6 animate-spin" />
       ) : isRecording ? (
-        <MicOff className="w-5 h-5 text-red-500" />
+        <MicOff className="w-6 h-6" />
       ) : (
-        <Mic className="w-5 h-5" />
+        <Mic className="w-6 h-6" />
       )}
     </Button>
   );
