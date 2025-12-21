@@ -359,7 +359,6 @@ const SurahWaqiah = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
