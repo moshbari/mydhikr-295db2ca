@@ -208,9 +208,9 @@ const SurahYasin = () => {
     : null;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
-      {/* Back Button */}
-      <div className="p-4 safe-top">
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Back Button - Fixed at top */}
+      <div className="p-4 safe-top" style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
@@ -221,11 +221,11 @@ const SurahYasin = () => {
         </Button>
       </div>
 
-      {/* Main Container */}
-      <div className="flex-1 bg-white md:rounded-t-3xl flex flex-col overflow-hidden">
+      {/* Sticky Header with Surah Name and Last Recited */}
+      <div className="sticky top-0 z-10">
         {/* Header */}
         <div 
-          className="text-center py-5 px-4 md:py-7 md:px-6 md:rounded-t-3xl relative"
+          className="text-center py-5 px-4 md:py-7 md:px-6"
           style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
         >
           <h1 
@@ -237,57 +237,10 @@ const SurahYasin = () => {
           <p className="text-white/80 text-sm md:text-base">Surah Yasin - 83 Ayahs</p>
         </div>
 
-        {/* Font Size Selector */}
-        <FontSizeSelector 
-          fontSize={fontSize} 
-          onFontSizeChange={handleFontSizeChange}
-          accentColor="#1e3c72"
-          rightElement={
-            <VoiceAyahSearch 
-              ayahs={AYAH_DATA} 
-              onAyahFound={handleVoiceAyahFound}
-              accentColor="#1e3c72"
-            />
-          }
-        />
-
-        {/* Progress Bar Section */}
-        <div className="bg-[#f8f9fa] px-4 py-2 md:px-6 md:py-3 border-t border-gray-200">
-          <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full rounded-full transition-all duration-300"
-              style={{ 
-                width: `${progressPercent}%`,
-                background: "linear-gradient(90deg, #11998e 0%, #38ef7d 100%)"
-              }}
-            />
-            <span className="absolute inset-0 flex items-center justify-center text-xs md:text-sm font-semibold text-gray-700">
-              {completedCount} / {TOTAL_AYAHS} ({progressPercent}%)
-            </span>
-          </div>
-          {lastSaveTime && (
-            <p className="text-center text-xs text-gray-500 mt-2">
-              Last saved: {lastSaveTime}
-            </p>
-          )}
-        </div>
-
-        {/* Reset Button */}
-        <div className="flex justify-center py-2">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleReset}
-            className="text-xs md:text-sm"
-          >
-            إعادة تعيين الكل - Reset All
-          </Button>
-        </div>
-
-        {/* Last Recited Ayah Section */}
+        {/* Last Recited Ayah Section - Right after surah name */}
         {lastCheckedAyahData && (
           <div 
-            className="mx-4 md:mx-6 mb-4 p-3 md:p-4 rounded-xl"
+            className="px-4 md:px-6 py-3"
             style={{ background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}
           >
             <p className="text-white text-xs md:text-sm font-semibold mb-2 text-center">
@@ -309,9 +262,57 @@ const SurahYasin = () => {
             </div>
           </div>
         )}
+      </div>
 
-        {/* Ayah List */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-6 safe-bottom">
+      {/* Font Size Selector */}
+      <FontSizeSelector 
+        fontSize={fontSize} 
+        onFontSizeChange={handleFontSizeChange}
+        accentColor="#1e3c72"
+        rightElement={
+          <VoiceAyahSearch 
+            ayahs={AYAH_DATA} 
+            onAyahFound={handleVoiceAyahFound}
+            accentColor="#1e3c72"
+          />
+        }
+      />
+
+      {/* Progress Bar Section */}
+      <div className="bg-[#f8f9fa] px-4 py-2 md:px-6 md:py-3 border-t border-gray-200">
+        <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full rounded-full transition-all duration-300"
+            style={{ 
+              width: `${progressPercent}%`,
+              background: "linear-gradient(90deg, #11998e 0%, #38ef7d 100%)"
+            }}
+          />
+          <span className="absolute inset-0 flex items-center justify-center text-xs md:text-sm font-semibold text-gray-700">
+            {completedCount} / {TOTAL_AYAHS} ({progressPercent}%)
+          </span>
+        </div>
+        {lastSaveTime && (
+          <p className="text-center text-xs text-gray-500 mt-2">
+            Last saved: {lastSaveTime}
+          </p>
+        )}
+      </div>
+
+      {/* Reset Button */}
+      <div className="flex justify-center py-2 bg-[#f8f9fa]">
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleReset}
+          className="text-xs md:text-sm"
+        >
+          إعادة تعيين الكل - Reset All
+        </Button>
+      </div>
+
+      {/* Ayah List */}
+      <div className="flex-1 px-4 md:px-6 pb-6 safe-bottom bg-white">
           <div className="space-y-2 md:space-y-3">
             {AYAH_DATA.map((ayah) => {
               const isChecked = progress[ayah.number] || false;
