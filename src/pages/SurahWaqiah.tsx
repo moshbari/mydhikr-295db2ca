@@ -239,8 +239,8 @@ const SurahWaqiah = () => {
           className="text-center py-5 px-4 md:py-7 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
         >
-          {/* Mic button in bottom right */}
-          <div className="absolute bottom-3 right-3">
+          {/* Mic button in bottom left */}
+          <div className="absolute bottom-3 left-3">
             <VoiceAyahSearch 
               ayahs={AYAH_DATA} 
               onAyahFound={handleVoiceAyahFound}
