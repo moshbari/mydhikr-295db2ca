@@ -260,8 +260,8 @@ const SurahKahf = () => {
           className="text-center py-5 px-4 md:py-7 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}
         >
-          {/* Mic button in top right */}
-          <div className="absolute top-3 right-3">
+          {/* Mic button in bottom right */}
+          <div className="absolute bottom-3 right-3">
             <VoiceAyahSearch 
               ayahs={AYAH_DATA} 
               onAyahFound={handleVoiceAyahFound}
