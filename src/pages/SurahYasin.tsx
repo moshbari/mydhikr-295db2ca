@@ -246,7 +246,11 @@ const SurahYasin = () => {
             <p className="text-white text-xs md:text-sm font-semibold mb-2 text-center">
               آخر آية تمت قراءتها - Last Recited Ayah:
             </p>
-            <div className="bg-white rounded-lg p-3 flex items-center gap-3" dir="rtl">
+            <div 
+              className="bg-white rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors" 
+              dir="rtl"
+              onClick={() => scrollToAyah(lastCheckedAyahData.number)}
+            >
               <div 
                 className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}
