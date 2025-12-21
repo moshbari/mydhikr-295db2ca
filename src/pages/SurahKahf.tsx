@@ -236,30 +236,61 @@ const SurahKahf = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #2d5016 0%, #4a7c23 100%)" }}>
-      {/* Header */}
-      <header className="text-white py-4 px-4 sm:py-6 sm:px-6 relative" style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}>
-        <div className="max-w-2xl mx-auto">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={async () => {
-              await haptics.light();
-              navigate("/");
-            }}
-            className="text-white hover:bg-white/20 mb-3"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center" style={{ fontFamily: "'Scheherazade New', serif" }}>
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Back Button - Fixed at top */}
+      <div className="p-4 safe-top" style={{ background: "linear-gradient(135deg, #2d5016 0%, #4a7c23 100%)" }}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={async () => {
+            await haptics.light();
+            navigate("/");
+          }}
+          className="text-white hover:bg-white/20"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
+      {/* Sticky Header with Surah Name and Last Recited */}
+      <div className="sticky top-0 z-10">
+        {/* Header */}
+        <div 
+          className="text-center py-5 px-4 md:py-7 md:px-6"
+          style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}
+        >
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Scheherazade New', serif" }}>
             سورة الكهف
           </h1>
-          <p className="text-center text-white/80 mt-1 text-sm sm:text-base">
+          <p className="text-white/80 text-sm sm:text-base">
             Surah Al-Kahf - {TOTAL_AYAHS} Ayahs
           </p>
         </div>
-      </header>
+
+        {/* Last Recited Ayah Section - Right after surah name */}
+        {lastCheckedAyah && (
+          <div 
+            className="px-4 md:px-6 py-3"
+            style={{ background: "linear-gradient(135deg, #4a7c23 0%, #6b9b3a 100%)" }}
+          >
+            <p className="text-white text-xs md:text-sm font-semibold mb-2 text-center">
+              آخر آية تمت قراءتها - Last Recited Ayah:
+            </p>
+            <div className="bg-white rounded-lg p-3 flex items-center gap-3" dir="rtl">
+              <div 
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0"
+                style={{ background: "linear-gradient(135deg, #4a7c23 0%, #6b9b3a 100%)" }}
+              >
+                {lastCheckedAyah}
+              </div>
+              <p className="text-base md:text-lg leading-relaxed" style={{ fontFamily: "'Scheherazade New', serif" }}>
+                {getAyahText(lastCheckedAyah)}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Font Size Selector */}
       <FontSizeSelector 
@@ -304,30 +335,8 @@ const SurahKahf = () => {
         </Button>
       </div>
 
-      {/* Last Recited Ayah */}
-      {lastCheckedAyah && (
-        <div className="px-4 py-3 sm:px-6 sm:py-4" style={{ background: "linear-gradient(135deg, #4a7c23 0%, #6b9b3a 100%)" }}>
-          <div className="max-w-2xl mx-auto">
-            <p className="text-white text-sm sm:text-base font-semibold mb-2 text-center">
-              آخر آية تمت قراءتها - Last Recited Ayah:
-            </p>
-            <div className="bg-white rounded-lg p-3 sm:p-4 flex items-center gap-3" dir="rtl">
-              <div 
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0"
-                style={{ background: "linear-gradient(135deg, #4a7c23 0%, #6b9b3a 100%)" }}
-              >
-                {lastCheckedAyah}
-              </div>
-              <p className="text-base sm:text-lg leading-relaxed" style={{ fontFamily: "'Scheherazade New', serif" }}>
-                {getAyahText(lastCheckedAyah)}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Ayah List */}
-      <div className="flex-1 overflow-auto bg-white">
+      <div className="flex-1 bg-white">
         <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-2 sm:space-y-3">
           {AYAH_DATA.map((ayah) => (
             <div
