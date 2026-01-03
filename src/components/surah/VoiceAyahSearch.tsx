@@ -241,15 +241,15 @@ export const VoiceAyahSearch = ({
       size="icon"
       onClick={handleClick}
       disabled={isProcessing}
-      className={`h-12 w-12 rounded-full ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
+      className={`h-20 w-20 rounded-full shadow-lg ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
       title="Voice search for ayah"
     >
       {isProcessing ? (
-        <Loader2 className="w-6 h-6 animate-spin" />
+        <Loader2 className="w-10 h-10 animate-spin" />
       ) : isRecording ? (
-        <MicOff className="w-6 h-6" />
+        <MicOff className="w-10 h-10" />
       ) : (
-        <Mic className="w-6 h-6" />
+        <Mic className="w-10 h-10" />
       )}
     </Button>
   );
