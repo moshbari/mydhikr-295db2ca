@@ -241,7 +241,7 @@ const SurahKahf = () => {
       <div className="sticky top-0 z-10 safe-top">
         {/* Header with Back Button */}
         <div 
-          className="py-5 px-4 md:py-7 md:px-6 relative"
+          className="pt-12 pb-5 px-4 md:pt-14 md:pb-7 md:px-6 relative text-center"
           style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}
         >
           <Button
