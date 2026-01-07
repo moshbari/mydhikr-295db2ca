@@ -213,25 +213,29 @@ const SurahYasin = () => {
       <div className="sticky top-0 z-10 safe-top">
         {/* Header with Back Button */}
         <div 
-          className="pt-12 pb-5 px-4 md:pt-14 md:pb-7 md:px-6 relative text-center"
+          className="py-3 px-4 md:py-4 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)" }}
         >
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="text-white hover:bg-white/20 absolute left-4 top-4"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back
-          </Button>
-          {/* Mic moved to floating bottom position */}
-          <h1 
-            className="text-2xl md:text-3xl font-bold text-white mb-1"
-            style={{ fontFamily: "'Scheherazade New', serif" }}
-          >
-            سورة يٰسٓ
-          </h1>
-          <p className="text-white/80 text-sm md:text-base">Surah Yasin - 83 Ayahs</p>
+          <div className="flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="text-white hover:bg-white/20 absolute left-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+            <div className="text-center">
+              <h1 
+                className="text-xl md:text-2xl font-bold text-white"
+                style={{ fontFamily: "'Scheherazade New', serif" }}
+              >
+                سورة يٰسٓ
+              </h1>
+              <p className="text-white/80 text-xs md:text-sm">Surah Yasin - 83 Ayahs</p>
+            </div>
+          </div>
         </div>
 
         {/* Last Recited Ayah Section - Right after surah name */}
