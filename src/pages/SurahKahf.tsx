@@ -241,28 +241,31 @@ const SurahKahf = () => {
       <div className="sticky top-0 z-10 safe-top">
         {/* Header with Back Button */}
         <div 
-          className="pt-12 pb-5 px-4 md:pt-14 md:pb-7 md:px-6 relative text-center"
+          className="py-3 px-4 md:py-4 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}
         >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={async () => {
-              await haptics.light();
-              navigate("/");
-            }}
-            className="text-white hover:bg-white/20 absolute left-4 top-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          {/* Mic moved to floating bottom position */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Scheherazade New', serif" }}>
-            سورة الكهف
-          </h1>
-          <p className="text-white/80 text-sm sm:text-base">
-            Surah Al-Kahf - {TOTAL_AYAHS} Ayahs
-          </p>
+          <div className="flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                await haptics.light();
+                navigate("/");
+              }}
+              className="text-white hover:bg-white/20 absolute left-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+            <div className="text-center">
+              <h1 className="text-xl md:text-2xl font-bold text-white" style={{ fontFamily: "'Scheherazade New', serif" }}>
+                سورة الكهف
+              </h1>
+              <p className="text-white/80 text-xs md:text-sm">
+                Surah Al-Kahf - {TOTAL_AYAHS} Ayahs
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Last Recited Ayah Section - Right after surah name */}
