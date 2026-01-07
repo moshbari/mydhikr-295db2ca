@@ -237,29 +237,25 @@ const SurahKahf = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Back Button - Fixed at top */}
-      <div className="p-4 safe-top" style={{ background: "linear-gradient(135deg, #2d5016 0%, #4a7c23 100%)" }}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={async () => {
-            await haptics.light();
-            navigate("/");
-          }}
-          className="text-white hover:bg-white/20"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-      </div>
-
-      {/* Sticky Header with Surah Name, Last Recited, and Mic */}
-      <div className="sticky top-0 z-10">
-        {/* Header */}
+      {/* Sticky Header with Back Button, Surah Name, Last Recited */}
+      <div className="sticky top-0 z-10 safe-top">
+        {/* Header with Back Button */}
         <div 
-          className="text-center py-5 px-4 md:py-7 md:px-6 relative"
+          className="py-5 px-4 md:py-7 md:px-6 relative"
           style={{ background: "linear-gradient(135deg, #1a3009 0%, #2d5016 100%)" }}
         >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              await haptics.light();
+              navigate("/");
+            }}
+            className="text-white hover:bg-white/20 absolute left-4 top-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
           {/* Mic moved to floating bottom position */}
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Scheherazade New', serif" }}>
             سورة الكهف
