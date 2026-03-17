@@ -39,6 +39,7 @@ const App = () => (
           <Route path="/sura-waqiah-last-read" element={<ProtectedRoute><SurahWaqiah /></ProtectedRoute>} />
           <Route path="/sura-kahf-last-read" element={<ProtectedRoute><SurahKahf /></ProtectedRoute>} />
           <Route path="/sura-mulk-last-read" element={<ProtectedRoute><SurahMulk /></ProtectedRoute>} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
