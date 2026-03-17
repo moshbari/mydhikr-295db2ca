@@ -14,6 +14,7 @@ import SurahKahf from "./pages/SurahKahf";
 import SurahMulk from "./pages/SurahMulk";
 import AuthPage from "./components/auth/AuthPage";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
