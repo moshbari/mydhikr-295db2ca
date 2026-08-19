@@ -16,6 +16,7 @@ export interface DailyEntry {
   count: number;
   timestamp: string;
   extraInfo?: string; // For storing range info like "71 → 77"
+  entryIds?: string[]; // Every row merged into this line
 }
 
 interface DailySummaryProps {

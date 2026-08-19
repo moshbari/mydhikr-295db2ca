@@ -75,6 +75,7 @@ const Index = () => {
             // If entry exists, add to count and use latest timestamp
             const existing = entriesMap.get(key);
             existing.count += entry.count;
+            existing.entryIds.push(entry.id);
             // Keep the latest timestamp (entries are ordered by created_at desc)
             if (entry.created_at > existing.created_at) {
               existing.timestamp = timestamp;
@@ -91,6 +92,7 @@ const Index = () => {
               timestamp: timestamp,
               created_at: entry.created_at,
               extraInfo: entry.extra_info,
+              entryIds: [entry.id],
             });
           }
         });
@@ -102,6 +104,7 @@ const Index = () => {
           count: entry.count,
           timestamp: entry.timestamp,
           extraInfo: entry.extraInfo,
+          entryIds: entry.entryIds,
         }));
 
         setEntries(transformedEntries);
@@ -249,8 +252,24 @@ const Index = () => {
 
   const handleEditEntry = async (id: string | number, newCount: number, newName: string) => {
     if (!user) return;
-    
+
     try {
+      // When a line stands for several additions, the correction replaces all
+      // of them — otherwise the others stay and the total goes back up.
+      const line = entries.find(entry => entry.id === id);
+      const ids = line?.entryIds?.length ? line.entryIds : [String(id)];
+      const olderIds = ids.filter(entryId => entryId !== String(id));
+
+      if (olderIds.length > 0) {
+        const { error: removeError } = await supabase
+          .from('daily_entries')
+          .delete()
+          .in('id', olderIds)
+          .eq('user_id', user.id);
+
+        if (removeError) throw removeError;
+      }
+
       const { error } = await supabase
         .from('daily_entries')
         .update({
@@ -263,10 +282,10 @@ const Index = () => {
       if (error) throw error;
 
       // Update local state
-      setEntries(prev => 
-        prev.map(entry => 
-          entry.id === id 
-            ? { ...entry, count: newCount, name: newName }
+      setEntries(prev =>
+        prev.map(entry =>
+          entry.id === id
+            ? { ...entry, count: newCount, name: newName, entryIds: [String(id)] }
             : entry
         )
       );
@@ -289,12 +308,17 @@ const Index = () => {
 
   const handleDeleteEntry = async (id: string | number) => {
     if (!user) return;
-    
+
     try {
+      // A summary line can stand for several additions of the same worship.
+      // Deleting it has to remove all of them, or the rest quietly reappear.
+      const line = entries.find(entry => entry.id === id);
+      const ids = line?.entryIds?.length ? line.entryIds : [String(id)];
+
       const { error } = await supabase
         .from('daily_entries')
         .delete()
-        .eq('id', String(id))
+        .in('id', ids)
         .eq('user_id', user.id);
 
       if (error) throw error;
