@@ -4,8 +4,9 @@ import { NumberPad } from "@/components/ui/number-pad";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle, Trash2 } from "lucide-react";
 import { useIslamicOptions } from "@/hooks/use-islamic-options";
+import { useCustomOptions } from "@/hooks/use-custom-options";
 import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 
@@ -18,6 +19,9 @@ interface TrackerSectionProps {
 
 export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps) {
   const { options: dbOptions, loading: optionsLoading } = useIslamicOptions(type);
+  const builtInOptions = dbOptions.filter(opt => opt.is_active).map(opt => opt.name);
+  const { customOptions, addCustomOption, removeCustomOption } = useCustomOptions(type, builtInOptions);
+  const [managingTypes, setManagingTypes] = useState<boolean>(false);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [customName, setCustomName] = useState<string>("");
   const [numberValue, setNumberValue] = useState<string>("");
@@ -30,7 +34,7 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   const [isCompleteSurah, setIsCompleteSurah] = useState<boolean>(false);
 
   const getOptions = () => {
-    return dbOptions.map(opt => opt.name);
+    return [...customOptions, ...builtInOptions];
   };
 
   const extractVerseCount = (surahOption: string): number => {
@@ -163,7 +167,26 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                   <SelectValue placeholder={optionsLoading ? "Loading..." : `Select ${title.toLowerCase()}...`} />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-input shadow-lg z-50 max-h-60">
-                  {getOptions().map((option) => (
+                  {customOptions.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                        My {title.toLowerCase()} types
+                      </div>
+                      {customOptions.map((option) => (
+                        <SelectItem
+                          key={`custom-${option}`}
+                          value={option}
+                          className="cursor-pointer hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          {option}
+                        </SelectItem>
+                      ))}
+                      <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground border-t mt-1">
+                        All {title.toLowerCase()}
+                      </div>
+                    </>
+                  )}
+                  {builtInOptions.map((option) => (
                     <SelectItem 
                       key={option} 
                       value={option}
@@ -185,8 +208,46 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                 className="w-full touch-target"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Custom {title}
+                New {title.toLowerCase()} type
               </Button>
+
+              {customOptions.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setManagingTypes(!managingTypes)}
+                  className="w-full touch-target text-xs text-muted-foreground"
+                >
+                  {managingTypes ? "Done" : "Manage my types"}
+                </Button>
+              )}
+
+              {managingTypes && (
+                <div className="rounded-md border border-input p-2 space-y-1">
+                  {customOptions.map((option) => (
+                    <div key={`manage-${option}`} className="flex items-center gap-2">
+                      <span className="flex-1 text-sm truncate">{option}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={async () => {
+                          await haptics.light();
+                          removeCustomOption(option);
+                          if (selectedOption === option) setSelectedOption("");
+                        }}
+                        className="h-8 w-8 p-0 text-destructive"
+                        aria-label={`Remove ${option}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Removing a type only takes it off this list. Anything you already
+                    logged stays in your history.
+                  </p>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -205,6 +266,10 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                 }}
               />
               
+              <p className="text-xs text-muted-foreground">
+                It stays in your {title.toLowerCase()} list for every day, not just today.
+              </p>
+
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -217,6 +282,22 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                   className="flex-1 touch-target"
                 >
                   Back to List
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={!customName.trim()}
+                  onClick={async () => {
+                    const added = addCustomOption(customName);
+                    if (!added) return;
+                    await haptics.success();
+                    setSelectedOption(added);
+                    setCustomName("");
+                    setShowCustomInput(false);
+                  }}
+                  className="flex-1 touch-target"
+                >
+                  Save type
                 </Button>
               </div>
             </>
