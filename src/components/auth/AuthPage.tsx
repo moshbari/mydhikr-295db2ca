@@ -373,6 +373,41 @@ export default function AuthPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Get the app */}
+        <div className="text-center space-y-4 pb-8">
+          <h2 className="text-xl font-semibold">Get the app on your phone</h2>
+          <p className="text-sm text-muted-foreground">
+            The same account works everywhere — your entries follow you.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <a
+              href="https://apps.apple.com/us/app/my-dhikr/id6760689869"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <Button variant="outline" size="lg" className="w-full sm:w-auto min-w-[220px]">
+                <span className="mr-2 text-lg"></span>
+                Download for iPhone
+              </Button>
+            </a>
+
+            <a href="/MyDhikr.apk" download className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto min-w-[220px] islamic-button">
+                <span className="mr-2 text-lg">🤖</span>
+                Download for Android
+              </Button>
+            </a>
+          </div>
+
+          <p className="text-xs text-muted-foreground max-w-md mx-auto">
+            Android will ask you to allow the install because the file comes from
+            here rather than the Play Store — tap allow and it installs normally.
+            Needs Android 8 or newer.
+          </p>
+        </div>
       </div>
     </div>
   );
