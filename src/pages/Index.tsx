@@ -20,6 +20,7 @@ import { BarChart3, Shield, CalendarIcon, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
 import { createAdminAccounts } from "@/lib/admin-setup";
+import { worshipMatchKey } from "@/lib/worship-name";
 
 const Index = () => {
   const { toast } = useToast();
@@ -62,9 +63,10 @@ const Index = () => {
         
         (entriesData || []).forEach(entry => {
           // For Quran entries, include extra_info in the key to keep different verse ranges separate
+          const nameKey = worshipMatchKey(entry.name);
           const key = entry.type === 'quran' && entry.extra_info 
-            ? `${entry.type}-${entry.name}-${entry.extra_info}`
-            : `${entry.type}-${entry.name}`;
+            ? `${entry.type}-${nameKey}-${entry.extra_info}`
+            : `${entry.type}-${nameKey}`;
           const timestamp = entry.timestamp || new Date().toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit',
@@ -76,6 +78,9 @@ const Index = () => {
             const existing = entriesMap.get(key);
             existing.count += entry.count;
             existing.entryIds.push(entry.id);
+            // Rows arrive newest first, so the last spelling seen is the oldest:
+            // the line keeps the name it was first given.
+            existing.name = entry.name;
             // Keep the latest timestamp (entries are ordered by created_at desc)
             if (entry.created_at > existing.created_at) {
               existing.timestamp = timestamp;

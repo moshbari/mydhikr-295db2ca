@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { worshipMatchKey } from "@/lib/worship-name";
 
 type Category = "dhikr" | "quran" | "salah";
 
@@ -68,7 +69,7 @@ export const useCustomOptions = (category: Category, builtIn: string[]) => {
       const names: string[] = [];
       for (const row of data) {
         const name = (row as { name: string }).name;
-        const key = name.toLowerCase();
+        const key = worshipMatchKey(name);
         if (!seen.has(key)) {
           seen.add(key);
           names.push(name);
@@ -83,13 +84,13 @@ export const useCustomOptions = (category: Category, builtIn: string[]) => {
     };
   }, [user, category]);
 
-  const builtInKeys = new Set(builtIn.map((name) => name.toLowerCase()));
-  const removedKeys = new Set(removed.map((name) => name.toLowerCase()));
+  const builtInKeys = new Set(builtIn.map((name) => worshipMatchKey(name)));
+  const removedKeys = new Set(removed.map((name) => worshipMatchKey(name)));
 
   const customOptions: string[] = [];
   const seen = new Set<string>();
   for (const name of [...saved, ...history]) {
-    const key = name.toLowerCase();
+    const key = worshipMatchKey(name);
     if (builtInKeys.has(key) || removedKeys.has(key) || seen.has(key)) continue;
     seen.add(key);
     customOptions.push(name);
@@ -101,7 +102,7 @@ export const useCustomOptions = (category: Category, builtIn: string[]) => {
       if (!cleaned || !user) return null;
 
       setSaved((current) => {
-        const next = current.some((n) => n.toLowerCase() === cleaned.toLowerCase())
+        const next = current.some((n) => worshipMatchKey(n) === worshipMatchKey(cleaned))
           ? current
           : [...current, cleaned];
         write(savedKey(user.id, category), next);
@@ -110,7 +111,7 @@ export const useCustomOptions = (category: Category, builtIn: string[]) => {
 
       // Adding it back undoes an earlier removal.
       setRemoved((current) => {
-        const next = current.filter((n) => n.toLowerCase() !== cleaned.toLowerCase());
+        const next = current.filter((n) => worshipMatchKey(n) !== worshipMatchKey(cleaned));
         write(removedKey(user.id, category), next);
         return next;
       });
@@ -125,13 +126,13 @@ export const useCustomOptions = (category: Category, builtIn: string[]) => {
       if (!user) return;
 
       setSaved((current) => {
-        const next = current.filter((n) => n.toLowerCase() !== name.toLowerCase());
+        const next = current.filter((n) => worshipMatchKey(n) !== worshipMatchKey(name));
         write(savedKey(user.id, category), next);
         return next;
       });
 
       setRemoved((current) => {
-        const next = current.some((n) => n.toLowerCase() === name.toLowerCase())
+        const next = current.some((n) => worshipMatchKey(n) === worshipMatchKey(name))
           ? current
           : [...current, name];
         write(removedKey(user.id, category), next);
