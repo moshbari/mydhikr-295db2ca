@@ -394,7 +394,17 @@ export default function AuthPage() {
               </Button>
             </a>
 
-            <a href="/MyDhikr.apk" download className="w-full sm:w-auto">
+            {/*
+              Wired to the source, not to a file kept in this repo. Every build
+              of moshbari/mydhikr-android republishes the "latest" release in
+              moshbari/mydhikr-downloads, and this URL always resolves to the
+              newest APK — so shipping an Android update never means editing or
+              re-publishing this site again.
+            */}
+            <a
+              href="https://github.com/moshbari/mydhikr-downloads/releases/latest/download/MyDhikr.apk"
+              className="w-full sm:w-auto"
+            >
               <Button size="lg" className="w-full sm:w-auto min-w-[220px] islamic-button">
                 <span className="mr-2 text-lg">🤖</span>
                 Download for Android

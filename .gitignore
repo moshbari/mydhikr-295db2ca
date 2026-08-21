@@ -25,3 +25,7 @@ dist-ssr
 
 # Capacitor native scaffold, generated locally
 ios/
+
+# The Android APK is published as a GitHub release in moshbari/mydhikr-downloads,
+# not carried in this repo. See the download button in AuthPage.tsx.
+public/*.apk
