@@ -8,7 +8,7 @@ import { Edit3, Trash2, Save, X } from "lucide-react";
 import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 import { motion, AnimatePresence } from "framer-motion";
-import { parseRange, displayRange, totalVersesInName } from "@/lib/quran-range";
+import { parseRange, displayRange, totalVersesInName, formatRange } from "@/lib/quran-range";
 
 export interface DailyEntry {
   id: string | number;
@@ -22,7 +22,7 @@ export interface DailyEntry {
 
 interface DailySummaryProps {
   entries: DailyEntry[];
-  onEdit?: (id: string | number, newCount: number, newName: string) => void;
+  onEdit?: (id: string | number, newCount: number, newName: string, newExtraInfo?: string) => void;
   onDelete?: (id: string | number) => void;
 }
 
@@ -30,6 +30,12 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const [editCount, setEditCount] = useState<number>(0);
   const [editName, setEditName] = useState<string>("");
+  // A Quran reading is corrected by its verses, not by a bare number — the
+  // count is worked out from them, so the two can never disagree.
+  const [editStart, setEditStart] = useState<string>("");
+  const [editEnd, setEditEnd] = useState<string>("");
+  const [editProblem, setEditProblem] = useState<string>("");
+  const [editType, setEditType] = useState<DailyEntry["type"] | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<DailyEntry | null>(null);
 
@@ -39,15 +45,58 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
     setEditingId(entry.id);
     setEditCount(entry.count);
     setEditName(entry.name);
+    setEditType(entry.type);
+    setEditProblem("");
+
+    // Filled in with the verses the entry already holds — including rows the
+    // phone wrote as `1_10` — so a wrong range is fixed, not retyped.
+    const range = parseRange(entry.extraInfo, totalVersesInName(entry.name));
+    setEditStart(range ? String(range.start) : "");
+    setEditEnd(range ? String(range.end) : "");
+  };
+
+  /// The verses typed into the edit boxes, or the reason they cannot be used.
+  const editedRange = () => {
+    const total = totalVersesInName(editName);
+    const start = parseInt(editStart, 10);
+    const end = parseInt(editEnd, 10);
+
+    if (!Number.isFinite(start) || start < 1) return { problem: "Type the verse you started at." };
+    if (!Number.isFinite(end) || end < 1) return { problem: "Type the verse you stopped at." };
+    if (end < start) return { problem: "The last verse can't come before the first one." };
+    if (total > 0 && end > total) return { problem: `This surah only has ${total} verses.` };
+    return { range: { start, end } };
+  };
+
+  /// The number that will be saved, before it is saved.
+  const editingDisplayCount = () => {
+    if (editType !== "quran") return editCount;
+    const { range } = editedRange();
+    return range ? range.end - range.start + 1 : 0;
   };
 
   const handleEditSave = async () => {
-    if (editingId && onEdit) {
+    if (!editingId || !onEdit) return;
+
+    if (editType === "quran") {
+      const { range, problem } = editedRange();
+      if (!range) {
+        setEditProblem(problem || "");
+        await haptics.error();
+        return;
+      }
+      await haptics.success();
+      sounds.success();
+      // The count comes from the verses, never typed beside them.
+      onEdit(editingId, range.end - range.start + 1, editName, formatRange(range));
+    } else {
       await haptics.success();
       sounds.success();
       onEdit(editingId, editCount, editName);
-      setEditingId(null);
     }
+
+    setEditingId(null);
+    setEditProblem("");
   };
 
   const handleEditCancel = async () => {
@@ -216,17 +265,46 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                           placeholder="Activity name"
                           autoComplete="off"
                         />
+                        {editProblem && (
+                          <p className="text-xs text-destructive">{editProblem}</p>
+                        )}
                         <div className="flex items-center gap-2">
-                          <Input
-                            id={`edit-count-${entry.id}`}
-                            name={`editCount-${entry.id}`}
-                            type="number"
-                            value={editCount}
-                            onChange={(e) => setEditCount(parseInt(e.target.value) || 0)}
-                            className="w-20 text-sm"
-                            min="1"
-                            autoComplete="off"
-                          />
+                          {entry.type === 'quran' ? (
+                            <>
+                              <Input
+                                aria-label="From verse"
+                                type="number"
+                                value={editStart}
+                                onChange={(e) => setEditStart(e.target.value)}
+                                className="w-16 text-sm"
+                                min="1"
+                                placeholder="From"
+                                autoComplete="off"
+                              />
+                              <span className="text-xs text-muted-foreground">→</span>
+                              <Input
+                                aria-label="To verse"
+                                type="number"
+                                value={editEnd}
+                                onChange={(e) => setEditEnd(e.target.value)}
+                                className="w-16 text-sm"
+                                min="1"
+                                placeholder="To"
+                                autoComplete="off"
+                              />
+                            </>
+                          ) : (
+                            <Input
+                              id={`edit-count-${entry.id}`}
+                              name={`editCount-${entry.id}`}
+                              type="number"
+                              value={editCount}
+                              onChange={(e) => setEditCount(parseInt(e.target.value) || 0)}
+                              className="w-20 text-sm"
+                              min="1"
+                              autoComplete="off"
+                            />
+                          )}
                           <span className="text-xs text-muted-foreground">{entry.timestamp}</span>
                         </div>
                       </div>
@@ -260,7 +338,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   {editingId === entry.id ? (
                     // Edit Mode Actions
                     <div className="flex items-center gap-1">
-                      <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{editCount.toLocaleString()}</span>
+                      <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{editingDisplayCount().toLocaleString()}</span>
                       <Button
                         size="sm"
                         variant="outline"
@@ -343,17 +421,46 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                       placeholder="Activity name"
                       autoComplete="off"
                     />
+                    {editProblem && (
+                      <p className="text-xs text-destructive">{editProblem}</p>
+                    )}
                     <div className="flex items-center gap-2">
-                      <Input
-                        id={`edit-count-${entry.id}`}
-                        name={`editCount-${entry.id}`}
-                        type="number"
-                        value={editCount}
-                        onChange={(e) => setEditCount(parseInt(e.target.value) || 0)}
-                        className="w-20 text-sm"
-                        min="1"
-                        autoComplete="off"
-                      />
+                      {entry.type === 'quran' ? (
+                        <>
+                          <Input
+                            aria-label="From verse"
+                            type="number"
+                            value={editStart}
+                            onChange={(e) => setEditStart(e.target.value)}
+                            className="w-16 text-sm"
+                            min="1"
+                            placeholder="From"
+                            autoComplete="off"
+                          />
+                          <span className="text-xs text-muted-foreground">→</span>
+                          <Input
+                            aria-label="To verse"
+                            type="number"
+                            value={editEnd}
+                            onChange={(e) => setEditEnd(e.target.value)}
+                            className="w-16 text-sm"
+                            min="1"
+                            placeholder="To"
+                            autoComplete="off"
+                          />
+                        </>
+                      ) : (
+                        <Input
+                          id={`edit-count-${entry.id}`}
+                          name={`editCount-${entry.id}`}
+                          type="number"
+                          value={editCount}
+                          onChange={(e) => setEditCount(parseInt(e.target.value) || 0)}
+                          className="w-20 text-sm"
+                          min="1"
+                          autoComplete="off"
+                        />
+                      )}
                       <Badge className={getTypeColor(entry.type)}>
                         {formatType(entry.type)}
                       </Badge>
@@ -389,7 +496,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
               {editingId === entry.id ? (
                 // Edit Mode Actions
                 <div className="flex items-center gap-1">
-                  <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{editCount.toLocaleString()}</span>
+                  <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{editingDisplayCount().toLocaleString()}</span>
                   <Button
                     size="sm"
                     variant="outline"

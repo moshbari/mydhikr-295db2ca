@@ -259,7 +259,7 @@ const Index = () => {
     }
   };
 
-  const handleEditEntry = async (id: string | number, newCount: number, newName: string) => {
+  const handleEditEntry = async (id: string | number, newCount: number, newName: string, newExtraInfo?: string) => {
     if (!user) return;
 
     try {
@@ -284,6 +284,10 @@ const Index = () => {
         .update({
           count: newCount,
           name: newName,
+          // Correcting a Quran reading changes which verses it was, not just
+          // how many — leaving the old range behind would make the card
+          // contradict its own number.
+          ...(newExtraInfo ? { extra_info: newExtraInfo } : {}),
         })
         .eq('id', String(id))
         .eq('user_id', user.id);
@@ -294,7 +298,7 @@ const Index = () => {
       setEntries(prev =>
         prev.map(entry =>
           entry.id === id
-            ? { ...entry, count: newCount, name: newName, entryIds: [String(id)] }
+            ? { ...entry, count: newCount, name: newName, entryIds: [String(id)], extraInfo: newExtraInfo ?? entry.extraInfo }
             : entry
         )
       );
