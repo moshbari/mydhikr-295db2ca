@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * The Quran itself, set in Indo-Pak script — the hand South Asian readers
+ * learned to read from, rather than the Naskh shapes the old face drew.
+ *
+ * DigitalKhatt IndoPak by Amine Anane and Tarteel Inc., under the SIL Open
+ * Font License 1.1. The licence is served alongside it at
+ * /fonts/DigitalKhattIndoPak-OFL.txt.
+ *
+ * `swap` on purpose: an ayah readable in the fallback beats an ayah that is
+ * not there at all while 200KB comes down.
+ */
+@font-face {
+  font-family: 'DigitalKhatt IndoPak';
+  src: url('/fonts/DigitalKhattIndoPak.woff2') format('woff2'),
+       url('/fonts/DigitalKhattIndoPak.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  /*
+   * Indo-Pak sits on a smaller x-height, so at the same point size it looks
+   * shrunken beside everything else. `size-adjust` scales the glyphs without
+   * touching the size the page asked for, which keeps the S/M/L/XL picker and
+   * the line height honest. Matches the 1.35x used on the phone.
+   */
+  size-adjust: 135%;
+}
+
 /* Islamic Daily Tracker Design System
 All colors in HSL format following Islamic green theme
 */

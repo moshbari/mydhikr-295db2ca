@@ -166,89 +166,49 @@ const Index = () => {
     }
     
     try {
-      // Check if entry with same type, name, and extraInfo (verse range) already exists today
-      const existingEntry = entries.find(entry => 
-        entry.type === type && 
-        entry.name === name && 
-        (type !== "quran" ||
-          normalizeRangeKey(entry.extraInfo, entry.name) === normalizeRangeKey(extraInfo, name))
-      );
-
-      if (existingEntry) {
-        // Update existing entry by adding the new count
-        const newCount = existingEntry.count + count;
-        
-        const currentTime = new Date().toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit',
-          hour12: true 
-        });
-        
-        const { error } = await supabase
-          .from('daily_entries')
-          .update({
-            count: newCount,
-            timestamp: currentTime,
-            created_at: new Date().toISOString(), // Update created_at to reflect last update time
-          })
-          .eq('id', String(existingEntry.id))
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        // Update local state
-        setEntries(prev => 
-          prev.map(entry => 
-            entry.id === existingEntry.id 
-              ? { ...entry, count: newCount, timestamp: currentTime }
-              : entry
-          )
-        );
-
-        toast({
-          title: "Entry updated",
-          description: `${name}: ${count} added (total: ${newCount})`,
-        });
-      } else {
-        // Create new entry
-        const { data, error } = await supabase
-          .from('daily_entries')
-          .insert({
-            user_id: user.id,
-            type,
-            name,
-            count,
-            entry_date: today,
-            timestamp: new Date().toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: true 
-            }),
-            extra_info: extraInfo,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        const newEntry: DailyEntry = {
-          id: data.id,
+      // Every addition is its own row, the way the phone has always saved
+      // them. They used to be folded into one row here, so fifteen rak'ah at
+      // one o'clock and seven at twenty past became a single 22 with no way
+      // to see — or correct — either half. The summary groups them under one
+      // heading now, so the detail costs nothing to keep.
+      // Create new entry
+      const { data, error } = await supabase
+        .from('daily_entries')
+        .insert({
+          user_id: user.id,
           type,
           name,
           count,
-          timestamp: data.timestamp,
-          extraInfo: extraInfo,
-        };
+          entry_date: today,
+          timestamp: new Date().toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          }),
+          extra_info: extraInfo,
+        })
+        .select()
+        .single();
 
-        setEntries(prev => [newEntry, ...prev]);
-        
-        sounds.add();
-        await haptics.success();
-        toast({
-          title: "Entry added",
-          description: `${name}: ${count} recorded`,
-        });
-      }
+      if (error) throw error;
+
+      const newEntry: DailyEntry = {
+        id: data.id,
+        type,
+        name,
+        count,
+        timestamp: data.timestamp,
+        extraInfo: extraInfo,
+      };
+
+      setEntries(prev => [newEntry, ...prev]);
+      
+      sounds.add();
+      await haptics.success();
+      toast({
+        title: "Entry added",
+        description: `${name}: ${count} recorded`,
+      });
     } catch (error) {
       console.error('Error adding entry:', error);
       toast({

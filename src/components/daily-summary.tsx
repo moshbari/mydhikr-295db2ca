@@ -9,6 +9,7 @@ import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 import { motion, AnimatePresence } from "framer-motion";
 import { parseRange, displayRange, totalVersesInName, formatRange } from "@/lib/quran-range";
+import { worshipMatchKey } from "@/lib/worship-name";
 
 export interface DailyEntry {
   id: string | number;
@@ -149,6 +150,14 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
     }
   };
 
+  const typeIcon = (type: string) => {
+    switch (type) {
+      case "quran": return "📖";
+      case "salah": return "🕌";
+      default: return "📿";
+    }
+  };
+
   const formatType = (type: string) => {
     switch (type) {
       case "dhikr":
@@ -175,34 +184,58 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
     );
   }
 
-  // Group Quran entries by surah name
-  const groupQuranEntries = (entries: DailyEntry[]) => {
-    const quranEntries = entries.filter(entry => entry.type === "quran");
-    const otherEntries = entries.filter(entry => entry.type !== "quran");
-    
-    const quranGroups = quranEntries.reduce((groups, entry) => {
-      const surahName = entry.name;
-      if (!groups[surahName]) {
-        groups[surahName] = [];
+  /**
+   * Every entry of one worship under a single heading — An-Nisa read three
+   * times is one card, not three cards all headed "An-Nisa". Quran was already
+   * grouped this way; dhikr and salah are now too, so the day's total for a
+   * worship is the headline and the individual additions sit underneath.
+   *
+   * Group order follows the first time each name appears, so a heading does
+   * not jump about as more is added to an older one.
+   */
+  const groupEntries = (list: DailyEntry[]) => {
+    const order: string[] = [];
+    const byKey = new Map<string, DailyEntry[]>();
+
+    list.forEach((entry) => {
+      const key = `${entry.type}-${worshipMatchKey(entry.name)}`;
+      if (!byKey.has(key)) {
+        order.push(key);
+        byKey.set(key, []);
       }
-      groups[surahName].push(entry);
-      return groups;
-    }, {} as Record<string, DailyEntry[]>);
-    
-    return { quranGroups, otherEntries };
+      byKey.get(key)!.push(entry);
+    });
+
+    return order.map((key) => {
+      const groupEntries = byKey.get(key)!;
+      return {
+        key,
+        type: groupEntries[0].type,
+        name: groupEntries[0].name,
+        entries: groupEntries,
+        total: groupEntries.reduce((sum, e) => sum + e.count, 0),
+        /**
+         * Whether the entries underneath say anything the heading does not.
+         * A lone count under its own name is the heading repeated; a lone
+         * Quran reading still has to say which verses it was.
+         */
+        showsLines:
+          groupEntries.length > 1 || Boolean(groupEntries[0].extraInfo),
+      };
+    });
   };
 
-  const { quranGroups, otherEntries } = groupQuranEntries(entries);
+  const groups = groupEntries(entries);
 
   return (
     <div className="tracker-card">
       <h3 className="text-lg font-semibold mb-4 text-foreground">📊 Daily Summary</h3>
       <AnimatePresence mode="popLayout">
         <div className="space-y-3">
-          {/* Render grouped Quran entries */}
-          {Object.entries(quranGroups).map(([surahName, surahEntries]) => (
+          {/* One card per worship, whatever its type */}
+          {groups.map(({ key, type: groupType, name: surahName, entries: surahEntries, total, showsLines }) => (
             <motion.div 
-              key={surahName}
+              key={key}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
@@ -212,26 +245,26 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
             {/* Main Surah Header */}
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <span className="text-lg shrink-0">📖</span>
+                <span className="text-lg shrink-0">{typeIcon(groupType)}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground text-sm sm:text-base truncate">{surahName}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <Badge className="bg-accent text-accent-foreground text-xs whitespace-nowrap">
-                      Quran
+                    <Badge className={`${getTypeColor(groupType)} text-xs whitespace-nowrap`}>
+                      {formatType(groupType)}
                     </Badge>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {surahEntries.length} session{surahEntries.length > 1 ? 's' : ''}
+                      {surahEntries.length} {surahEntries.length > 1 ? 'entries' : 'entry'}
                     </span>
                   </div>
                 </div>
               </div>
               <div className="text-lg sm:text-xl font-bold text-primary shrink-0">
-                {surahEntries.reduce((total, entry) => total + entry.count, 0).toLocaleString()}
+                ×{total.toLocaleString()}
               </div>
             </div>
 
-            {/* Sub-entries for each verse range */}
-            {surahEntries.map((entry) => (
+            {/* The individual additions, small, under the heading */}
+            {showsLines && surahEntries.map((entry) => (
               <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -251,7 +284,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                 <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border border-border/30"
                 >
                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <span className="text-lg shrink-0">📿</span>
+                  <span className="text-lg shrink-0">{typeIcon(entry.type)}</span>
                   <div className="flex-1 min-w-0">
                     {editingId === entry.id ? (
                       // Edit Mode
@@ -387,161 +420,6 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
           </motion.div>
         ))}
 
-        {/* Render other entries (Dhikr, Salah) normally */}
-        {otherEntries.map((entry) => (
-          <motion.div
-            key={entry.id}
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ 
-              opacity: 1, 
-              scale: editingId === entry.id ? 1.02 : 1,
-              y: 0
-            }}
-            exit={{ opacity: 0, x: -100, height: 0, transition: { duration: 0.25 } }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          >
-            <SwipeableItem
-              onEdit={() => handleEditStart(entry)}
-              onDelete={() => handleDeleteStart(entry)}
-            >
-            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50"
-            >
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <span className="text-lg shrink-0">{getTypeIcon(entry.type)}</span>
-              <div className="flex-1 min-w-0">
-                {editingId === entry.id ? (
-                  // Edit Mode
-                  <div className="space-y-2">
-                    <Input
-                      id={`edit-name-${entry.id}`}
-                      name={`editName-${entry.id}`}
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="text-sm"
-                      placeholder="Activity name"
-                      autoComplete="off"
-                    />
-                    {editProblem && (
-                      <p className="text-xs text-destructive">{editProblem}</p>
-                    )}
-                    <div className="flex items-center gap-2">
-                      {entry.type === 'quran' ? (
-                        <>
-                          <Input
-                            aria-label="From verse"
-                            type="number"
-                            value={editStart}
-                            onChange={(e) => setEditStart(e.target.value)}
-                            className="w-16 text-sm"
-                            min="1"
-                            placeholder="From"
-                            autoComplete="off"
-                          />
-                          <span className="text-xs text-muted-foreground">→</span>
-                          <Input
-                            aria-label="To verse"
-                            type="number"
-                            value={editEnd}
-                            onChange={(e) => setEditEnd(e.target.value)}
-                            className="w-16 text-sm"
-                            min="1"
-                            placeholder="To"
-                            autoComplete="off"
-                          />
-                        </>
-                      ) : (
-                        <Input
-                          id={`edit-count-${entry.id}`}
-                          name={`editCount-${entry.id}`}
-                          type="number"
-                          value={editCount}
-                          onChange={(e) => setEditCount(parseInt(e.target.value) || 0)}
-                          className="w-20 text-sm"
-                          min="1"
-                          autoComplete="off"
-                        />
-                      )}
-                      <Badge className={getTypeColor(entry.type)}>
-                        {formatType(entry.type)}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">{entry.timestamp}</span>
-                    </div>
-                  </div>
-                ) : (
-                  // View Mode
-                  <div className="min-w-0">
-                    <p className="font-medium text-foreground text-sm sm:text-base truncate">
-                      {entry.name}
-                      {entry.type === 'quran' && entry.extraInfo && (() => {
-                        const range = parseRange(entry.extraInfo, totalVersesInName(entry.name));
-                        return (
-                          <span className="ml-1 text-xs opacity-60">
-                            ({range ? displayRange(range).toLowerCase() : entry.extraInfo})
-                          </span>
-                        );
-                      })()}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <Badge className={`${getTypeColor(entry.type)} text-xs whitespace-nowrap`}>
-                        {formatType(entry.type)}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">{entry.timestamp}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {editingId === entry.id ? (
-                // Edit Mode Actions
-                <div className="flex items-center gap-1">
-                  <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{editingDisplayCount().toLocaleString()}</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleEditSave}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleEditCancel}
-                    className="h-8 w-8 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                // View Mode Actions
-                <div className="flex items-center gap-1">
-                  <span className="text-lg sm:text-xl font-bold text-primary mr-2 shrink-0">{entry.count.toLocaleString()}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleEditStart(entry)}
-                    className="h-8 w-8 p-0 touch-target"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDeleteStart(entry)}
-                    className="h-8 w-8 p-0 text-destructive hover:text-destructive touch-target"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-          </SwipeableItem>
-          </motion.div>
-        ))}
         </div>
       </AnimatePresence>
 

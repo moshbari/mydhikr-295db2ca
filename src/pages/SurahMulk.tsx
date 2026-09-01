@@ -162,7 +162,7 @@ const SurahMulk = () => {
               Back
             </Button>
             <div className="text-center">
-              <h1 className="text-xl md:text-2xl font-bold text-white" style={{ fontFamily: "'Scheherazade New', serif" }}>
+              <h1 className="text-xl md:text-2xl font-bold text-white" style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif" }}>
                 سورة الملك
               </h1>
               <p className="text-white/80 text-xs md:text-sm">
@@ -192,7 +192,7 @@ const SurahMulk = () => {
               >
                 {lastCheckedAyah}
               </div>
-              <p className="text-base md:text-lg leading-relaxed" style={{ fontFamily: "'Scheherazade New', serif" }}>
+              <p className="text-base md:text-lg leading-relaxed" style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif" }}>
                 {getAyahText(lastCheckedAyah)}
               </p>
             </div>
@@ -253,7 +253,7 @@ const SurahMulk = () => {
               </span>
               <p 
                 className={cn("leading-loose flex-1", fontSizeClass)}
-                style={{ fontFamily: "'Scheherazade New', serif", lineHeight: "2.2" }}
+                style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif", lineHeight: "2.2" }}
               >
                 {getAyahText(ayah.number)}
               </p>

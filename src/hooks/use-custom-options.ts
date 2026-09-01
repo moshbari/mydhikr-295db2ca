@@ -7,6 +7,7 @@ type Category = "dhikr" | "quran" | "salah";
 
 const savedKey = (userId: string, category: Category) => `custom_options_${userId}_${category}`;
 const removedKey = (userId: string, category: Category) => `removed_options_${userId}_${category}`;
+const defaultKey = (userId: string, category: Category) => `default_option_${userId}_${category}`;
 
 const read = (key: string): string[] => {
   try {
@@ -40,6 +41,8 @@ export const useCustomOptions = (category: Category, builtIn: string[]) => {
   const [history, setHistory] = useState<string[]>([]);
   const [saved, setSaved] = useState<string[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
+  /// Bumped when the pin changes, so the section redraws with it.
+  const [defaultTick, setDefaultTick] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -142,5 +145,40 @@ export const useCustomOptions = (category: Category, builtIn: string[]) => {
     [user, category]
   );
 
-  return { customOptions, addCustomOption, removeCustomOption };
+  /**
+   * The worship this section opens on.
+   *
+   * Someone praying the same nafl every day was opening the picker and
+   * hunting for it every single time. Whatever is pinned here is what the
+   * section starts on, until something else is pinned.
+   */
+  const defaultOption = (() => {
+    void defaultTick;
+    if (!user) return "";
+    try {
+      return localStorage.getItem(defaultKey(user.id, category)) || "";
+    } catch {
+      return "";
+    }
+  })();
+
+  const setDefaultOption = useCallback(
+    (name: string | null) => {
+      if (!user) return;
+      const key = defaultKey(user.id, category);
+      try {
+        if (name && name.trim()) {
+          localStorage.setItem(key, name.trim());
+        } else {
+          localStorage.removeItem(key);
+        }
+        setDefaultTick((n) => n + 1);
+      } catch {
+        // A full or blocked localStorage shouldn't break adding an entry.
+      }
+    },
+    [user, category]
+  );
+
+  return { customOptions, addCustomOption, removeCustomOption, defaultOption, setDefaultOption };
 };

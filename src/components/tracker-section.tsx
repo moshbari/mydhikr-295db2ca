@@ -4,7 +4,7 @@ import { NumberPad } from "@/components/ui/number-pad";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, AlertCircle, Trash2 } from "lucide-react";
+import { Plus, AlertCircle, Trash2, Pin, PinOff } from "lucide-react";
 import { useIslamicOptions } from "@/hooks/use-islamic-options";
 import { useCustomOptions } from "@/hooks/use-custom-options";
 import { haptics } from "@/lib/haptics";
@@ -23,7 +23,8 @@ interface TrackerSectionProps {
 export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps) {
   const { options: dbOptions, loading: optionsLoading } = useIslamicOptions(type);
   const builtInOptions = dbOptions.filter(opt => opt.is_active).map(opt => opt.name);
-  const { customOptions, addCustomOption, removeCustomOption } = useCustomOptions(type, builtInOptions);
+  const { customOptions, addCustomOption, removeCustomOption, defaultOption, setDefaultOption } =
+    useCustomOptions(type, builtInOptions);
   const { rangesFor, refreshProgress } = useQuranProgress();
   /// Readings added in this sitting, so the bookmark moves the moment one is
   /// added rather than waiting for the server to answer.
@@ -65,6 +66,19 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   };
 
   const currentName = showCustomInput ? customName.trim() : selectedOption;
+  const isDefault =
+    Boolean(defaultOption) && worshipMatchKey(defaultOption) === worshipMatchKey(currentName);
+
+  // Open on the pinned worship — but only while it is still in the list, so a
+  // name deleted since being pinned cannot leave the section stuck on
+  // something that is not there.
+  useEffect(() => {
+    if (selectedOption || showCustomInput || optionsLoading) return;
+    if (!defaultOption) return;
+    const available = [...customOptions, ...builtInOptions];
+    const match = available.find((name) => worshipMatchKey(name) === worshipMatchKey(defaultOption));
+    if (match) setSelectedOption(match);
+  }, [defaultOption, selectedOption, showCustomInput, optionsLoading, customOptions, builtInOptions]);
 
   /// How far through this surah the member has got, over every day they have
   /// ever recorded. Null for anything that isn't a surah.
@@ -194,8 +208,10 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         <div className="space-y-3">
           {!showCustomInput ? (
             <>
+              <div className="flex items-center gap-2">
               <Select value={selectedOption} onValueChange={setSelectedOption} disabled={optionsLoading}>
                 <SelectTrigger className="w-full bg-background border border-input">
+                  {isDefault && <Pin className="w-3.5 h-3.5 mr-1.5 shrink-0 text-primary" />}
                   <SelectValue placeholder={optionsLoading ? "Loading..." : `Select ${title.toLowerCase()}...`} />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-input shadow-lg z-50 max-h-60">
@@ -229,7 +245,24 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
                   ))}
                 </SelectContent>
               </Select>
-              
+
+              {/* Pin the one you always pick, so this opens on it next time. */}
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={!currentName}
+                title={isDefault ? "Remove as default" : "Set as default"}
+                aria-label={isDefault ? "Remove as default" : "Set as default"}
+                onClick={async () => {
+                  await haptics.light();
+                  setDefaultOption(isDefault ? null : currentName);
+                }}
+                className="shrink-0"
+              >
+                {isDefault ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
+              </Button>
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"

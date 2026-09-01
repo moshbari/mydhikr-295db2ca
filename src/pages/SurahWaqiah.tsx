@@ -248,7 +248,7 @@ const SurahWaqiah = () => {
             <div className="text-center">
               <h1 
                 className="text-xl md:text-2xl font-bold text-white"
-                style={{ fontFamily: "'Scheherazade New', serif" }}
+                style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif" }}
               >
                 سورة الواقعة
               </h1>
@@ -279,7 +279,7 @@ const SurahWaqiah = () => {
               </div>
               <p 
                 className="text-base md:text-lg leading-relaxed"
-                style={{ fontFamily: "'Scheherazade New', serif" }}
+                style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif" }}
               >
                 {getAyahText(lastCheckedAyahData.number)}
               </p>
@@ -355,7 +355,7 @@ const SurahWaqiah = () => {
                   </span>
                   <p 
                     className={cn("flex-1 leading-loose", fontSizeClass)}
-                    style={{ fontFamily: "'Scheherazade New', serif", lineHeight: 2.2 }}
+                    style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif", lineHeight: 2.2 }}
                   >
                     {getAyahText(ayah.number)}
                   </p>
