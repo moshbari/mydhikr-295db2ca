@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
 import { createAdminAccounts } from "@/lib/admin-setup";
 import { worshipMatchKey } from "@/lib/worship-name";
+import { normalizeRangeKey } from "@/lib/quran-range";
 
 const Index = () => {
   const { toast } = useToast();
@@ -64,8 +65,10 @@ const Index = () => {
         (entriesData || []).forEach(entry => {
           // For Quran entries, include extra_info in the key to keep different verse ranges separate
           const nameKey = worshipMatchKey(entry.name);
+          // `1_10` from the phone and `1 → 10` from here are the same ten
+          // verses, so they belong on one line.
           const key = entry.type === 'quran' && entry.extra_info 
-            ? `${entry.type}-${nameKey}-${entry.extra_info}`
+            ? `${entry.type}-${nameKey}-${normalizeRangeKey(entry.extra_info, entry.name)}`
             : `${entry.type}-${nameKey}`;
           const timestamp = entry.timestamp || new Date().toLocaleTimeString('en-US', { 
             hour: '2-digit', 
@@ -167,7 +170,8 @@ const Index = () => {
       const existingEntry = entries.find(entry => 
         entry.type === type && 
         entry.name === name && 
-        (type !== "quran" || entry.extraInfo === extraInfo)
+        (type !== "quran" ||
+          normalizeRangeKey(entry.extraInfo, entry.name) === normalizeRangeKey(extraInfo, name))
       );
 
       if (existingEntry) {

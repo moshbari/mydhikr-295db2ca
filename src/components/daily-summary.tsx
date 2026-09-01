@@ -8,6 +8,7 @@ import { Edit3, Trash2, Save, X } from "lucide-react";
 import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 import { motion, AnimatePresence } from "framer-motion";
+import { parseRange, displayRange, totalVersesInName } from "@/lib/quran-range";
 
 export interface DailyEntry {
   id: string | number;
@@ -235,10 +236,13 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                         {entry.extraInfo && (
                           <div className="text-sm text-foreground break-words">
                             {(() => {
-                              const [start, end] = entry.extraInfo.split(' → ').map(v => v.trim());
+                              // A reading saved on the phone reads `1_10`, so it
+                              // is parsed rather than split on the arrow alone.
+                              const range = parseRange(entry.extraInfo, totalVersesInName(entry.name));
+                              if (!range) return <span>{entry.extraInfo}</span>;
                               return (
                                 <span>
-                                  Verses {start} → {end} ({entry.count.toLocaleString()} verses)
+                                  {displayRange(range)} ({entry.count.toLocaleString()} verses)
                                 </span>
                               );
                             })()}
@@ -361,11 +365,14 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   <div className="min-w-0">
                     <p className="font-medium text-foreground text-sm sm:text-base truncate">
                       {entry.name}
-                      {entry.type === 'quran' && entry.extraInfo && (
-                        <span className="ml-1 text-xs opacity-60">
-                          (verses {entry.extraInfo.replace(' → ', '-')})
-                        </span>
-                      )}
+                      {entry.type === 'quran' && entry.extraInfo && (() => {
+                        const range = parseRange(entry.extraInfo, totalVersesInName(entry.name));
+                        return (
+                          <span className="ml-1 text-xs opacity-60">
+                            ({range ? displayRange(range).toLowerCase() : entry.extraInfo})
+                          </span>
+                        );
+                      })()}
                     </p>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <Badge className={`${getTypeColor(entry.type)} text-xs whitespace-nowrap`}>

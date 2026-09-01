@@ -9,6 +9,9 @@ import { useIslamicOptions } from "@/hooks/use-islamic-options";
 import { useCustomOptions } from "@/hooks/use-custom-options";
 import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
+import { useQuranProgress } from "@/hooks/use-quran-progress";
+import { buildProgress, totalVersesInName, type QuranRange } from "@/lib/quran-range";
+import { worshipMatchKey } from "@/lib/worship-name";
 
 interface TrackerSectionProps {
   title: string;
@@ -21,6 +24,10 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   const { options: dbOptions, loading: optionsLoading } = useIslamicOptions(type);
   const builtInOptions = dbOptions.filter(opt => opt.is_active).map(opt => opt.name);
   const { customOptions, addCustomOption, removeCustomOption } = useCustomOptions(type, builtInOptions);
+  const { rangesFor, refreshProgress } = useQuranProgress();
+  /// Readings added in this sitting, so the bookmark moves the moment one is
+  /// added rather than waiting for the server to answer.
+  const [sessionRanges, setSessionRanges] = useState<{ name: string; range: QuranRange }[]>([]);
   const [managingTypes, setManagingTypes] = useState<boolean>(false);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [customName, setCustomName] = useState<string>("");
@@ -57,10 +64,33 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
     return "";
   };
 
+  const currentName = showCustomInput ? customName.trim() : selectedOption;
+
+  /// How far through this surah the member has got, over every day they have
+  /// ever recorded. Null for anything that isn't a surah.
+  const quranProgress = (() => {
+    if (type !== "quran") return null;
+    const total = totalVersesInName(currentName);
+    if (!currentName || total <= 0) return null;
+
+    const key = worshipMatchKey(currentName);
+    const justAdded = sessionRanges.filter((r) => worshipMatchKey(r.name) === key).map((r) => r.range);
+    return buildProgress(total, [...rangesFor(currentName), ...justAdded]);
+  })();
+
   // Clear error when selection changes
   useEffect(() => {
     setVerseError("");
   }, [selectedOption, customName]);
+
+  // Start where the last reading of this surah stopped. It only fills an empty
+  // pair of boxes, so it can never overwrite what is being typed.
+  useEffect(() => {
+    if (type !== "quran" || isCompleteSurah) return;
+    if (startValue || endValue) return;
+    if (!quranProgress?.nextVerse) return;
+    setStartValue(String(quranProgress.nextVerse));
+  }, [type, isCompleteSurah, startValue, endValue, quranProgress?.nextVerse]);
 
   // Handle complete surah checkbox
   useEffect(() => {
@@ -112,8 +142,10 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
         sounds.add();
         const rangeInfo = `${start} → ${end}`;
         onAdd(name, difference, rangeInfo);
-        setSelectedOption("");
-        setCustomName("");
+        setSessionRanges((prev) => [...prev, { name, range: { start, end } }]);
+        refreshProgress();
+        // The surah stays selected: the next sitting almost always carries on
+        // in the same one, and the boxes refill with the verse after this.
         setStartValue("");
         setEndValue("");
         setVerseError("");
@@ -319,7 +351,29 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
           {type === "quran" ? (
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Verse Range</h3>
-              
+
+              {quranProgress && (
+                <div className="p-3 rounded-lg bg-primary/5 border border-primary/10 text-sm">
+                  {!quranProgress.hasReadAnything ? (
+                    <span>Nothing recorded from this surah yet — start at verse 1.</span>
+                  ) : quranProgress.isComplete ? (
+                    <span>Finished — all {quranProgress.totalVerses} verses recorded.</span>
+                  ) : (
+                    <span>
+                      Read to verse <strong>{quranProgress.furthestVerse}</strong> of{" "}
+                      {quranProgress.totalVerses}. Carry on from verse{" "}
+                      <strong>{quranProgress.nextVerse}</strong>.
+                    </span>
+                  )}
+                  {quranProgress.hasReadAnything &&
+                    quranProgress.versesRead < quranProgress.furthestVerse && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {quranProgress.versesRead} verses recorded, so some earlier ones are still missing.
+                      </p>
+                    )}
+                </div>
+              )}
+
               <div className="flex items-center space-x-2 mb-3">
                 <Checkbox 
                   id="complete-surah"

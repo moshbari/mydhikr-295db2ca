@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { haptics } from "@/lib/haptics";
 import { worshipMatchKey } from "@/lib/worship-name";
+import { normalizeRangeKey } from "@/lib/quran-range";
 
 interface HistoricalData {
   date: string;
@@ -316,7 +317,7 @@ const History = () => {
     entries.forEach((entry) => {
       const nameKey = worshipMatchKey(entry.name);
       const key = entry.type === 'quran' && entry.extraInfo
-        ? `${entry.type}-${nameKey}-${entry.extraInfo}`
+        ? `${entry.type}-${nameKey}-${normalizeRangeKey(entry.extraInfo, entry.name)}`
         : `${entry.type}-${nameKey}`;
 
       const existing = lines.get(key);
