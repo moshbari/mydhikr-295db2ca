@@ -27,6 +27,8 @@ interface DailySummaryProps {
   onDelete?: (id: string | number) => void;
 }
 
+const LINES_SHOWN_COLLAPSED = 3;
+
 export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const [editCount, setEditCount] = useState<number>(0);
@@ -37,6 +39,8 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
   const [editEnd, setEditEnd] = useState<string>("");
   const [editProblem, setEditProblem] = useState<string>("");
   const [editType, setEditType] = useState<DailyEntry["type"] | null>(null);
+  /** Groups the reader has opened up. A long list is folded until asked for. */
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<DailyEntry | null>(null);
 
@@ -221,11 +225,46 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
          */
         showsLines:
           groupEntries.length > 1 || Boolean(groupEntries[0].extraInfo),
+        /**
+         * Short lists stay open: two readings of An-Nisa are the verse ranges
+         * the summary exists to show. It is a day of nafl — seven, ten, twenty
+         * additions of the same prayer — that turns one card into a screenful.
+         */
+        hasHiddenLines: groupEntries.length > LINES_SHOWN_COLLAPSED,
       };
     });
   };
 
   const groups = groupEntries(entries);
+
+  /**
+   * The entries on show: all of them once opened, the newest few otherwise.
+   * A line being edited always stays on screen, so opening the last one in a
+   * long list cannot make it vanish under the cursor.
+   */
+  const visibleLines = (key: string, lines: DailyEntry[]) => {
+    if (expandedGroups.has(key)) return lines;
+
+    const shown = lines.slice(0, LINES_SHOWN_COLLAPSED);
+    if (editingId && !shown.some((e) => e.id === editingId)) {
+      const editing = lines.find((e) => e.id === editingId);
+      if (editing) shown.push(editing);
+    }
+    return shown;
+  };
+
+  const toggleGroup = async (key: string) => {
+    await haptics.light();
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="tracker-card">
@@ -233,7 +272,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
       <AnimatePresence mode="popLayout">
         <div className="space-y-3">
           {/* One card per worship, whatever its type */}
-          {groups.map(({ key, type: groupType, name: surahName, entries: surahEntries, total, showsLines }) => (
+          {groups.map(({ key, type: groupType, name: surahName, entries: surahEntries, total, showsLines, hasHiddenLines }) => (
             <motion.div 
               key={key}
               initial={{ opacity: 0, y: -10 }}
@@ -264,7 +303,7 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
             </div>
 
             {/* The individual additions, small, under the heading */}
-            {showsLines && surahEntries.map((entry) => (
+            {showsLines && visibleLines(key, surahEntries).map((entry) => (
               <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -417,6 +456,16 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                 </SwipeableItem>
               </motion.div>
             ))}
+
+            {showsLines && hasHiddenLines && (
+              <button
+                type="button"
+                onClick={() => toggleGroup(key)}
+                className="w-full py-2 text-xs font-semibold text-primary hover:opacity-80 transition-opacity"
+              >
+                {expandedGroups.has(key) ? "Show less" : `Show all ${surahEntries.length}`}
+              </button>
+            )}
           </motion.div>
         ))}
 
