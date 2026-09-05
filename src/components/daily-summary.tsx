@@ -25,11 +25,16 @@ interface DailySummaryProps {
   entries: DailyEntry[];
   onEdit?: (id: string | number, newCount: number, newName: string, newExtraInfo?: string) => void;
   onDelete?: (id: string | number) => void;
+  /** Counts another set of rak'ah against a salah already on the day's list. */
+  onQuickAdd?: (type: DailyEntry["type"], name: string, count: number) => void;
 }
 
 const LINES_SHOWN_COLLAPSED = 3;
 
-export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
+/** A nafl prayer is two rak'ah, so that is what one tap counts. */
+const QUICK_ADD_RAKAH = 2;
+
+export function DailySummary({ entries, onEdit, onDelete, onQuickAdd }: DailySummaryProps) {
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const [editCount, setEditCount] = useState<number>(0);
   const [editName, setEditName] = useState<string>("");
@@ -110,6 +115,20 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
     setEditingId(null);
     setEditCount(0);
     setEditName("");
+  };
+
+  /**
+   * Nafl is prayed two rak'ah at a time, over and over. Scrolling down to the
+   * tracker, picking the same name again and typing 2 is a lot of screen for
+   * something done ten times in an evening — this counts it where the day is
+   * already on show. It goes in as its own addition, exactly as the tracker
+   * would send it, so it can be corrected or deleted like any other.
+   */
+  const handleQuickAdd = (type: DailyEntry["type"], name: string) => {
+    if (!onQuickAdd) return;
+    // The sound and the buzz belong to the save itself, not to this tap —
+    // playing them here too would make one addition feel like two.
+    onQuickAdd(type, name, QUICK_ADD_RAKAH);
   };
 
   const handleDeleteStart = async (entry: DailyEntry) => {
@@ -297,8 +316,20 @@ export function DailySummary({ entries, onEdit, onDelete }: DailySummaryProps) {
                   </div>
                 </div>
               </div>
-              <div className="text-lg sm:text-xl font-bold text-primary shrink-0">
-                ×{total.toLocaleString()}
+              <div className="flex items-center gap-2 shrink-0">
+                {groupType === "salah" && onQuickAdd && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleQuickAdd(groupType, surahName)}
+                    className="h-9 px-3 font-bold touch-target"
+                    aria-label={`Add ${QUICK_ADD_RAKAH} rak'ah to ${surahName}`}
+                  >
+                    +{QUICK_ADD_RAKAH}
+                  </Button>
+                )}
+                <div className="text-lg sm:text-xl font-bold text-primary">
+                  ×{total.toLocaleString()}
+                </div>
               </div>
             </div>
 

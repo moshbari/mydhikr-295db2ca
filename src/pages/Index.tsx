@@ -580,6 +580,7 @@ const Index = () => {
               entries={entries} 
               onEdit={handleEditEntry}
               onDelete={handleDeleteEntry}
+              onQuickAdd={(type, name, count) => addEntry(type, name, count)}
             />
 
             {/* Dhikr & Tasbih Section */}
