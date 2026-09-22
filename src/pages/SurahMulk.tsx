@@ -8,6 +8,10 @@ import { haptics } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { useSurahFontSize } from "@/hooks/use-surah-font-size";
 import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
+import { TajweedControls } from "@/components/surah/TajweedControls";
+import { TajweedText } from "@/components/surah/TajweedText";
+import { useTajweed } from "@/hooks/use-tajweed";
+import { TAJWEED_MARKS } from "@/data/tajweed-marks";
 import { FloatingVoiceAyahSearch } from "@/components/surah/FloatingVoiceAyahSearch";
 
 const AYAH_DATA = [
@@ -51,6 +55,7 @@ const SurahMulk = () => {
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
   const { fontSize, fontSizeClass, handleFontSizeChange } = useSurahFontSize();
+  const tajweed = useTajweed();
   const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const scrollToAyah = (ayahNumber: number) => {
@@ -134,12 +139,10 @@ const SurahMulk = () => {
   const completedCount = Object.values(progress).filter(Boolean).length;
   const progressPercent = Math.round((completedCount / TOTAL_AYAHS) * 100);
 
-  const getAyahText = (ayahNumber: number) => {
+  const renderAyah = (ayahNumber: number) => {
     const ayah = AYAH_DATA.find(a => a.number === ayahNumber);
-    if (!ayah) return "";
-    const words = ayah.text.split(" ");
-    if (words.length <= 8) return ayah.text;
-    return `${words.slice(0, 4).join(" ")} ... ${words.slice(-4).join(" ")}`;
+    if (!ayah) return null;
+    return <TajweedText text={ayah.text} marks={tajweed.enabled ? TAJWEED_MARKS.mulk[ayahNumber - 1] : undefined} />;
   };
 
   return (
@@ -193,7 +196,7 @@ const SurahMulk = () => {
                 {lastCheckedAyah}
               </div>
               <p className="text-base md:text-lg leading-relaxed" style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif" }}>
-                {getAyahText(lastCheckedAyah)}
+                {renderAyah(lastCheckedAyah)}
               </p>
             </div>
           </div>
@@ -205,6 +208,7 @@ const SurahMulk = () => {
         fontSize={fontSize} 
         onFontSizeChange={handleFontSizeChange}
         accentColor="#1a237e"
+        rightElement={<TajweedControls enabled={tajweed.enabled} onToggle={tajweed.toggle} accentColor="#1a237e" />}
       />
 
       <div className="bg-gray-100 px-4 py-2 sm:px-6 sm:py-3 border-t border-gray-200">
@@ -255,7 +259,7 @@ const SurahMulk = () => {
                 className={cn("leading-loose flex-1", fontSizeClass)}
                 style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif", lineHeight: "2.2" }}
               >
-                {getAyahText(ayah.number)}
+                {renderAyah(ayah.number)}
               </p>
             </div>
           ))}

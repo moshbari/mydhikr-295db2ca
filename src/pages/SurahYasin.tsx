@@ -9,6 +9,10 @@ import { haptics } from "@/lib/haptics";
 import { sounds } from "@/lib/sounds";
 import { useSurahFontSize } from "@/hooks/use-surah-font-size";
 import { FontSizeSelector } from "@/components/surah/FontSizeSelector";
+import { TajweedControls } from "@/components/surah/TajweedControls";
+import { TajweedText } from "@/components/surah/TajweedText";
+import { useTajweed } from "@/hooks/use-tajweed";
+import { TAJWEED_MARKS } from "@/data/tajweed-marks";
 import { FloatingVoiceAyahSearch } from "@/components/surah/FloatingVoiceAyahSearch";
 
 // Ayah data for Surah Yasin
@@ -106,6 +110,7 @@ const SurahYasin = () => {
   const [lastCheckedAyah, setLastCheckedAyah] = useState<number | null>(null);
   const [lastSaveTime, setLastSaveTime] = useState<string | null>(null);
   const { fontSize, fontSizeClass, handleFontSizeChange } = useSurahFontSize();
+  const tajweed = useTajweed();
   const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const scrollToAyah = (ayahNumber: number) => {
@@ -158,12 +163,10 @@ const SurahYasin = () => {
     }
   }, [progress, lastCheckedAyah]);
 
-  const getAyahText = (ayahNumber: number) => {
+  const renderAyah = (ayahNumber: number) => {
     const ayah = AYAH_DATA.find(a => a.number === ayahNumber);
-    if (!ayah) return "";
-    const words = ayah.text.split(" ");
-    if (words.length <= 8) return ayah.text;
-    return `${words.slice(0, 4).join(" ")} ... ${words.slice(-4).join(" ")}`;
+    if (!ayah) return null;
+    return <TajweedText text={ayah.text} marks={tajweed.enabled ? TAJWEED_MARKS.yasin[ayahNumber - 1] : undefined} />;
   };
 
   const completedCount = Object.values(progress).filter(Boolean).length;
@@ -270,7 +273,7 @@ const SurahYasin = () => {
                 className="text-base md:text-lg leading-relaxed"
                 style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif" }}
               >
-                {getAyahText(lastCheckedAyahData.number)}
+                {renderAyah(lastCheckedAyahData.number)}
               </p>
             </div>
           </div>
@@ -282,6 +285,7 @@ const SurahYasin = () => {
         fontSize={fontSize} 
         onFontSizeChange={handleFontSizeChange}
         accentColor="#1e3c72"
+        rightElement={<TajweedControls enabled={tajweed.enabled} onToggle={tajweed.toggle} accentColor="#1e3c72" />}
       />
 
       {/* Progress Bar Section */}
@@ -346,7 +350,7 @@ const SurahYasin = () => {
                     className={cn("flex-1 leading-loose", fontSizeClass)}
                     style={{ fontFamily: "'DigitalKhatt IndoPak', 'Scheherazade New', serif", lineHeight: 2.2 }}
                   >
-                    {getAyahText(ayah.number)}
+                    {renderAyah(ayah.number)}
                   </p>
                 </div>
               );
