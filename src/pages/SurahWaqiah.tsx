@@ -341,8 +341,10 @@ const SurahWaqiah = () => {
                 <div
                   key={ayah.number}
                   ref={(el) => { ayahRefs.current[ayah.number] = el; }}
+                  // The whole box answers a tap, not just the checkbox.
+                  onClick={() => handleCheckAyah(ayah.number, !isChecked)}
                   className={cn(
-                    "p-3 md:p-4 rounded-lg transition-all duration-200 flex items-center gap-3",
+                    "p-3 md:p-4 rounded-lg transition-all duration-200 flex items-center gap-3 cursor-pointer select-none",
                     isChecked 
                       ? "bg-green-100 border-r-4 border-green-500" 
                       : "bg-[#f8f9fa] hover:bg-gray-200"
@@ -352,6 +354,7 @@ const SurahWaqiah = () => {
                   <Checkbox
                     checked={isChecked}
                     onCheckedChange={(checked) => handleCheckAyah(ayah.number, checked as boolean)}
+                    onClick={(e) => e.stopPropagation()}
                     className="w-6 h-6 border-2 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
                   />
                   <span className="font-bold text-lg md:text-xl min-w-[40px] text-center">

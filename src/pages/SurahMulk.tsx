@@ -240,7 +240,9 @@ const SurahMulk = () => {
             <div
               key={ayah.number}
               ref={(el) => { ayahRefs.current[ayah.number] = el; }}
-              className={`p-3 sm:p-4 rounded-lg flex items-center gap-3 transition-all ${
+              // The whole box answers a tap, not just the checkbox.
+              onClick={() => handleCheckAyah(ayah.number, !progress[ayah.number])}
+              className={`p-3 sm:p-4 rounded-lg flex items-center gap-3 transition-all cursor-pointer select-none ${
                 progress[ayah.number]
                   ? "bg-indigo-100 border-r-4 border-indigo-600"
                   : "bg-gray-50 hover:bg-gray-100"
@@ -250,6 +252,7 @@ const SurahMulk = () => {
               <Checkbox
                 checked={!!progress[ayah.number]}
                 onCheckedChange={(checked) => handleCheckAyah(ayah.number, checked as boolean)}
+                onClick={(e) => e.stopPropagation()}
                 className="w-6 h-6 border-2 border-indigo-600 data-[state=checked]:bg-indigo-600"
               />
               <span className="w-10 sm:w-12 text-center font-bold text-gray-700 shrink-0">
