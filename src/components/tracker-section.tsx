@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { NumberPad } from "@/components/ui/number-pad";
 import { Button } from "@/components/ui/button";
@@ -72,12 +72,19 @@ export function TrackerSection({ title, icon, type, onAdd }: TrackerSectionProps
   // Open on the pinned worship — but only while it is still in the list, so a
   // name deleted since being pinned cannot leave the section stuck on
   // something that is not there.
+  // A pin that changes (here or on another device) moves the section to it.
+  const appliedDefault = useRef("");
   useEffect(() => {
-    if (selectedOption || showCustomInput || optionsLoading) return;
+    if (showCustomInput || optionsLoading) return;
     if (!defaultOption) return;
+    const changed = appliedDefault.current !== defaultOption;
+    if (selectedOption && !changed) return;
     const available = [...customOptions, ...builtInOptions];
     const match = available.find((name) => worshipMatchKey(name) === worshipMatchKey(defaultOption));
-    if (match) setSelectedOption(match);
+    if (match) {
+      appliedDefault.current = defaultOption;
+      setSelectedOption(match);
+    }
   }, [defaultOption, selectedOption, showCustomInput, optionsLoading, customOptions, builtInOptions]);
 
   /// How far through this surah the member has got, over every day they have
