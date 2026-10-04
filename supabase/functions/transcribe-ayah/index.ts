@@ -42,7 +42,7 @@ serve(async (req) => {
   }
 
   try {
-    const { audio, mimeType } = await req.json();
+    const { audio, mimeType, surah } = await req.json();
     
     if (!audio) {
       throw new Error('No audio data provided');
@@ -58,13 +58,13 @@ serve(async (req) => {
     // Process audio in chunks
     const binaryAudio = processBase64Chunks(audio);
     
-    // Prepare form data
-    const formData = new FormData();
     const safeMimeType = (typeof mimeType === 'string' && mimeType.trim().length > 0)
       ? mimeType
       : 'audio/webm';
 
-    const fileName = safeMimeType.includes('mp4')
+    const fileName = safeMimeType.includes('m4a')
+      ? 'audio.m4a'
+      : safeMimeType.includes('mp4')
       ? 'audio.mp4'
       : safeMimeType.includes('mpeg')
         ? 'audio.mp3'
@@ -75,30 +75,56 @@ serve(async (req) => {
     console.log('Audio mimeType:', safeMimeType, 'bytes:', binaryAudio.byteLength);
 
     const blob = new Blob([binaryAudio], { type: safeMimeType });
-    formData.append('file', blob, fileName);
-    formData.append('model', 'whisper-1');
-    formData.append('language', 'ar'); // Arabic language for Quran
 
-    // Send to OpenAI
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-      },
-      body: formData,
-    });
+    // gpt-transcribe, told it is hearing Quran and which surah, finds the ayah
+    // far more often than whisper-1 on short, noisy recitation (tested on
+    // Yasin/Mulk/Kahf clips, Oct 2026). The gpt-4o transcribe models were
+    // tried too and drop Arabic for German or Chinese on noisy clips, so they
+    // are not used. whisper-1 stays as the fallback if the newer model errors
+    // or hears nothing.
+    const hint = typeof surah === 'string' && surah.trim()
+      ? `تلاوة من ${surah.trim()}`
+      : 'تلاوة من القرآن الكريم';
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+    const transcribe = async (model: string, prompt?: string) => {
+      const formData = new FormData();
+      formData.append('file', blob, fileName);
+      formData.append('model', model);
+      formData.append('language', 'ar'); // Arabic language for Quran
+      if (prompt) formData.append('prompt', prompt);
+
+      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error (${model}): ${await response.text()}`);
+      }
+      const json = await response.json();
+      return (json.text ?? '') as string;
+    };
+
+    let text = '';
+    let engine = 'gpt-transcribe';
+    try {
+      text = await transcribe('gpt-transcribe', hint);
+    } catch (e) {
+      console.error(e);
+    }
+    if (!text.trim()) {
+      engine = 'whisper-1';
+      text = await transcribe('whisper-1');
     }
 
-    const result = await response.json();
-    console.log('Transcription result:', result.text);
+    const result = { text, engine };
+    console.log('Transcription result:', engine, result.text);
 
     return new Response(
-      JSON.stringify({ text: result.text }),
+      JSON.stringify({ text: result.text, engine: result.engine }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

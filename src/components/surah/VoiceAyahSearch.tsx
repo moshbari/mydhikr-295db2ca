@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { haptics } from "@/lib/haptics";
+import { findAyah } from "@/lib/ayah-match";
 
 const MAX_RECORDING_TIME_MS = 30000; // 30 seconds
 
@@ -17,12 +18,15 @@ interface AyahData {
 interface VoiceAyahSearchProps {
   ayahs: AyahData[];
   onAyahFound: (ayahNumber: number) => void;
+  /** The surah's Arabic name, e.g. "سورة يس" — tells the transcriber what it is hearing. */
+  surahName?: string;
   accentColor?: string;
 }
 
 export const VoiceAyahSearch = ({ 
   ayahs, 
   onAyahFound, 
+  surahName,
   accentColor = "#1e3c72" 
 }: VoiceAyahSearchProps) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -40,55 +44,6 @@ export const VoiceAyahSearch = ({
       }
     };
   }, []);
-
-  const normalizeArabicText = (text: string): string => {
-    // Remove diacritics and normalize Arabic text for better matching
-    return text
-      .replace(/[\u064B-\u065F\u0670]/g, '') // Remove tashkeel
-      .replace(/[\u0621]/g, 'ا') // Normalize hamza
-      .replace(/[\u0622\u0623\u0625]/g, 'ا') // Normalize alef variants
-      .replace(/[\u0629]/g, 'ه') // Normalize taa marbuta
-      .replace(/[\u064A\u0649]/g, 'ي') // Normalize yaa variants
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-
-  const findBestMatch = (transcribedText: string): number | null => {
-    const normalizedTranscript = normalizeArabicText(transcribedText);
-    console.log('Searching for:', normalizedTranscript);
-    
-    let bestMatch: { ayahNumber: number; score: number } | null = null;
-
-    for (const ayah of ayahs) {
-      let fullAyah = '';
-      if (ayah.text) {
-        fullAyah = normalizeArabicText(ayah.text);
-      } else if (ayah.first && ayah.last) {
-        const normalizedFirst = normalizeArabicText(ayah.first);
-        const normalizedLast = normalizeArabicText(ayah.last);
-        fullAyah = normalizedFirst + ' ' + normalizedLast;
-      }
-
-      // Check if transcript is contained in any ayah or vice versa
-      const transcriptWords = normalizedTranscript.split(' ').filter(w => w.length > 1);
-      
-      let matchingWords = 0;
-      for (const word of transcriptWords) {
-        if (fullAyah.includes(word)) {
-          matchingWords++;
-        }
-      }
-
-      const score = transcriptWords.length > 0 ? matchingWords / transcriptWords.length : 0;
-
-      if (score > 0.3 && (!bestMatch || score > bestMatch.score)) {
-        bestMatch = { ayahNumber: ayah.number, score };
-      }
-    }
-
-    console.log('Best match:', bestMatch);
-    return bestMatch?.ayahNumber ?? null;
-  };
 
   const startRecording = async () => {
     try {
@@ -190,7 +145,7 @@ export const VoiceAyahSearch = ({
 
       // Call edge function
       const { data, error } = await supabase.functions.invoke('transcribe-ayah', {
-        body: { audio: base64Audio, mimeType: audioBlob.type }
+        body: { audio: base64Audio, mimeType: audioBlob.type, surah: surahName }
       });
 
       if (error) {
@@ -207,7 +162,7 @@ export const VoiceAyahSearch = ({
       toast.success(`Heard: "${data.text}"`);
 
       // Find matching ayah
-      const matchedAyah = findBestMatch(data.text);
+      const matchedAyah = findAyah(data.text, ayahs);
       
       if (matchedAyah) {
         await haptics.success();

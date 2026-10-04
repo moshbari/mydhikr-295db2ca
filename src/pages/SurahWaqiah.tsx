@@ -372,6 +372,7 @@ const SurahWaqiah = () => {
       <FloatingVoiceAyahSearch
         ayahs={AYAH_DATA}
         onAyahFound={handleVoiceAyahFound}
+        surahName="سورة الواقعة"
         accentColor="#1e3c72"
       />
     </div>
