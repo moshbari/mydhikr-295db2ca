@@ -219,7 +219,7 @@ const SurahYasin = () => {
     : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-card">
       {/* Sticky Header with Back Button, Surah Name, Last Recited */}
       <div className="sticky top-0 z-10 safe-top">
         {/* Header with Back Button */}
@@ -259,7 +259,7 @@ const SurahYasin = () => {
               آخر آية تمت قراءتها - Last Recited Ayah:
             </p>
             <div 
-              className="bg-white rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors" 
+              className="bg-white dark:bg-card rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-muted active:bg-gray-100 dark:active:bg-muted transition-colors" 
               dir="rtl"
               onClick={() => scrollToAyah(lastCheckedAyahData.number)}
             >
@@ -289,8 +289,8 @@ const SurahYasin = () => {
       />
 
       {/* Progress Bar Section */}
-      <div className="bg-[#f8f9fa] px-4 py-2 md:px-6 md:py-3 border-t border-gray-200">
-        <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+      <div className="bg-[#f8f9fa] dark:bg-muted px-4 py-2 md:px-6 md:py-3 border-t border-gray-200 dark:border-border">
+        <div className="relative h-6 bg-gray-200 dark:bg-muted rounded-full overflow-hidden">
           <div 
             className="h-full rounded-full transition-all duration-300"
             style={{ 
@@ -298,19 +298,19 @@ const SurahYasin = () => {
               background: "linear-gradient(90deg, #11998e 0%, #38ef7d 100%)"
             }}
           />
-          <span className="absolute inset-0 flex items-center justify-center text-xs md:text-sm font-semibold text-gray-700">
+          <span className="absolute inset-0 flex items-center justify-center text-xs md:text-sm font-semibold text-gray-700 dark:text-foreground">
             {completedCount} / {TOTAL_AYAHS} ({progressPercent}%)
           </span>
         </div>
         {lastSaveTime && (
-          <p className="text-center text-xs text-gray-500 mt-2">
+          <p className="text-center text-xs text-gray-500 dark:text-muted-foreground mt-2">
             Last saved: {lastSaveTime}
           </p>
         )}
       </div>
 
       {/* Reset Button */}
-      <div className="flex justify-center py-2 bg-[#f8f9fa]">
+      <div className="flex justify-center py-2 bg-[#f8f9fa] dark:bg-muted">
         <Button
           variant="destructive"
           size="sm"
@@ -322,7 +322,7 @@ const SurahYasin = () => {
       </div>
 
       {/* Ayah List */}
-      <div className="flex-1 px-4 md:px-6 pb-24 safe-bottom bg-white">
+      <div className="flex-1 px-4 md:px-6 pb-24 safe-bottom bg-white dark:bg-card">
           <div className="space-y-2 md:space-y-3">
             {AYAH_DATA.map((ayah) => {
               const isChecked = progress[ayah.number] || false;
@@ -335,8 +335,8 @@ const SurahYasin = () => {
                   className={cn(
                     "p-3 md:p-4 rounded-lg transition-all duration-200 flex items-center gap-3 cursor-pointer select-none",
                     isChecked 
-                      ? "bg-green-100 border-r-4 border-green-500" 
-                      : "bg-[#f8f9fa] hover:bg-gray-200"
+                      ? "bg-green-100 dark:bg-green-900/40 border-r-4 border-green-500" 
+                      : "bg-[#f8f9fa] dark:bg-muted hover:bg-gray-200"
                   )}
                   dir="rtl"
                 >

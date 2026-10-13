@@ -449,7 +449,7 @@ const Admin = () => {
   // Show loading state while auth is still loading
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 dark:from-background via-blue-50 dark:via-background to-purple-50 dark:to-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto animate-pulse">
             <span className="text-2xl">🕌</span>
@@ -463,7 +463,7 @@ const Admin = () => {
   // Show loading if user role is still being determined
   if (user && !user.role) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 dark:from-background via-blue-50 dark:via-background to-purple-50 dark:to-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto animate-pulse">
             <span className="text-2xl">🔑</span>
@@ -480,7 +480,7 @@ const Admin = () => {
   // }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 dark:from-background via-blue-50 dark:via-background to-purple-50 dark:to-background p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

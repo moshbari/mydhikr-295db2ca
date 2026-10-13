@@ -376,10 +376,10 @@ const History = () => {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'dhikr': return 'text-emerald-600 bg-emerald-50';
-      case 'quran': return 'text-blue-600 bg-blue-50';
-      case 'salah': return 'text-purple-600 bg-purple-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'dhikr': return 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40';
+      case 'quran': return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40';
+      case 'salah': return 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40';
+      default: return 'text-gray-600 dark:text-muted-foreground bg-gray-50 dark:bg-muted/40';
     }
   };
 
@@ -559,7 +559,7 @@ const History = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4 safe-top safe-bottom">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 dark:from-background via-blue-50 dark:via-background to-purple-50 dark:to-background p-4 safe-top safe-bottom">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between pt-4">
@@ -821,26 +821,26 @@ const History = () => {
 
                     {/* Overall Totals */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                      <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">📿</span>
-                          <h3 className="font-semibold text-emerald-800">Total Dhikr</h3>
+                          <h3 className="font-semibold text-emerald-800 dark:text-emerald-300">Total Dhikr</h3>
                         </div>
-                        <p className="text-3xl font-bold text-emerald-600">{summary.totalDhikr.toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{summary.totalDhikr.toLocaleString()}</p>
                       </div>
-                      <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                      <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">📖</span>
-                          <h3 className="font-semibold text-blue-800">Total Quran</h3>
+                          <h3 className="font-semibold text-blue-800 dark:text-blue-300">Total Quran</h3>
                         </div>
-                        <p className="text-3xl font-bold text-blue-600">{summary.totalQuran.toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{summary.totalQuran.toLocaleString()}</p>
                       </div>
-                      <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+                      <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">🕌</span>
-                          <h3 className="font-semibold text-purple-800">Total Nafl Salah</h3>
+                          <h3 className="font-semibold text-purple-800 dark:text-purple-300">Total Nafl Salah</h3>
                         </div>
-                        <p className="text-3xl font-bold text-purple-600">{summary.totalSalah.toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{summary.totalSalah.toLocaleString()}</p>
                       </div>
                     </div>
 
@@ -912,9 +912,9 @@ const History = () => {
                       {format(new Date(dayData.date), 'EEEE, MMMM d, yyyy')}
                     </CardTitle>
                     <div className="flex gap-4 text-sm">
-                      <span className="text-emerald-600">Dhikr: {dayData.totalDhikr.toLocaleString()}</span>
-                      <span className="text-blue-600">Quran: {dayData.totalQuran.toLocaleString()}</span>
-                      <span className="text-purple-600">Nafl Salah: {dayData.totalSalah.toLocaleString()}</span>
+                      <span className="text-emerald-600 dark:text-emerald-400">Dhikr: {dayData.totalDhikr.toLocaleString()}</span>
+                      <span className="text-blue-600 dark:text-blue-400">Quran: {dayData.totalQuran.toLocaleString()}</span>
+                      <span className="text-purple-600 dark:text-purple-400">Nafl Salah: {dayData.totalSalah.toLocaleString()}</span>
                     </div>
                   </div>
                 </CardHeader>

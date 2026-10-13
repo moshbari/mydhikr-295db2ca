@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { ayahPreviewRanges, tajweedRuns } from "@/lib/tajweed";
+import { ayahPreviewRanges, tajweedInk, tajweedRuns } from "@/lib/tajweed";
 
 interface TajweedTextProps {
   text: string;
@@ -17,7 +17,7 @@ export function TajweedText({ text, marks }: TajweedTextProps) {
           {i > 0 && " ... "}
           {tajweedRuns(text, marks, from, to).map((run, j) =>
             run.color ? (
-              <span key={j} style={{ color: run.color }}>
+              <span key={j} className="tajweed-ink" style={tajweedInk(run.color)}>
                 {run.text}
               </span>
             ) : (

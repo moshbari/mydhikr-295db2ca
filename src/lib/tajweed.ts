@@ -39,6 +39,22 @@ export const TAJWEED_RULES: {
   },
 ];
 
+/** The same colours lifted for a dark page — the printed reds and greens sink into a dark background. */
+export const TAJWEED_DARK_COLOR: Record<string, string> = {
+  "#8B0000": "#E05A5A",
+  "#D0021B": "#FF7A7A",
+  "#F57C00": "#FFA94D",
+  "#B8860B": "#E8C04A",
+  "#2E7D32": "#6CC970",
+  "#0288D1": "#5CC4F5",
+  "#9E9E9E": "#8A8A8A",
+};
+
+/** Inline style for a coloured tajweed run: `.tajweed-ink` swaps to the dark colour under `.dark`. */
+export function tajweedInk(color: string): Record<string, string> {
+  return { "--tj": color, "--tj-dark": TAJWEED_DARK_COLOR[color] ?? color };
+}
+
 const COLOR = Object.fromEntries(TAJWEED_RULES.map((r) => [r.rule, r.color])) as Record<TajweedRule, string>;
 
 /** The rule codes of the alquran.cloud `quran-tajweed` edition. */

@@ -99,43 +99,67 @@ All colors in HSL format following Islamic green theme
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Night: deep green-black, nothing near pure white, so a phone opened for
+     Tahajjud doesn't light up the room. Applied by src/lib/theme.ts. */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    color-scheme: dark;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --background: 160 22% 5%;
+    --foreground: 150 12% 88%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --card: 160 18% 9%;
+    --card-foreground: 150 12% 88%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --popover: 160 18% 10%;
+    --popover-foreground: 150 12% 88%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --primary: 146 42% 42%;
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 146 42% 52%;
+    --primary-dark: 146 43% 28%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --secondary: 160 12% 15%;
+    --secondary-foreground: 150 12% 88%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --muted: 160 12% 14%;
+    --muted-foreground: 150 6% 60%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: 43 65% 48%;
+    --accent-foreground: 160 22% 7%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --success: 134 45% 40%;
+    --success-foreground: 0 0% 98%;
+
+    --destructive: 0 62% 48%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 160 12% 18%;
+    --input: 160 12% 20%;
+    --ring: 146 42% 42%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(146 42% 26%), hsl(146 42% 32%));
+    --gradient-header: linear-gradient(90deg, hsl(146 40% 20%), hsl(134 34% 24%));
+    --gradient-gold: linear-gradient(135deg, hsl(43 60% 38%), hsl(43 60% 46%));
+
+    --shadow-soft: 0 2px 8px hsla(0, 0%, 0%, 0.4);
+    --shadow-card: 0 4px 12px hsla(0, 0%, 0%, 0.45);
+    --shadow-button: 0 2px 4px hsla(0, 0%, 0%, 0.4);
+
+    --sidebar-background: 160 18% 8%;
+    --sidebar-foreground: 150 12% 88%;
+    --sidebar-primary: 146 42% 42%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 160 12% 14%;
+    --sidebar-accent-foreground: 150 12% 88%;
+    --sidebar-border: 160 12% 18%;
+    --sidebar-ring: 146 42% 42%;
   }
+
+  /* Tajweed letters carry their colour in --tj; the dark page lifts it to --tj-dark. */
+  .tajweed-ink { color: var(--tj); }
+  .dark .tajweed-ink { color: var(--tj-dark); }
+  .tajweed-swatch { background-color: var(--tj); }
+  .dark .tajweed-swatch { background-color: var(--tj-dark); }
 }
 
 @layer base {

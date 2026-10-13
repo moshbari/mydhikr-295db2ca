@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { useThemeController } from "@/hooks/use-theme-mode";
 import Index from "./pages/Index";
 import History from "./pages/History";
 import Admin from "./pages/Admin";
@@ -18,9 +19,15 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
+const ThemeController = () => {
+  useThemeController();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <ThemeController />
       <Toaster />
       <Sonner />
       <OfflineIndicator />

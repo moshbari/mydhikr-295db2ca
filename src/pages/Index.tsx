@@ -19,6 +19,7 @@ import { sounds } from "@/lib/sounds";
 import { BarChart3, Shield, CalendarIcon, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
+import { AppearanceDialog } from "@/components/AppearanceDialog";
 import { createAdminAccounts } from "@/lib/admin-setup";
 import { worshipMatchKey } from "@/lib/worship-name";
 import { normalizeRangeKey } from "@/lib/quran-range";
@@ -529,6 +530,7 @@ const Index = () => {
                 <BarChart3 className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">History</span>
               </Button>
+              <AppearanceDialog />
               <ChangePasswordDialog />
               <Button 
                 onClick={async () => {

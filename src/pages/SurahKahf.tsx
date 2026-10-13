@@ -239,7 +239,7 @@ const SurahKahf = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-card">
       {/* Sticky Header with Back Button, Surah Name, Last Recited */}
       <div className="sticky top-0 z-10 safe-top">
         {/* Header with Back Button */}
@@ -281,7 +281,7 @@ const SurahKahf = () => {
               آخر آية تمت قراءتها - Last Recited Ayah:
             </p>
             <div 
-              className="bg-white rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors" 
+              className="bg-white dark:bg-card rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-muted active:bg-gray-100 dark:active:bg-muted transition-colors" 
               dir="rtl"
               onClick={() => scrollToAyah(lastCheckedAyah)}
             >
@@ -308,7 +308,7 @@ const SurahKahf = () => {
       />
 
       {/* Progress Section */}
-      <div className="bg-gray-100 px-4 py-2 sm:px-6 sm:py-3 border-t border-gray-200">
+      <div className="bg-gray-100 dark:bg-muted px-4 py-2 sm:px-6 sm:py-3 border-t border-gray-200 dark:border-border">
         <div className="max-w-2xl mx-auto">
           <div className="relative">
             <Progress value={progressPercent} className="h-6 sm:h-8" />
@@ -325,7 +325,7 @@ const SurahKahf = () => {
       </div>
 
       {/* Reset Button */}
-      <div className="flex justify-center py-2 sm:py-3 bg-gray-100">
+      <div className="flex justify-center py-2 sm:py-3 bg-gray-100 dark:bg-muted">
         <Button
           onClick={handleReset}
           variant="destructive"
@@ -337,7 +337,7 @@ const SurahKahf = () => {
       </div>
 
       {/* Ayah List */}
-      <div className="flex-1 bg-white">
+      <div className="flex-1 bg-white dark:bg-card">
         <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-28 space-y-2 sm:space-y-3">
           {AYAH_DATA.map((ayah) => (
             <div
@@ -347,8 +347,8 @@ const SurahKahf = () => {
               onClick={() => handleCheckAyah(ayah.number, !progress[ayah.number])}
               className={`p-3 sm:p-4 rounded-lg flex items-center gap-3 transition-all cursor-pointer select-none ${
                 progress[ayah.number]
-                  ? "bg-green-100 border-r-4 border-green-600"
-                  : "bg-gray-50 hover:bg-gray-100"
+                  ? "bg-green-100 dark:bg-green-900/40 border-r-4 border-green-600"
+                  : "bg-gray-50 dark:bg-muted/40 hover:bg-gray-100 dark:hover:bg-muted"
               }`}
               dir="rtl"
             >
@@ -358,7 +358,7 @@ const SurahKahf = () => {
                 onClick={(e) => e.stopPropagation()}
                 className="w-6 h-6 border-2 border-green-600 data-[state=checked]:bg-green-600"
               />
-              <span className="w-10 sm:w-12 text-center font-bold text-gray-700 shrink-0">
+              <span className="w-10 sm:w-12 text-center font-bold text-gray-700 dark:text-foreground shrink-0">
                 {ayah.number}
               </span>
               <p 

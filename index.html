@@ -25,6 +25,40 @@
     <meta name="twitter:title" content="My Dhikr - Your Personal Islamic Daily Tracker" />
     <meta name="twitter:description" content="📿 Count Dhikr • 📖 Track Quran • 🕌 Log Prayers - Make Every Day Count" />
     <meta name="twitter:image" content="/social-image.png" />
+    <!-- Pick light/dark before the app loads so a phone opened at night never flashes white. Full logic: src/lib/theme.ts -->
+    <script>
+      (function () {
+        try {
+          var mode = localStorage.getItem("theme_mode") || "auto", now = new Date(), dark;
+          if (mode === "dark") dark = true;
+          else if (mode === "light") dark = false;
+          else if (mode === "system") dark = matchMedia("(prefers-color-scheme: dark)").matches;
+          else {
+            var c = JSON.parse(localStorage.getItem("theme_coords") || "null");
+            if (!c) { var h = now.getHours(); dark = h < 6 || h >= 18; }
+            else {
+              var R = Math.PI / 180, lat = c[0], lon = c[1];
+              var n = Math.round(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 12) / 864e5 + 2440587.5 - 2451545);
+              var j = n - lon / 360, m = (357.5291 + 0.98560028 * j) % 360;
+              var l = (m + 1.9148 * Math.sin(m * R) + 0.02 * Math.sin(2 * m * R) + 0.0003 * Math.sin(3 * m * R) + 282.9372) % 360;
+              var t = 2451545 + j + 0.0053 * Math.sin(m * R) - 0.0069 * Math.sin(2 * l * R);
+              var sd = Math.sin(l * R) * Math.sin(23.4397 * R);
+              var ch = (Math.sin(-0.833 * R) - Math.sin(lat * R) * sd) / (Math.cos(lat * R) * Math.cos(Math.asin(sd)));
+              if (ch > 1) dark = true;
+              else if (ch < -1) dark = false;
+              else {
+                var w = Math.acos(ch) / R / 360, ms = now.getTime();
+                dark = ms < (t - w - 2440587.5) * 864e5 || ms >= (t + w - 2440587.5) * 864e5;
+              }
+            }
+          }
+          if (dark) {
+            document.documentElement.classList.add("dark");
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#0a110e");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
 
   <body>
