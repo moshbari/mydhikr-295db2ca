@@ -321,7 +321,7 @@ export function DailySummary({ entries, onEdit, onDelete, onQuickAdd }: DailySum
                   <Button
                     size="sm"
                     onClick={() => handleQuickAdd(groupType, surahName)}
-                    className="h-9 px-3 font-bold touch-target"
+                    className="h-12 min-w-[4.5rem] px-4 text-xl font-bold rounded-xl touch-target"
                     aria-label={`Add ${QUICK_ADD_RAKAH} rak'ah to ${surahName}`}
                   >
                     +{QUICK_ADD_RAKAH}
