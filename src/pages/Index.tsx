@@ -20,6 +20,7 @@ import { BarChart3, Shield, CalendarIcon, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
 import { AppearanceDialog } from "@/components/AppearanceDialog";
+import { PrayerTimesCard } from "@/components/prayer-times-card";
 import { createAdminAccounts } from "@/lib/admin-setup";
 import { worshipMatchKey } from "@/lib/worship-name";
 import { normalizeRangeKey } from "@/lib/quran-range";
@@ -550,6 +551,9 @@ const Index = () => {
         {/* Scrollable Main Content */}
         <main className="space-y-4 sm:space-y-6">
           <div className="space-y-4 sm:space-y-6">
+            {/* Today's prayer + iqama times (UAE Awqaf method) */}
+            <PrayerTimesCard />
+
             {/* Date Selector */}
             <div className="flex justify-center mb-4">
               <Popover>
