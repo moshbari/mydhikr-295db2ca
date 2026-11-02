@@ -1,12 +1,13 @@
-import { CalculationMethod, CalculationParameters, Coordinates, Madhab, PrayerTimes } from "adhan";
+import { CalculationMethod, CalculationParameters, Coordinates, Madhab, PrayerTimes, Rounding } from "adhan";
 import { timeZoneId, zoneCoordinates } from "./theme";
 
 /**
  * Prayer + iqama times.
  *
  * UAE areas follow the official Awqaf timetable (awqaf.gov.ae): Fajr and Isha at 18.2°,
- * plus the small fixed corrections Awqaf applies. Tuned on 2 Nov 2026 against Awqaf's own
- * page for Abu Dhabi, Al Ain and Dubai: most times exact, none more than 1 minute out.
+ * plus fixed corrections (in seconds) and Awqaf's habit of rounding every time UP.
+ * Fitted to Awqaf's official Abu Dhabi tables for Nov + Dec 2026 (61 days): the five
+ * prayers match exactly on all but a handful of days, never more than 1 minute out.
  * Awqaf has no public feed, so the times are worked out here (offline, no API).
  *
  * Iqama gaps are Awqaf's: Fajr +25, Zuhr/Asr/Isha +20, Maghrib +8. Jumu'ah khutbah 12:45 (since Jan 2026).
@@ -23,7 +24,7 @@ export interface PrayerArea {
 
 /** Awqaf groups its many districts into a few zones; one reference point per zone. */
 export const UAE_AREAS: PrayerArea[] = [
-  { id: "abu-dhabi", name: "Abu Dhabi", lat: 24.3589, lon: 54.4835 },
+  { id: "abu-dhabi", name: "Abu Dhabi", lat: 24.4667, lon: 54.3667 },
   { id: "al-ain", name: "Al Ain", lat: 24.2075, lon: 55.7447 },
   { id: "madinat-zayed", name: "Al Dhafra (Madinat Zayed)", lat: 23.6833, lon: 53.7044 },
   { id: "ruwais", name: "Ruwais", lat: 24.1103, lon: 52.7306 },
@@ -107,8 +108,23 @@ export function resolveArea(id: string): ResolvedArea {
 function uaeParameters(): CalculationParameters {
   const p = new CalculationParameters("Other", 18.2, 18.2);
   p.madhab = Madhab.Shafi;
-  p.adjustments = { fajr: 0, sunrise: -4, dhuhr: 2, asr: 1, maghrib: 3, isha: 0 };
+  p.rounding = Rounding.None; // corrections + rounding up are applied in uaeTime()
   return p;
+}
+
+/** Minutes added to the exact astronomical time before rounding up to the minute (fitted to Awqaf). */
+const UAE_CORRECTION_MIN: Record<PrayerKey, number> = {
+  fajr: -0.7,
+  sunrise: -4.25,
+  dhuhr: 1.8,
+  asr: 0,
+  maghrib: 2.4,
+  isha: -1.1,
+};
+
+function uaeTime(exact: Date, key: PrayerKey): Date {
+  const shifted = exact.getTime() + UAE_CORRECTION_MIN[key] * 60_000;
+  return new Date(Math.ceil(shifted / 60_000) * 60_000);
 }
 
 /** Calendar Y/M/D of `now` in the given zone (the area's "today", not the device's). */
@@ -159,7 +175,7 @@ export function prayersForDay(areaId: string, dayOffset = 0, now = new Date()): 
       : null;
 
   const rows = PRAYER_ORDER.map((key) => {
-    const adhan = t[key] as Date;
+    const adhan = area.isUAE ? uaeTime(t[key] as Date, key) : (t[key] as Date);
     const gap = area.isUAE ? IQAMA_MINUTES[key] : undefined;
     let iqama = gap != null ? new Date(adhan.getTime() + gap * 60_000) : null;
     let label = PRAYER_LABELS[key];
