@@ -1,14 +1,17 @@
 import { CalculationMethod, CalculationParameters, Coordinates, Madhab, PrayerTimes, Rounding } from "adhan";
 import { timeZoneId, zoneCoordinates } from "./theme";
+import { AWQAF_ABU_DHABI } from "@/data/awqaf-abu-dhabi";
 
 /**
  * Prayer + iqama times.
  *
  * UAE areas follow the official Awqaf timetable (awqaf.gov.ae): Fajr and Isha at 18.2°,
  * plus fixed corrections (in seconds) and Awqaf's habit of rounding every time UP.
- * Fitted to Awqaf's official Abu Dhabi tables for Nov + Dec 2026 (61 days): the five
- * prayers match exactly on all but a handful of days, never more than 1 minute out.
- * Awqaf has no public feed, so the times are worked out here (offline, no API).
+ * Fitted to Awqaf's official Abu Dhabi tables (Nov 2026 - Dec 2027): about 9 in 10 prayer
+ * times exact, never more than 1 minute out.
+ * Abu Dhabi shows Awqaf's OFFICIAL table (src/data/awqaf-abu-dhabi.ts, from their monthly PDFs)
+ * for every date it covers; other areas and later dates use the calculation below.
+ * Awqaf has no public feed, so nothing is fetched (works offline).
  *
  * Iqama gaps are Awqaf's: Fajr +25, Zuhr/Asr/Isha +20, Maghrib +8. Jumu'ah khutbah 12:45 (since Jan 2026).
  */
@@ -149,6 +152,8 @@ export interface DayPrayers {
   isFriday: boolean;
   khutbah: Date | null;
   rows: PrayerRow[];
+  /** True when the times come straight from Awqaf's published table. */
+  official: boolean;
 }
 
 /** Absolute instant for hour:minute on Y/M/D in a zone with no DST (UAE) or via offset lookup. */
@@ -174,8 +179,15 @@ export function prayersForDay(areaId: string, dayOffset = 0, now = new Date()): 
       ? instantIn(area.timeZone, date.getFullYear(), date.getMonth() + 1, date.getDate(), JUMUAH_KHUTBAH.hour, JUMUAH_KHUTBAH.minute)
       : null;
 
-  const rows = PRAYER_ORDER.map((key) => {
-    const adhan = area.isUAE ? uaeTime(t[key] as Date, key) : (t[key] as Date);
+  const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const official = area.id === "abu-dhabi" ? AWQAF_ABU_DHABI[iso]?.split(" ") : undefined;
+
+  const rows = PRAYER_ORDER.map((key, i) => {
+    const adhan = official
+      ? new Date(`${iso}T${official[i]}:00+04:00`)
+      : area.isUAE
+        ? uaeTime(t[key] as Date, key)
+        : (t[key] as Date);
     const gap = area.isUAE ? IQAMA_MINUTES[key] : undefined;
     let iqama = gap != null ? new Date(adhan.getTime() + gap * 60_000) : null;
     let label = PRAYER_LABELS[key];
@@ -186,7 +198,7 @@ export function prayersForDay(areaId: string, dayOffset = 0, now = new Date()): 
     return { key, label, adhan, iqama };
   });
 
-  return { area, isFriday, khutbah, rows };
+  return { area, isFriday, khutbah, rows, official: !!official };
 }
 
 /** The next prayer (sunrise skipped) after `now`, looking into tomorrow after Isha. */

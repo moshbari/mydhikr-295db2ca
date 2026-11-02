@@ -105,7 +105,7 @@ export const PrayerTimesCard = () => {
 
       <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
         {area.isUAE
-          ? `${area.name} · UAE Awqaf method. Iqama: Fajr +${IQAMA_MINUTES.fajr} min, Maghrib +${IQAMA_MINUTES.maghrib}, others +${IQAMA_MINUTES.dhuhr}. Your mosque's board may differ by a minute or two.`
+          ? `${area.name} · ${day.official ? "Awqaf official timetable" : "UAE Awqaf method"}. Iqama: Fajr +${IQAMA_MINUTES.fajr} min, Maghrib +${IQAMA_MINUTES.maghrib}, others +${IQAMA_MINUTES.dhuhr}. Your mosque's board may differ by a minute or two.`
           : `${area.name} · Muslim World League method, worked out from your time zone. Iqama varies by mosque, so check yours.`}
       </p>
     </div>
