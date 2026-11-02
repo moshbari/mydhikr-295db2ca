@@ -1,4 +1,4 @@
-import { CalculationMethod, CalculationParameters, Coordinates, Madhab, PrayerTimes, Rounding } from "adhan";
+import { prayerHours, type PrayerKey } from "./prayer-math";
 import { timeZoneId, zoneCoordinates } from "./theme";
 import { AWQAF_ABU_DHABI } from "@/data/awqaf-abu-dhabi";
 
@@ -7,8 +7,8 @@ import { AWQAF_ABU_DHABI } from "@/data/awqaf-abu-dhabi";
  *
  * UAE areas follow the official Awqaf timetable (awqaf.gov.ae): Fajr and Isha at 18.2°,
  * plus fixed corrections (in seconds) and Awqaf's habit of rounding every time UP.
- * Fitted to Awqaf's official Abu Dhabi tables (Nov 2026 - Dec 2027): about 9 in 10 prayer
- * times exact, never more than 1 minute out.
+ * Fitted to Awqaf's official Abu Dhabi tables (Nov 2026 - Dec 2027): about 19 in 20 prayer
+ * times exact, never more than 1 minute out. Same arithmetic and numbers as iOS/Android.
  * Abu Dhabi shows Awqaf's OFFICIAL table (src/data/awqaf-abu-dhabi.ts, from their monthly PDFs)
  * for every date it covers; other areas and later dates use the calculation below.
  * Awqaf has no public feed, so nothing is fetched (works offline).
@@ -16,7 +16,7 @@ import { AWQAF_ABU_DHABI } from "@/data/awqaf-abu-dhabi";
  * Iqama gaps are Awqaf's: Fajr +25, Zuhr/Asr/Isha +20, Maghrib +8. Jumu'ah khutbah 12:45 (since Jan 2026).
  */
 
-export type PrayerKey = "fajr" | "sunrise" | "dhuhr" | "asr" | "maghrib" | "isha";
+export type { PrayerKey };
 
 export interface PrayerArea {
   id: string;
@@ -108,27 +108,15 @@ export function resolveArea(id: string): ResolvedArea {
   return { id: TZ_AREA_ID, name: city, lat, lon, timeZone: zone || "UTC", isUAE: false };
 }
 
-function uaeParameters(): CalculationParameters {
-  const p = new CalculationParameters("Other", 18.2, 18.2);
-  p.madhab = Madhab.Shafi;
-  p.rounding = Rounding.None; // corrections + rounding up are applied in uaeTime()
-  return p;
-}
-
-/** Minutes added to the exact astronomical time before rounding up to the minute (fitted to Awqaf). */
+/** Minutes added to the exact time before rounding UP to the minute (fitted to Awqaf; same as iOS/Android). */
 const UAE_CORRECTION_MIN: Record<PrayerKey, number> = {
   fajr: -0.7,
-  sunrise: -4.25,
-  dhuhr: 1.8,
-  asr: 0,
-  maghrib: 2.4,
-  isha: -1.1,
+  sunrise: -4.2,
+  dhuhr: 1.75,
+  asr: -0.15,
+  maghrib: 2.35,
+  isha: -1.15,
 };
-
-function uaeTime(exact: Date, key: PrayerKey): Date {
-  const shifted = exact.getTime() + UAE_CORRECTION_MIN[key] * 60_000;
-  return new Date(Math.ceil(shifted / 60_000) * 60_000);
-}
 
 /** Calendar Y/M/D of `now` in the given zone (the area's "today", not the device's). */
 function ymdIn(now: Date, timeZone: string): [number, number, number] {
@@ -156,38 +144,54 @@ export interface DayPrayers {
   official: boolean;
 }
 
-/** Absolute instant for hour:minute on Y/M/D in a zone with no DST (UAE) or via offset lookup. */
+/** The zone's UTC offset (ms) at an instant. Uses formatToParts, so the DEVICE's zone never leaks in. */
+function zoneOffsetMs(timeZone: string, at: Date): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(at);
+  const n = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  const asUTC = Date.UTC(n("year"), n("month") - 1, n("day"), n("hour") % 24, n("minute"), n("second"));
+  return asUTC - Math.floor(at.getTime() / 1000) * 1000;
+}
+
+/** Absolute instant for hour:minute on Y/M/D as a wall clock in `timeZone`. */
 function instantIn(timeZone: string, y: number, m: number, d: number, hour: number, minute: number): Date {
-  const guess = new Date(Date.UTC(y, m - 1, d, hour, minute));
-  const shown = new Date(guess.toLocaleString("en-US", { timeZone }));
-  const asUTC = new Date(guess.toLocaleString("en-US", { timeZone: "UTC" }));
-  return new Date(guess.getTime() - (shown.getTime() - asUTC.getTime()));
+  const guess = Date.UTC(y, m - 1, d, hour, minute);
+  const first = guess - zoneOffsetMs(timeZone, new Date(guess));
+  return new Date(guess - zoneOffsetMs(timeZone, new Date(first)));
 }
 
 export function prayersForDay(areaId: string, dayOffset = 0, now = new Date()): DayPrayers {
   const area = resolveArea(areaId);
-  const [y, m, d] = ymdIn(now, area.timeZone);
-  // adhan wants the local calendar date; build it from the area's Y/M/D.
-  const date = new Date(y, m - 1, d + dayOffset);
-  const params = area.isUAE ? uaeParameters() : CalculationMethod.MuslimWorldLeague();
-  const t = new PrayerTimes(new Coordinates(area.lat, area.lon), date, params);
+  const [y0, m0, d0] = ymdIn(now, area.timeZone);
+  // Calendar arithmetic only (UTC fields), so the device's own zone never shifts the day.
+  const date = new Date(Date.UTC(y0, m0 - 1, d0 + dayOffset));
+  const [y, m, d] = [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()];
+  const start = instantIn(area.timeZone, y, m, d, 0, 0);
+  const noon = instantIn(area.timeZone, y, m, d, 12, 0);
+  const tzHours = (Date.UTC(y, m - 1, d, 12) - noon.getTime()) / 3_600_000;
+  const hours = prayerHours(y, m, d, area.lat, area.lon, tzHours, area.isUAE ? 18.2 : 18, area.isUAE ? 18.2 : 17);
 
-  const weekday = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).getUTCDay();
-  const isFriday = weekday === 5;
-  const khutbah =
-    area.isUAE && isFriday
-      ? instantIn(area.timeZone, date.getFullYear(), date.getMonth() + 1, date.getDate(), JUMUAH_KHUTBAH.hour, JUMUAH_KHUTBAH.minute)
-      : null;
+  const isFriday = date.getUTCDay() === 5;
+  const khutbah = area.isUAE && isFriday ? instantIn(area.timeZone, y, m, d, JUMUAH_KHUTBAH.hour, JUMUAH_KHUTBAH.minute) : null;
 
-  const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const iso = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
   const official = area.id === "abu-dhabi" ? AWQAF_ABU_DHABI[iso]?.split(" ") : undefined;
 
   const rows = PRAYER_ORDER.map((key, i) => {
     const adhan = official
       ? new Date(`${iso}T${official[i]}:00+04:00`)
-      : area.isUAE
-        ? uaeTime(t[key] as Date, key)
-        : (t[key] as Date);
+      : new Date(
+          start.getTime() +
+            (area.isUAE ? Math.ceil(hours[key] * 60 + UAE_CORRECTION_MIN[key]) : Math.round(hours[key] * 60)) * 60_000,
+        );
     const gap = area.isUAE ? IQAMA_MINUTES[key] : undefined;
     let iqama = gap != null ? new Date(adhan.getTime() + gap * 60_000) : null;
     let label = PRAYER_LABELS[key];
