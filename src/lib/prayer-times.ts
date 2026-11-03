@@ -216,6 +216,29 @@ export function nextPrayer(areaId: string, now = new Date()): PrayerRow & { tomo
   return { ...fallback, tomorrow: true };
 }
 
+/** Between a prayer's adhan and its iqama (or, on Friday, the Jumu'ah khutbah): what we're waiting for. */
+export interface IqamaWait {
+  row: PrayerRow;
+  target: Date;
+  isKhutbah: boolean;
+}
+
+export function iqamaWait(day: DayPrayers, now = new Date()): IqamaWait | null {
+  for (const row of day.rows) {
+    const isKhutbah = row.key === "dhuhr" && !!day.khutbah;
+    const target = isKhutbah ? day.khutbah : row.iqama;
+    if (!target) continue;
+    if (now.getTime() >= row.adhan.getTime() && now.getTime() < target.getTime()) return { row, target, isKhutbah };
+  }
+  return null;
+}
+
+/** "07:42": minutes and seconds left (rounded up so 00:00 is the moment itself). Same as iOS. */
+export function formatMinutesSeconds(ms: number): string {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 export function formatPrayerClock(d: Date, timeZone: string): string {
   return d.toLocaleTimeString("en-US", { timeZone, hour: "numeric", minute: "2-digit" });
 }
